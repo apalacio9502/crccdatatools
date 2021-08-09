@@ -6,15 +6,16 @@
 \usage{
 dt_gen_cm_titulos(
   conexion,
+  proveedor = "MySQL",
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  ficticio = FALSE,
-  segmentos = NULL,
-  oracle = FALSE
+  ficticio = FALSE
 )
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
+
+\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 
@@ -23,11 +24,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
 \item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 caso contrario sera igual al "ID". Por defecto FALSE}
-
-\item{segmentos}{clase array character. Lista de segmentos de los cuales se desea descargar la información.
-Por defecto descarga la información de todos los segmentos.}
-
-\item{oracle}{clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.}
 }
 \description{
 Esta función descarga los datos de la tabla gen_cm_titulos para un periodo de análisis y

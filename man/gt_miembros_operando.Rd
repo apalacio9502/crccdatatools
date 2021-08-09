@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_volumen.R
 \name{gt_miembros_operando}
 \alias{gt_miembros_operando}
-\title{Gráfica el número de miembros operando en cada segmento por mes (barras)}
+\title{Grafica el número de miembros operando en cada segmento por mes (barras)}
 \usage{
 gt_miembros_operando(datos, colores, fixedrange = FALSE)
 }
@@ -11,7 +11,7 @@ gt_miembros_operando(datos, colores, fixedrange = FALSE)
 \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-#' por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 }

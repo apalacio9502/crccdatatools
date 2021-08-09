@@ -2,11 +2,11 @@
 #'
 #' Esta función convierte un periodo de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
-#' @param oracle clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 
-dt_periodo_analisis_sql<- function(periodo_analisis,oracle=FALSE){
-  # Se verifica si oracle es igual a true
-  if (oracle==TRUE) {
+dt_periodo_analisis_sql<- function(periodo_analisis,proveedor="MySQL"){
+  # Se verifica si el proveedor es Oracle
+  if (proveedor=="Oracle") {
     # Se crea la lista periodo_analisis_sql
     periodo_analisis_sql <- c(glue("TO_DATE('{periodo_analisis[1]}','YYYY-MM-DD')"), glue("TO_DATE('{periodo_analisis[2]}','YYYY-MM-DD')"))
   }else{
@@ -20,11 +20,11 @@ dt_periodo_analisis_sql<- function(periodo_analisis,oracle=FALSE){
 #'
 #' Esta función convierte una fecha de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis
-#' @param oracle clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 
-dt_fecha_analisis_sql<- function(fecha_analisis,oracle=FALSE){
-  # Se verifica si oracle es igual a true
-  if (oracle==TRUE) {
+dt_fecha_analisis_sql<- function(fecha_analisis,proveedor="MySQL"){
+  # Se verifica si el proveedor es Oracle
+  if (proveedor=="Oracle") {
     # Se crea la variable fecha_analisis_sql
     fecha_analisis_sql <- glue("TO_DATE('{fecha_analisis}','YYYY-MM-DD')")
   }else{
@@ -32,6 +32,24 @@ dt_fecha_analisis_sql<- function(fecha_analisis,oracle=FALSE){
     fecha_analisis_sql <-glue("'{fecha_analisis}'")
   }
   return(fecha_analisis_sql)
+}
+
+#' Convertir segmentos_analisis a formato SQL (system)
+#'
+#' Esta función convierte una lista de segmentos a formato SQL
+#' @param segmentos_analisis clase array character. Debe contener la lista de segmentos análisis
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
+
+dt_segmentos_analisis_sql<- function(segmentos_analisis,proveedor="MySQL"){
+  # Se verifica si segmentos_analisis es nulo
+  if (is.null(segmentos_analisis)) {
+    # Se crea la variable segmentos_analisis_sql
+    segmentos_analisis_sql <- glue("SEGMENTO_ID NOT IN ('')")
+  }else{
+    # Se crea la variable segmentos_analisis_sql
+    segmentos_analisis_sql <- glue("SEGMENTO_ID IN ('{paste0(segmentos_analisis,collapse = \"','\")}')")
+  }
+  return(segmentos_analisis_sql)
 }
 
 #' ID Miembros SQL (system)
@@ -64,6 +82,40 @@ dt_porcentaje_variacion<- function(x){
   paste0(round(if_else(lag(x)!=0,x /lag(x )-1,if_else(x ==0,0,1))*100,2),"%")
 }
 
+#' Convertir numero a caracter (system)
+#'
+#' Esta función convierte un numero a caracter. Unicamente se puede aplicar a un data.frame
+#' @param x clase column. Columna sobre la cual se va a realizar la converción
+
+dt_num_char <- function(x){
+  x <- as.numeric(x)
+  paste0(if_else(str_length(x)==1,"0",""),x)
+}
+
+#' Descargar los datos adm_fechas
+#'
+#' Esta función descarga los datos de la tabla adm_fechas para un periodo de análisis
+#' @param conexion clase formal. Conexión base de datos
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
+#' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
+
+dt_fechas<- function(conexion,proveedor="MySQL",periodo_analisis){
+
+  # Se covierte el periodo de analisis a SQL
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+
+  # Descarga datos
+  datos <- dbGetQuery(conexion, glue("SELECT FECHA FROM ADM_FECHAS WHERE
+                                          DIA_SEMANA NOT IN (6,7) AND FESTIVO<>1 AND
+                                          FECHA BETWEEN {periodo_analisis_sql[1]}
+                                          AND {periodo_analisis_sql[2]}"))
+
+  # Se convierte la fecha de los datos en un date
+  datos <- datos %>% mutate(FECHA=ymd(FECHA))
+
+
+  return(datos)
+}
 
 #' Filtrar el data.frame con base en los inputs
 #'
@@ -112,7 +164,6 @@ dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NUL
   return(datos)
 }
 
-
 #' Descarga los datos adm_colores
 #'
 #' Esta función descarga los datos de la tabla adm_colores
@@ -121,7 +172,29 @@ dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NUL
 dt_colores<- function(conexion){
 
   # Descarga datos
-  datos <- dbReadTable(conexion,"MOD_ADM_COLORES")
+  datos <- dbReadTable(conexion,"ADM_COLORES")
 
   return(datos)
 }
+
+#' Abrir conexion de la base de datos
+#'
+#' Esta función abre la conexion de la base de datos
+#' @param config clase data.frame. Configuración de la conexión
+#' @param proveedor clase character. Se debe especificar le proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
+#' @export
+
+dt_abrir_conexion <- function(config,proveedor="MySQL"){
+  if (proveedor=="Oracle") {
+    # Se crea la conexión con la bodega de datos
+    conexion <- dbConnect(ROracle::Oracle(),username=config$username,password=config$password,dbname=config$dbname)
+  }else{
+    # Se crea la conexión con la bodega de datos
+    conexion <- dbConnect(drv= RMySQL::MySQL() , port=config$port, host=config$host, username=config$username,
+                                    dbname=config$dbname, password=config$password)
+  }
+}
+
+
+
+

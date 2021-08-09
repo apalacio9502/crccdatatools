@@ -11,7 +11,7 @@ gt_gar_dep(datos, colores)
 \code{\link{dt_gen_gar_dep_resumen_fecha}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-por la función colores}
+por la función \code{\link{dt_colores}}}
 }
 \description{
 Esta función crea la gráfica de la garantía depositada tipo activo en formato de pie

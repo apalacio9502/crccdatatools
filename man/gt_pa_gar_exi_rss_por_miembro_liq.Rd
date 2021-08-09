@@ -20,7 +20,7 @@ gt_pa_gar_exi_rss_por_miembro_liq(
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica (....). Por defecto c()}
 }
 \description{

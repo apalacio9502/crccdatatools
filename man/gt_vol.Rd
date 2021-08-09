@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_volumen.R
 \name{gt_vol}
 \alias{gt_vol}
-\title{Gráfica el volumen operado (barras h)}
+\title{Grafica el volumen operado (barras h)}
 \usage{
 gt_vol(
   datos,
@@ -17,12 +17,12 @@ gt_vol(
 \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
 "Origen Producto", "Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()}
 }

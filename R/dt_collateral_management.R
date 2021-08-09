@@ -3,37 +3,49 @@
 #' Esta función descarga los datos de la tabla gen_garantia_depositada_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 #' caso contrario sera igual al "ID". Por defecto FALSE
-#' @param segmentos clase array character. Lista de segmentos de los cuales se desea descargar la información.
-#' Por defecto descarga la información de todos los segmentos.
-#' @param oracle clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.
 #' @export
 
-dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE,segmentos=NULL,oracle=FALSE){
+dt_gen_gar_dep_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,oracle)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+
+  # Se covierte el segmentos analisis a SQL
+  segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,
-                                      SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
-                                      MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,ACTIVO_TIPO,
-                                      VOLUMEN, IMPORTE_ANTES_HAIRCUT, IMPORTE
-                                      FROM MOD_GE_SUB_IO_GARANTIA_DEPOSITADA_RESUMEN
-                                      WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
+                                           SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+                                           MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,ACTIVO_TIPO,
+                                           VOLUMEN, IMPORTE_ANTES_HAIRCUT, IMPORTE
+                                           FROM GEN_GARANTIA_DEPOSITADA_RESUMEN
+                                           WHERE {segmentos_analisis_sql} AND
+                                           FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
+
+  # Se convierte la fecha de los datos en un date
+  datos <- datos %>% mutate(FECHA=ymd(FECHA))
+
+  # Se verifica si segmentos_analisis es diferente de nulo
+  if (!is.null(segmentos_analisis)) {
+    # Se agregan todas las posibles fechas del periodo de análisis
+    datos <- dt_fechas(conexion=conexion,proveedor=proveedor,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+  }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
-  datos <-  datos %>% mutate(FECHA=ymd(FECHA)) %>%
+  datos <-  datos %>%
     complete(FECHA,nesting(SEGMENTO_ID, SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO,MIEMBRO_TIPO, CUENTA_GARANTIA_TIPO,ACTIVO_TIPO),
-             fill = list(VOLUMEN=0,IMPORTE_ANTES_HAIRCUT=0,IMPORTE=0)) %>%
-    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA")
+             fill = list(VOLUMEN=0,IMPORTE_ANTES_HAIRCUT=0,IMPORTE=0))
 
   return(datos)
 }
@@ -43,23 +55,21 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 #' Esta función descarga los datos de la tabla gen_cm_titulos para un periodo de análisis y
 #' con base en los parametros ingresados. Adicionalmente tranforma la tabla (Cambia su estructura a pivot_longer)
 #' @param conexion clase formal. Conexión base de datos
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 #' caso contrario sera igual al "ID". Por defecto FALSE
-#' @param segmentos clase array character. Lista de segmentos de los cuales se desea descargar la información.
-#' Por defecto descarga la información de todos los segmentos.
-#' @param oracle clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.
 #' @export
 
-dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE,segmentos=NULL,oracle=FALSE){
+dt_gen_cm_titulos<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,oracle)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID, SEGMENTO_NOMBRE,
@@ -69,7 +79,7 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
                                      VOLUMEN_GARANTIA, VOLUMEN_MEC_SEN, VOLUMEN_SIMULTANEAS,
                                      IMPORTE_GARANTIA_DESPUES_HAIRCUT,
                                      IMPORTE_GARANTIA_HAIRCUT, IMPORTE_MEC_SEN, IMPORTE_SIMULTANEAS
-                                     FROM MOD_GE_SUB_ICM_TITULOS
+                                     FROM GEN_CM_TITULOS
                                      WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
 
@@ -105,23 +115,21 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
 #' Esta función descarga los datos de la tabla gen_cm_acciones para un periodo de análisis y
 #' con base en los parametros ingresados. Adicionalmente tranforma la tabla (Cambia su estructura a pivot_longer)
 #' @param conexion clase formal. Conexión base de datos
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 #' caso contrario sera igual al "ID". Por defecto FALSE
-#' @param segmentos clase array character. Lista de segmentos de los cuales se desea descargar la información.
-#' Por defecto descarga la información de todos los segmentos.
-#' @param oracle clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.
 #' @export
 
-dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE,segmentos=NULL,oracle=FALSE){
+dt_gen_cm_acciones<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,oracle)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
@@ -131,7 +139,7 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                     VOLUMEN_GARANTIA, VOLUMEN_CONTADO, VOLUMEN_ADR,
                                     IMPORTE_GARANTIA_DESPUES_HAIRCUT,
                                     IMPORTE_GARANTIA_HAIRCUT, IMPORTE_CONTADO, IMPORTE_ADR
-                                    FROM MOD_GE_SUB_ICM_ACCIONES
+                                    FROM GEN_CM_ACCIONES
                                     WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 

@@ -4,12 +4,12 @@
 \alias{dt_periodo_analisis_sql}
 \title{Convertir periodo análisis a formato SQL (system)}
 \usage{
-dt_periodo_analisis_sql(periodo_analisis, oracle = FALSE)
+dt_periodo_analisis_sql(periodo_analisis, proveedor = "MySQL")
 }
 \arguments{
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 
-\item{oracle}{clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE}
+\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 }
 \description{
 Esta función convierte un periodo de análisis a formato SQL dependiendo del tipo de base de datos

@@ -16,7 +16,7 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion(
 \code{\link{dt_gen_cm_promedio_diario}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-#' por la función colores}
+#' por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

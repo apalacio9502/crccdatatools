@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_rss.R
 \name{gt_rss_test_fgc}
 \alias{gt_rss_test_fgc}
-\title{Gráfica el test del FGC (lineas)}
+\title{Grafica el test del FGC (lineas)}
 \usage{
 gt_rss_test_fgc(
   datos,
@@ -20,7 +20,7 @@ gt_rss_test_fgc(
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica (....). Por defecto c()}
 }
 \description{

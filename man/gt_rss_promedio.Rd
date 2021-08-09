@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_rss.R
 \name{gt_rss_promedio}
 \alias{gt_rss_promedio}
-\title{Gráfica el riesgo en situación de estres promedio 90 dias vs FGC (lineas)}
+\title{Grafica el riesgo en situación de estres promedio 90 dias vs FGC (lineas)}
 \usage{
 gt_rss_promedio(
   datos,
@@ -20,7 +20,7 @@ gt_rss_promedio(
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica (....). Por defecto c()}
 }
 \description{

@@ -1,4 +1,4 @@
-#' Gráfica el riesgo en situación de estres promedio 90 dias vs FGC (lineas)
+#' Grafica el riesgo en situación de estres promedio 90 dias vs FGC (lineas)
 #'
 #' Esta función crea la gráfica del riesgo en situación de estres promedio 90 dias vs FGC en formato lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
@@ -7,7 +7,7 @@
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica (....). Por defecto c()
 #' @export
 
@@ -61,7 +61,7 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
       updatemenus <- NULL
     }
 
-    # Se grafica el riesgo en situación de estres diario
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos,split=~SEGMENTO_NOMBRE,x=~FECHA,colors=c("#66c2a5","#8da0cb"),
                     hoverinfo="text+x+name") %>%
       add_lines(y=~RIESGO_ST_PROMEDIO_1,text=~TEXT_RIESGO_ST_1,visible=~VISIBLE,stackgroup="1",name="1st. RSS",color="1") %>%
@@ -81,7 +81,92 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
   }
 }
 
-#' Gráfica el test del FGC (lineas)
+
+#' Tabla fgc resumen
+#'
+#' Esta función crea la tabla ingresos en formato html
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' @param pageLength clase number. Número de filas por hoja que alojara
+#' la tabla. Por defecto 100
+#' @param style clase character. Estilo boostrap que se debe utilizar
+#' para renderizar la tabla. Por defecto "bootstrap4"
+#' @export
+
+gt_rss_fgc_resumen<- function(datos,pageLength=100,style="bootstrap4"){
+
+  # Manipulación de datos
+  datos <- datos  %>%
+    group_by(across(MIEMBRO_LIQ_ID_SEUDONIMO:MIEMBRO_LIQ_COLETIVIZADOR)) %>%
+    summarise(across(RIESGO_ST_PROMEDIO:APORTACION_NUEVA, ~sum(.x)),.groups="drop") %>%
+    arrange(desc(RIESGO_ST_PROMEDIO)) %>%
+    group_by(MIEMBRO_LIQ_COLETIVIZADOR) %>%
+    mutate(POSICION=row_number()) %>% ungroup() %>%
+    transmute("ID Miembro"=MIEMBRO_LIQ_ID_SEUDONIMO,
+              "Nombre Miembro"=MIEMBRO_LIQ_NOMBRE,
+              "Colectiviza"=if_else(MIEMBRO_LIQ_COLETIVIZADOR==1,"Si","No"),
+              "Posición Ranking"=row_number(),
+              "Riesgo en Situación de Estrés Promedio"=RIESGO_ST_PROMEDIO,
+              "Aportación Mínima"=APORTACION_MINIMA,
+              "Aportación Actual"=APORTACION_ACTUAL,
+              "Aportación Nueva"=APORTACION_NUEVA,
+              "Variación Aportación"=if_else(APORTACION_ACTUAL!=0,APORTACION_NUEVA/APORTACION_ACTUAL-1,if_else(APORTACION_NUEVA ==0,0,1)))
+
+  # Se crea la tabla
+  table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                                    columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+    formatCurrency(c(5,6,7,8), '$',digits = 0) %>% formatPercentage(9,digits = 2)
+
+  return(table)
+}
+
+#' Grafica el fgc diario (lineas)
+#'
+#' Esta función crea la gráfica del fgc diario en formato de lineas
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
+#' @param colores clase data.frame. Debe contener los datos generados
+#' #' por la función colores
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @export
+
+gt_rss_fgc_diario<- function(datos,colores,fixedrange=FALSE){
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>% mutate(VALOR=GARANTIA_EXIGIDA_FGC) %>%
+      group_by(TIPO="SEGMENTO_NOMBRE",ID=SEGMENTO_NOMBRE,FECHA) %>%
+      summarise(across(VALOR, ~round(sum(.x)/1e+9,6)),.groups="drop_last")%>%
+      mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA,TIPO)  %>% group_by(FECHA,TIPO) %>%
+      group_by(FECHA) %>%
+      mutate(TEXTO=paste(VALOR,"Miles M /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
+      ungroup() %>% mutate(COLOR_ID=as.character(as.numeric(fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T))))
+
+    # Se crea el vector_colores
+    vector_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = vector_colores,color=~COLOR_ID,alpha=1,
+                    textposition = 'none') %>%
+      add_lines(y=~VALOR,text=~TEXTO,name=~ID,line = list(color = 'transparent'),
+                fill = 'tonexty',stackgroup="1",legendgroup=~ID,hoverinfo="text+x+name") %>%
+      layout(hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
+             xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Miles M-COP",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es")
+
+    return(plot)
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
+#' Grafica el test del FGC (lineas)
 #'
 #' Esta función crea la gráfica del test del FGC en formato lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
@@ -90,7 +175,7 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica (....). Por defecto c()
 #' @export
 
@@ -145,7 +230,7 @@ gt_rss_test_fgc <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
       updatemenus <- NULL
     }
 
-    # Se grafica el test del fgc
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos,split=~SEGMENTO_NOMBRE,x=~FECHA,colors=c("#66c2a5","#8da0cb"),hoverinfo="text+x+name") %>%
       add_lines(y=~RIESGO_ST_1,text=~TEXT_RIESGO_ST_1,visible=~VISIBLE,stackgroup="1",name="1st. RSS",color="1") %>%
       add_lines(y=~RIESGO_ST_2,text=~TEXT_RIESGO_ST_2,visible=~VISIBLE,stackgroup="1",name="2st. RSS",color="2") %>%

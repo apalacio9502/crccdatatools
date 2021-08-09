@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_ingresos.R
 \name{gt_ing}
 \alias{gt_ing}
-\title{Gráfica los ingresos (pie)}
+\title{Grafica los ingresos (pie)}
 \usage{
 gt_ing(datos, colores, boton_activo = NULL, botones_inactivos = c())
 }
@@ -11,12 +11,12 @@ gt_ing(datos, colores, boton_activo = NULL, botones_inactivos = c())
 \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto", "Origen Producto",
 "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()}
 }

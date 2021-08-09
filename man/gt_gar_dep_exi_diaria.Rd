@@ -18,7 +18,7 @@ gt_gar_dep_exi_diaria(
 \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 
@@ -27,8 +27,8 @@ por la función colores}
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
-en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento","Tipo Cuenta Gar."). En caso
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
+en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento", "Tipo Miembro", "Tipo Cuenta Gar."). En caso
 contrario los botones son (General,D-sss--s-s-s-s-s-s--s). Por defecto c()}
 }
 \description{

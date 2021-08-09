@@ -17,7 +17,7 @@ gt_pa_promedio_diario_tipocuenta(
 \code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-#' por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

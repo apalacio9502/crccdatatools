@@ -6,11 +6,11 @@
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
-#' en la gráfica ("Segmento","Tipo Cuenta Gar."). Por defecto c()
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
+#' en la gráfica ("Segmento", "Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()
 #' @export
 
 gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
@@ -22,8 +22,8 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
   if (nrow(datos)>0) {
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("SEGMENTO_NOMBRE","CUENTA_GARANTIA_TIPO"),
-                        BOTON=c("Segmento","Tipo Cuenta Gar.")) %>% filter(!BOTON %in% botones_inactivos)
+    tipos <- data.frame(TIPO=c("SEGMENTO_NOMBRE","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
+                        BOTON=c("Segmento","Tipo Miembro","Tipo Cuenta Gar.")) %>% filter(!BOTON %in% botones_inactivos)
 
     # Verificación boton_activo
     if (is.null(boton_activo) || !boton_activo %in% tipos$BOTON)boton_activo <- tipos$BOTON[1]
@@ -41,10 +41,10 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
              VALOR_1=VALOR_1/sum(VALOR_1),
              VALOR_2=VALOR_2/sum(VALOR_2)) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -56,12 +56,12 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
                                  visible = as.logical(rep(rep(visible,n_dist),2))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica la garantia depositada vs exigida (Fecha Especifica)
-    plot <- plot_ly(data= datos_completos%>% arrange(COLOR_ID),colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos%>% arrange(COLOR_ID),colors = colores,color=~COLOR_ID,
                     textposition = 'none') %>%
       add_bars(y="Depositadas",x=~VALOR_1,text=~TEXTO_1,name=~ID,visible=~VISIBLE_1,
                legendgroup=~ID,hoverinfo="text+name") %>%
@@ -89,12 +89,12 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dos_ejes clase boolean. TRUE si se desea que la garantia depositada y exigida se muestren en ejes distintos. Por defecto TRUE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento","Tipo Cuenta Gar."). En caso
 #' contrario los botones son (General,D-sss--s-s-s-s-s-s--s). Por defecto c()
 #' @export
@@ -129,10 +129,10 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
         mutate(TEXTO_1=paste(VALOR_1,"Billones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
                TEXTO_2=paste(VALOR_2,"Billones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)), "C")) %>% ungroup() %>%
         left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-        mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),
-               COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+        mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+        arrange(COLOR_ID)
 
-      # Se crea la lista n_dist
+      # Se crea el vector n_dist
       n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
         summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -144,13 +144,13 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
                                    visible = as.logical(rep(c(rep(visible,n_dist),visible[1]),2))))))
       }
 
-      # Se crea la lista de colores
-      lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      # Se crea el vector colores
+      colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
 
-      # Se grafica la garantia depositada vs exigida por miembro (Fecha Especifica)
-      plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = lista_colores,color=~COLOR_ID,
+      # Se crea la gráfica
+      plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,color=~COLOR_ID,
                       textposition = 'none') %>%
         add_bars(y=~VALOR_1,text=~TEXTO_1,name=~ID,visible=~VISIBLE_1,legendgroup=~ID,
                  hoverinfo="text+x+name") %>%
@@ -182,7 +182,7 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
         mutate(SEGMENTO_NOMBRE=relevel(factor(SEGMENTO_NOMBRE),"General")) %>%
         arrange(SEGMENTO_NOMBRE)
 
-      # Se crea la lista de segmetos
+      # Se crea el vector segmetos
       segmentos <- levels(datos$SEGMENTO_NOMBRE)
 
       # Verificación inputs
@@ -218,7 +218,7 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
         updatemenus <- NULL
       }
 
-      # Se grafica el riesgo en situación de estres diario
+      # Se crea la gráfica
       plot <- plot_ly(data=datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,split=~as.numeric(SEGMENTO_NOMBRE),
                       hoverinfo="text+x+name",textposition = 'none') %>%
         add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,name="Garantía Depositada") %>%
@@ -247,13 +247,13 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dos_ejes clase boolean. TRUE si se desea que la garantia depositada y exigida se muestren en ejes distintos. Por defecto TRUE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
-#' en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento","Tipo Cuenta Gar."). En caso
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
+#' en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento", "Tipo Miembro", "Tipo Cuenta Gar."). En caso
 #' contrario los botones son (General,D-sss--s-s-s-s-s-s--s). Por defecto c()
 #' @export
 
@@ -265,8 +265,8 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
     if (dos_ejes==1) {
 
       # Se crea el data.frame tipos
-      tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","CUENTA_GARANTIA_TIPO"),
-                          BOTON=c("General","Segmento","Tipo Cuenta Gar.")) %>%
+      tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
+                          BOTON=c("General","Segmento","Tipo Miembro","Tipo Cuenta Gar.")) %>%
         filter(!BOTON %in% botones_inactivos)
 
       # Verificación boton_activo
@@ -284,10 +284,10 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
         mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1, "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
                TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2, "C")) %>% ungroup() %>%
         left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-        mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),
-               COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+        mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+        arrange(COLOR_ID)
 
-      # Se crea la lista n_dist
+      # Se crea el vector n_dist
       n_dist<- (datos_completos %>% group_by(TIPO,POSICION) %>% summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION))$N
 
       # Se crean los botones
@@ -298,12 +298,12 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
                                    visible = as.logical(rep(c(rep(visible,n_dist),visible[1]),2))))))
       }
 
-      # Se crea la lista de colores
-      lista_colores <- (datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      # Se crea el vector colores
+      colores <- (datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
                           left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID))$COLOR
 
-      # Se grafica la garantia depositada vs exigida diaria
-      plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = lista_colores,color=~COLOR_ID,alpha=1,
+      # Se crea la gráfica
+      plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = colores,color=~COLOR_ID,alpha=1,
                       textposition = 'none') %>%
         add_lines(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE_1,name=~ID,line = list(color = 'transparent'),
                   fill = 'tonexty',stackgroup="1",legendgroup=~ID,hoverinfo="text+x+name") %>%
@@ -333,7 +333,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
         mutate(SEGMENTO_NOMBRE=relevel(factor(SEGMENTO_NOMBRE),"General")) %>%
         arrange(SEGMENTO_NOMBRE)
 
-      # Se crea la lista de segmetos
+      # Se crea el vector segmetos
       segmentos <- levels(datos$SEGMENTO_NOMBRE)
 
       # Verificación inputs
@@ -366,7 +366,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
         updatemenus <- NULL
       }
 
-      # Se grafica el riesgo en situación de estres diario
+      # Se crea la gráfica
       plot <- plot_ly(data=datos_completos ,x=~FECHA,split=~as.numeric(SEGMENTO_NOMBRE),
                       hoverinfo="text+x+name") %>%
         add_lines(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,name="Garantía Depositada") %>%
@@ -395,13 +395,13 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
-#' en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento","Tipo Cuenta Gar."). En caso
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
+#' en la gráfica. Si 'dos_ejes' es igual a true los botones son ("Segmento", "Tipo Miembro", "Tipo Cuenta Gar."). En caso
 #' contrario los botones son (General,D-sss--s-s-s-s-s-s--s). Por defecto c()
 #' @export
 
@@ -411,10 +411,9 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
   if (nrow(datos)>0) {
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","CUENTA_GARANTIA_TIPO"),
-                        BOTON=c("General","Segmento","Tipo Cuenta Gar.")) %>%
+    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
+                        BOTON=c("General","Segmento","Tipo Miembro","Tipo Cuenta Gar.")) %>%
       filter(!BOTON %in% botones_inactivos)
-
     # Verificación boton_activo
     if (is.null(boton_activo) || !boton_activo %in% tipos$BOTON) boton_activo <- tipos$BOTON[1]
 
@@ -439,11 +438,11 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1, "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)), "P /",CAMBIO_VALOR_2, "C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- (datos_completos %>% group_by(TIPO,POSICION) %>% summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION))$N
 
     # Se crean los botones
@@ -454,12 +453,12 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
                                  visible = as.logical(rep(c(rep(visible,n_dist),visible[1]),2))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- (datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- (datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
                         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID))$COLOR
 
-    # Se grafica la garantia depositada vs exigida promedio diario por (Mes o Año)
-    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE_1,
@@ -493,7 +492,7 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_ggl_ind_fgc_liq}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -519,12 +518,12 @@ gt_gar_ggl_ind_fgc_por_miembro_liq<- function(datos,colores,fixedrange=FALSE){
              TEXT=paste(VALUE,"Billones"),
              NAME=GARANTIA_TIPO)
 
-    # Se crea la lista de colores
-    lista_colores <- datos_garantias_exigidas %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_garantias_exigidas %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica la garantía Ind. + FGC vs garantía depositada a nivel de miembro liq (Fecha Especifica)
-    plot <- plot_ly(data=datos_garantias_exigidas,colors = lista_colores,x=~MIEMBRO_LIQ_ID_SEUDONIMO,textposition = 'none') %>%
+    # Se crea la gráfica
+    plot <- plot_ly(data=datos_garantias_exigidas,colors = colores,x=~MIEMBRO_LIQ_ID_SEUDONIMO,textposition = 'none') %>%
       add_bars(y=~VALUE,color=~COLOR_ID,text=~TEXT,hoverinfo="text+x+name",name=~NAME) %>%
       add_data(data=datos_garantias_depositadas) %>%
       add_markers(y=~VALUE,text=~TEXT,hoverinfo="text+x+name",name=~NAME,marker = list(color = "black")) %>%
@@ -551,7 +550,7 @@ gt_gar_ggl_ind_fgc_por_miembro_liq<- function(datos,colores,fixedrange=FALSE){
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica (....). Por defecto c()
 #' @export
 
@@ -573,7 +572,7 @@ gt_pa_bruta_gar_exi_por_miembro <- function(datos,fixedrange=FALSE,boton_activo=
       mutate(SEGMENTO_NOMBRE=relevel(factor(SEGMENTO_NOMBRE),"General")) %>%
       arrange(SEGMENTO_NOMBRE)
 
-    # Se crea la lista de segmetos
+    # Se crea el vector segmetos
     segmentos <- levels(datos$SEGMENTO_NOMBRE)
 
     # Verificación boton_activo
@@ -610,7 +609,7 @@ gt_pa_bruta_gar_exi_por_miembro <- function(datos,fixedrange=FALSE,boton_activo=
       updatemenus <- NULL
     }
 
-    # Se grafica la posición abierta dos puntas vs garantía exigida por miembro (Fecha Especifica)
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,split=~as.numeric(SEGMENTO_NOMBRE),
                     hoverinfo="text+x+name",textposition = 'none') %>%
       add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,name="Posición Dos Puntas",yaxis="y1",color="1") %>%
@@ -643,7 +642,7 @@ gt_pa_bruta_gar_exi_por_miembro <- function(datos,fixedrange=FALSE,boton_activo=
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica (....). Por defecto c()
 #' @export
 
@@ -662,7 +661,7 @@ gt_pa_gar_exi_rss_por_miembro_liq <- function(datos,fixedrange=FALSE,boton_activ
       mutate(SEGMENTO_NOMBRE=relevel(factor(SEGMENTO_NOMBRE),"General")) %>%
       arrange(SEGMENTO_NOMBRE)
 
-    # Se crea la lista de segmetos
+    # Se crea el vector segmetos
     segmentos <- levels(datos$SEGMENTO_NOMBRE)
 
     # Verificación inputs
@@ -700,7 +699,7 @@ gt_pa_gar_exi_rss_por_miembro_liq <- function(datos,fixedrange=FALSE,boton_activ
       updatemenus <- NULL
     }
 
-    # Se grafica la posición abierta vs garantía exigida por miembro liq (Fecha Especifica)
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos ,x=~MIEMBRO_LIQ_ID_SEUDONIMO,split=~as.numeric(SEGMENTO_NOMBRE),
                     hoverinfo="text+x+name",textposition = 'none') %>%
       add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,name="Posición",yaxis="y1",color="1",legendgroup="1") %>%
@@ -734,7 +733,7 @@ gt_pa_gar_exi_rss_por_miembro_liq <- function(datos,fixedrange=FALSE,boton_activ
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica (....). Por defecto c()
 #' @export
 
@@ -748,7 +747,7 @@ gt_pa_bruta_gar_exi_por_producto <- function(datos,fixedrange=FALSE,boton_activo
       mutate(SEGMENTO_NOMBRE=factor(SEGMENTO_NOMBRE)) %>%
       arrange(SEGMENTO_NOMBRE)
 
-    # Se crea la lista de segmetos
+    # Se crea el vector segmetos
     segmentos <- levels(datos$SEGMENTO_NOMBRE)
 
     # Verificación boton_activo
@@ -789,7 +788,7 @@ gt_pa_bruta_gar_exi_por_producto <- function(datos,fixedrange=FALSE,boton_activo
 
 
 
-    # Se grafica la posición abierta dos puntas vs garantía exigida por producto (Fecha Especifica)
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos,split=~SEGMENTO_NOMBRE,x=~PRODUCTO_DETALLE,
                     hoverinfo="text+x+name",textposition = 'none') %>%
       add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,name="Posición Dos Puntas",yaxis="y1",color="1") %>%

@@ -14,7 +14,8 @@ Depends:
     lubridate (>= 1.7.10),
     glue (>= 1.4.2),
     plotly (>= 4.9.4.1),
-    DBI (>= 1.1.1)
+    DBI (>= 1.1.1),
+    formattable (>= 0.2.1)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

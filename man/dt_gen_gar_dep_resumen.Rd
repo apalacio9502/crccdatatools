@@ -6,28 +6,28 @@
 \usage{
 dt_gen_gar_dep_resumen(
   conexion,
+  proveedor = "MySQL",
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  ficticio = FALSE,
-  segmentos = NULL,
-  oracle = FALSE
+  segmentos_analisis = NULL,
+  ficticio = FALSE
 )
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
+
+\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
+\item{segmentos_analisis}{clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
+de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.}
+
 \item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 caso contrario sera igual al "ID". Por defecto FALSE}
-
-\item{segmentos}{clase array character. Lista de segmentos de los cuales se desea descargar la información.
-Por defecto descarga la información de todos los segmentos.}
-
-\item{oracle}{clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.}
 }
 \description{
 Esta función descarga los datos de la tabla gen_garantia_depositada_resumen para un periodo de análisis y

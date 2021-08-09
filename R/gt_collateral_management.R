@@ -14,8 +14,9 @@ gt_gar_dep_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstr
 
   # Preprosesamiento
   datos <- datos %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",ACTIVO_TIPO="Consolidado")) %>%
-    group_by(FECHA,FECHA_ANO_MES,SEGMENTO_NOMBRE,ACTIVO_TIPO) %>%
+    group_by(FECHA,SEGMENTO_NOMBRE,ACTIVO_TIPO) %>%
     summarise(IMPORTE=sum(IMPORTE),.groups="drop") %>%
+    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
     group_by(SEGMENTO_NOMBRE,ACTIVO_TIPO) %>%
     summarise(IMPORTE_DIARIO=sum(IMPORTE[FECHA==fecha_analisis]),
               IMPORTE_DIARIO_PROMEDIO_MENSUAL=mean(IMPORTE[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
@@ -42,7 +43,7 @@ gt_gar_dep_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstr
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_resumen_fecha}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @export
 
 gt_gar_dep <- function(datos,colores){
@@ -58,17 +59,17 @@ gt_gar_dep <- function(datos,colores){
       group_by(TIPO="ACTIVO_TIPO",ID=ACTIVO_TIPO) %>%
       summarise(VALOR=round(sum(IMPORTE,na.rm = TRUE)/1e+12,6),.groups="drop_last") %>%
       mutate(TEXTO=paste(VALOR,"Billones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
-      mutate(ORDENADOR=fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T),
-             COLOR_ID=paste0(if_else(nchar(as.numeric(ORDENADOR))==1,"0",""),as.numeric(ORDENADOR))) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
                         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada (Fecha Especifica)
     plot <- plot_ly(data= datos_completos ,labels=~ID) %>%
       add_pie(values=~VALOR,text=~TEXTO,textinfo='percent',hoverinfo="text",
-              marker = list(colors =lista_colores),domain = list(x = c(0, 1), y = c(0.1, 0.95))) %>%
+              marker = list(colors =colores),domain = list(x = c(0, 1), y = c(0.1, 0.95))) %>%
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              margin=list("l"=50,"r"=50)) %>%
       config(displaylogo = F,locale = "es")
@@ -86,7 +87,7 @@ gt_gar_dep <- function(datos,colores){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_resumen_fecha}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -101,15 +102,15 @@ gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
     datos_completos <- datos %>% mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO), IMPORTE,.fun=sum,.desc=T),VALOR=IMPORTE)  %>%
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO="ACTIVO_TIPO",ID=ACTIVO_TIPO) %>% summarise(across(VALOR, ~round(sum(.x)/1e+12,6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Billones","/",dt_porcentaje_caracter(VALOR/sum(VALOR)))) %>% ungroup() %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada por miembro (Fecha Especifica)
-    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = lista_colores,color=~COLOR_ID,
+    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,name=~ID,
@@ -129,16 +130,14 @@ gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
 #' Gráfica la garantía depositada diaria (lineas)
 #'
 #' Esta función crea la gráfica de la garantía depositada diaria en formato de lineas
-#' @param datos clase data.frame. Los datos deben tener las siguientes columnas
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
 gt_gar_dep_diaria<- function(datos,colores,fixedrange=FALSE){
-
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -149,16 +148,15 @@ gt_gar_dep_diaria<- function(datos,colores,fixedrange=FALSE){
       summarise(across(VALOR, ~round(sum(.x)/1e+12,6)),.groups="drop_last")%>%
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA,TIPO)  %>% group_by(FECHA,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Billones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
 
-
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada diaria
-    plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = lista_colores,color=~COLOR_ID,alpha=1,
+    plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = colores,color=~COLOR_ID,alpha=1,
                     textposition = 'none') %>%
       add_lines(y=~VALOR,text=~TEXTO,name=~ID,line = list(color = 'transparent'),
                 fill = 'tonexty',stackgroup="1",legendgroup=~ID,hoverinfo="text+x+name") %>%
@@ -180,7 +178,7 @@ gt_gar_dep_diaria<- function(datos,colores,fixedrange=FALSE){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @export
@@ -204,15 +202,15 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
       summarise(across(VALOR, ~round(mean(.x),6)),.groups="drop_last")%>%
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Billones /",dt_porcentaje_caracter(proportions(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada promedio diario por (Mes o Año)
-    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = lista_colores,color=~COLOR_ID,
+    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,
@@ -236,7 +234,7 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_cm_promedio_diario}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Nominal", "Efectivo Cover 2", "Nominal Cover 2"). Por defecto NULL
@@ -291,13 +289,13 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
                                                         rep(visible[4],2)))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
                         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada vs volumen negociado por titulo promedio diario
     plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
-                    color=~COLOR_ID,colors=lista_colores,textposition = 'none') %>%
+                    color=~COLOR_ID,colors=colores,textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
                name=~ID,hoverinfo="text+x+name") %>%
       add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%
@@ -496,7 +494,7 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_cm_promedio_diario}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Acciones", "Efectivo Cover 2", "Acciones Cover 2"). Por defecto NULL
@@ -550,13 +548,13 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fix
                             list(yaxis=list(title=ifelse(i==1,"Miles de Millones-COP","Miles de Millones de Acciones"),fixedrange=fixedrange)))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se grafica la garantia depositada vs volumen negociado por acción promedio diario
     plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
-                    color=~COLOR_ID,colors=lista_colores,textposition = 'none') %>%
+                    color=~COLOR_ID,colors=colores,textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
                name=~ID,hoverinfo="text+x+name") %>%
       add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%

@@ -16,8 +16,9 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
   datos <- datos  %>% filter(TARIFA_SANCION!=1) %>%
     bind_rows(datos %>% filter(TARIFA_SANCION!=1) %>%
                 mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
-    group_by(FECHA,FECHA_ANO_MES,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
+    group_by(FECHA,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
     summarise(TARIFA=sum(TARIFA,na.rm=TRUE),.groups="drop") %>%
+    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
     group_by(SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
     summarise(INGRESO_DIARIO=sum(TARIFA[FECHA==fecha_analisis]),
               INGRESO_DIARIO_PROMEDIO_MENSUAL=mean(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
@@ -43,17 +44,17 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
   return(table)
 }
 
-#' Gráfica los ingresos (pie)
+#' Grafica los ingresos (pie)
 #'
 #' Esta función crea la gráfica de los ingresos en formato de pie.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto", "Origen Producto",
 #' "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
@@ -84,8 +85,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
       summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR),
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-"),
              TIPO=factor(TIPO,levels = tipos$TIPO)) %>% arrange(COLOR_ID)
 
     # Se crean los botones
@@ -96,14 +96,14 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
                                  visible = as.logical(c(visible))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los ingresos (Fecha Especifica)
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos ,split = ~TIPO,labels=~ID) %>%
       add_pie(values=~VALOR,text=~TEXTO,visible=~VISIBLE,textinfo='percent',hoverinfo="text",
-              marker = list(colors =lista_colores),domain = list(x = c(0, 1), y = c(0.1, 0.95))) %>%
+              marker = list(colors =colores),domain = list(x = c(0, 1), y = c(0.1, 0.95))) %>%
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              margin=list("l"=50,"r"=50),
              updatemenus=list(
@@ -118,18 +118,18 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
   }
 }
 
-#' Gráfica los ingresos por miembro  (barras)
+#' Grafica los ingresos por miembro  (barras)
 #'
 #' Esta función crea la gráfica de los ingresos por miembro en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto",
 #' "Subtipo Producto", "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
@@ -162,10 +162,10 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO,ID) %>% summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -178,12 +178,12 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
                                                         visible[1]))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
                         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los ingresos por miembro (Fecha Especifica)
-    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,name=~ID,visible=~VISIBLE,
@@ -206,18 +206,18 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
   }
 }
 
-#' Gráfica los ingresos promedio diario por miembro (barras)
+#' Grafica los ingresos promedio diario por miembro (barras)
 #'
 #' Esta función crea la gráfica de los ingresos promedio diario en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
@@ -247,11 +247,11 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
       summarise(across(VALOR, ~round(mean(.x),6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO),VALOR,.fun=sum,.desc=T),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO),VALOR,.fun=sum,.desc=T),
+             COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -264,12 +264,12 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
                                                         visible[1]))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los ingresos promedio diario por periodo y miembro
-    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,name=~ID,visible=~VISIBLE,
@@ -292,7 +292,7 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
   }
 }
 
-#' Gráfica los ingresos diarios (lines)
+#' Grafica los ingresos diarios (lines)
 #'
 #' Esta función crea la gráfica de los ingresos diarios en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
@@ -300,11 +300,11 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
@@ -334,10 +334,10 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -350,13 +350,13 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
                                                         visible[1]))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los ingresos diarios
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos %>% mutate(ID=as.character(ID)) ,x=~FECHA,
-                    colors = lista_colores,color=~COLOR_ID,alpha = 1,
+                    colors = colores,color=~COLOR_ID,alpha = 1,
                     textposition = 'none') %>%
       add_lines(y=~VALOR,text=~TEXTO,visible=~VISIBLE,name=~ID,line = list(color = 'transparent'),
                 fill = 'tonexty',stackgroup="1",legendgroup=~ID,hoverinfo="text+x+name") %>%
@@ -378,19 +378,19 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
   }
 }
 
-#' Gráfica los ingresos promedio diario por (Mes o Año) (barras)
+#' Grafica los ingresos promedio diario por (Mes o Año) (barras)
 #'
 #' Esta función crea la gráfica de los ingresos promedio diario en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
@@ -428,11 +428,11 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR, "C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -446,12 +446,12 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
     }
 
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los ingresos promedio diario por (Mes o Año)
-    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
@@ -474,14 +474,14 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
   }
 }
 
-#' Gráfica los ingresos promedio diario por (Mes o Año) y tipo de cuenta (barras)
+#' Grafica los ingresos promedio diario por (Mes o Año) y tipo de cuenta (barras)
 #'
 #' Esta función crea la gráfica de los ingresos promedio diario por tipo de cuenta en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función colores
+#' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -521,10 +521,10 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>% group_by(FECHA_FORMATO,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(paste0(POSICION,"-",ID)),VALOR,.fun=mean,.desc=T)),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      arrange(COLOR_ID)
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -536,14 +536,14 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
                                  visible = as.logical(rep(visible,n_dist))))))
     }
 
-    # Se crea la lista de colores
-    lista_colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
                         mutate(ID=ID, TIPO="PRODUCTO_SUBTIPO") %>%
                         left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
 
-    # Se grafica los ingresos diarios promedio (Mensual o Anual) por tipo de cuenta
-    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = lista_colores,color=~COLOR_ID,
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
       add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
@@ -604,23 +604,22 @@ gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLeng
   return(table)
 }
 
-#' Gráfica el resumen del cumplimiento del presupuesto
+#' Grafica el resumen del cumplimiento del presupuesto
 #'
 #' Esta función crea la gráfica resumen del cumplimiento del presupuesto para el utlimo mes
 #' y periodo(fecha min a fecha max de los datos) (barras).
 #' La información se muestra acorde la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos
-#' @param colores clase data.frame. Debe contener los datos generados
-#' por la función colores
+#' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
-#' @param botones_inactivos clase array character. Nombre de los botones a desactivar
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Origen Producto", "Producto"). Por defecto c()
 #' @export
 
-gt_ing_cumplimiento_presupuesto<- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -645,20 +644,24 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fixedrange=FALSE,boton_activo=N
       group_by(FECHA,FECHA_ANO_MES,TIPO,ID) %>%
       summarise(PROYECCION_DIARIA=sum(PROYECCION_DIARIA,na.rm = TRUE),
                 INGRESO_DIARIO=sum(TARIFA,na.rm=TRUE),.groups="drop") %>% group_by(TIPO,ID) %>%
-      summarise(INGRESO_MENSUAL=sum(INGRESO_DIARIO[FECHA_ANO_MES==max(FECHA_ANO_MES)]),
+      summarise(INGRESO_ULTIMO_DIA=sum(INGRESO_DIARIO[FECHA==fecha_analisis]),
+                INGRESO_ULTIMO_MES=sum(INGRESO_DIARIO[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
                 INGRESO_PERIODO=sum(INGRESO_DIARIO),
-                PROYECCION_MENSUAL=sum(PROYECCION_DIARIA[FECHA_ANO_MES==max(FECHA_ANO_MES)]),
+                PROYECCION_ULTIMO_DIA=sum(PROYECCION_DIARIA[FECHA==fecha_analisis]),
+                PROYECCION_ULTIMO_MES=sum(PROYECCION_DIARIA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
                 PROYECCION_PERIODO=sum(PROYECCION_DIARIA),.groups = "drop") %>%
-      mutate(VALOR_1=INGRESO_MENSUAL/PROYECCION_MENSUAL,
-             VALOR_2=INGRESO_PERIODO/PROYECCION_PERIODO,
-             TEXTO_1=paste(dt_porcentaje_caracter(VALOR_1),"/",round((INGRESO_MENSUAL-PROYECCION_MENSUAL)/1e+6,6),"Millones"),
-             TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
+      mutate(VALOR_1=INGRESO_ULTIMO_DIA/PROYECCION_ULTIMO_DIA,
+             VALOR_2=INGRESO_ULTIMO_MES/PROYECCION_ULTIMO_MES,
+             VALOR_3=INGRESO_PERIODO/PROYECCION_PERIODO,
+             TEXTO_1=paste(dt_porcentaje_caracter(VALOR_1),"/",round((INGRESO_ULTIMO_DIA-PROYECCION_ULTIMO_DIA)/1e+6,6),"Millones"),
+             TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
+             TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=as.numeric(relevel(factor(ID),"General")),
-             ORDENADOR=paste0(POSICION,"-",if_else(nchar(ORDENADOR)==1,"0",""),ORDENADOR)) %>% arrange(ORDENADOR) %>%
-      replace_na(list(VALOR_1=0,VALOR_2=0))
+      mutate(ORDENADOR=paste0(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"General")),sep="-")) %>%
+      arrange(ORDENADOR) %>%
+      replace_na(list(VALOR_1=0,VALOR_2=0,VALOR_3=0))
 
-    # Se crea la lista n_dist
+    # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
       summarise(N=n_distinct(ID),.groups="drop") %>% arrange(POSICION) %>% pull(N)
 
@@ -671,15 +674,17 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fixedrange=FALSE,boton_activo=N
     }
 
 
-    # Se grafica el cumplimento del presupuesto del útlimo mes y del periodo
-    plot <- plot_ly(data= datos_completos,split=~POSICION,x=~ORDENADOR,textposition = 'none') %>%
-      add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,hoverinfo="text+x",name="Último Mes") %>%
-      add_bars(y=~VALOR_2,text=~TEXTO_2,visible=~VISIBLE,hoverinfo="text+x",name="Periodo") %>%
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos,split=~POSICION,x=~ORDENADOR,textposition = 'none',colors=c("#af8dc3","#66c2a5","#8da0cb")) %>%
+      add_bars(y=~VALOR_1,text=~TEXTO_1,visible=~VISIBLE,hoverinfo="text+x",name="Último Día",color="1") %>%
+      add_bars(y=~VALOR_2,text=~TEXTO_2,visible=~VISIBLE,hoverinfo="text+x",name="Último Mes",color="2") %>%
+      add_bars(y=~VALOR_3,text=~TEXTO_3,visible=~VISIBLE,hoverinfo="text+x",name="Periodo",color="3") %>%
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              updatemenus=list(
                list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
-             xaxis=list(title=NA,fixedrange=fixedrange,tickmode="array",tickvals=datos_completos$ORDENADOR,ticktext =datos_completos$ID),
+             xaxis=list(title=NA,fixedrange=fixedrange,tickmode="array",tickvals=datos_completos$ORDENADOR,
+                        ticktext =datos_completos$ID),
              yaxis = list(title = "Cumplimiento",tickformat = "%",fixedrange=fixedrange)) %>%
       config(displaylogo = F,locale = "es")
 

@@ -2,10 +2,11 @@
 % Please edit documentation in R/gt_ingresos.R
 \name{gt_ing_cumplimiento_presupuesto}
 \alias{gt_ing_cumplimiento_presupuesto}
-\title{Gráfica el resumen del cumplimiento del presupuesto}
+\title{Grafica el resumen del cumplimiento del presupuesto}
 \usage{
 gt_ing_cumplimiento_presupuesto(
   datos,
+  fecha_analisis,
   fixedrange = FALSE,
   boton_activo = NULL,
   botones_inactivos = c()
@@ -15,16 +16,15 @@ gt_ing_cumplimiento_presupuesto(
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
 \code{\link{dt_gen_ing_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos}
 
+\item{fecha_analisis}{clase date. Fecha en la que se realiza el análisis (Último día de los datos)}
+
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico. Por defecto NULL}
 
-\item{botones_inactivos}{clase array character. Nombre de los botones a desactivar
+\item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica ("Segmento", "Tipo Producto", "Origen Producto", "Producto"). Por defecto c()}
-
-\item{colores}{clase data.frame. Debe contener los datos generados
-por la función colores}
 }
 \description{
 Esta función crea la gráfica resumen del cumplimiento del presupuesto para el utlimo mes

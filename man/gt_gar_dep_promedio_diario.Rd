@@ -11,7 +11,7 @@ gt_gar_dep_promedio_diario(datos, colores, fixedrange = FALSE, promedio = "m")
 \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-#' por la función colores}
+#' por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_volumen.R
 \name{gt_vol_promedio_diario_tipocuenta}
 \alias{gt_vol_promedio_diario_tipocuenta}
-\title{Gráfica el volumen operado promedio diario por (Mes o Año) y tipo de cuenta (barras)}
+\title{Grafica el volumen operado promedio diario por (Mes o Año) y tipo de cuenta (barras)}
 \usage{
 gt_vol_promedio_diario_tipocuenta(
   datos,
@@ -17,7 +17,7 @@ gt_vol_promedio_diario_tipocuenta(
 \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
-#' por la función colores}
+por la función \code{\link{dt_colores}}}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

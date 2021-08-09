@@ -4,12 +4,12 @@
 \alias{dt_fecha_analisis_sql}
 \title{Convertir fecha análisis a formato SQL (system)}
 \usage{
-dt_fecha_analisis_sql(fecha_analisis, oracle = FALSE)
+dt_fecha_analisis_sql(fecha_analisis, proveedor = "MySQL")
 }
 \arguments{
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis}
 
-\item{oracle}{clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE}
+\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 }
 \description{
 Esta función convierte una fecha de análisis a formato SQL dependiendo del tipo de base de datos

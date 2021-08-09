@@ -6,14 +6,16 @@
 \usage{
 dt_gen_lmc_consumo(
   conexion,
+  proveedor = "MySQL",
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  ficticio = FALSE,
-  oracle = FALSE
+  ficticio = FALSE
 )
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
+
+\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL}
 
@@ -22,8 +24,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
 \item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 caso contrario sera igual al "ID". Por defecto FALSE}
-
-\item{oracle}{clase boolean. TRUE si la base de datos utilizada es oracle. Por defecto FALSE.}
 }
 \description{
 Esta función descarga los datos de la tabla gen_lmc_consumo para un periodo de análisis y
