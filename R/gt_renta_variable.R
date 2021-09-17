@@ -157,7 +157,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
       arrange(CUENTA_GARANTIA_TITULAR)
 
     # Se crea el vector de titulares
-    titulares <- levels(datos_prueba$CUENTA_GARANTIA_TITULAR)
+    titulares <- levels(datos_completos$CUENTA_GARANTIA_TITULAR)
 
     # Se verifica si se debe crear el updatemenus
     if (length(titulares)>1) {
