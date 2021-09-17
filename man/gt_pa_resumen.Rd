@@ -4,13 +4,7 @@
 \alias{gt_pa_resumen}
 \title{Tabla posición abierta resumen}
 \usage{
-gt_pa_resumen(
-  datos,
-  fecha_analisis,
-  pageLength = 100,
-  style = "bootstrap4",
-  dom = NULL
-)
+gt_pa_resumen(datos, fecha_analisis, pageLength = 100, style = "bootstrap4")
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función

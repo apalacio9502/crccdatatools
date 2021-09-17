@@ -8,12 +8,12 @@ gt_rf_resumen_tramo_por_miembro(datos, fixedrange = FALSE, boton_activo = NULL)
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
-con un botón seleccionado en especifico. Por defecto NULL}
+con un botón seleccionado en especifico ("Posición Abierta Neta", "PV01", "Garantías", "PBS Cubiertos"). Por defecto NULL}
 }
 \description{
 Esta función crea la gráfica del resumen por tramo y miembro

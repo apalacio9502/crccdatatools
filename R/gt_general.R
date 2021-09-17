@@ -1,4 +1,5 @@
 #' Retorna la lista de configuración del idioma de las data.table (DT)
+#' @export
 
 gt_espanol <- list(
   sProcessing="Procesando...",
@@ -26,6 +27,7 @@ gt_espanol <- list(
 )
 
 #' Retorna la gráfica mensaje error
+#' @export
 
 gt_mensaje_error <- plot_ly() %>%
   add_text(x=1,y=1,text="Información no disponible",textfont=list(size = 20,color = toRGB("grey70"))) %>%

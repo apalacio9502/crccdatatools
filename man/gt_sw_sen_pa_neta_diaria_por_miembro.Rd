@@ -12,12 +12,12 @@ gt_sw_sen_pa_neta_diaria_por_miembro(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
-con un botón seleccionado en especifico. Por defecto NULL}
+con un botón seleccionado en especifico ("Sensibilidad", "Posición Abierta Neta"). Por defecto NULL}
 }
 \description{
 Esta función crea la gráfica la sensibilidad y posición abierta neta diaria por miembro

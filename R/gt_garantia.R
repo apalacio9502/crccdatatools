@@ -588,7 +588,7 @@ gt_pa_bruta_gar_exi_por_miembro <- function(datos,fixedrange=FALSE,boton_activo=
              TEXTO_2=paste(VALOR_2,"Billones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2))),
              TEXTO_3=dt_porcentaje_caracter(VALOR_3)) %>% ungroup() %>%
       mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO),VALOR_1,.fun=max,.desc=T),
-             VISIBLE=if_else(SEGMENTO_NOMBRE==boton_activo,TRUE,FALSE),) %>% arrange(SEGMENTO_NOMBRE)
+             VISIBLE=if_else(SEGMENTO_NOMBRE==boton_activo,TRUE,FALSE)) %>% arrange(SEGMENTO_NOMBRE)
 
     # Se verifica si se debe crear el updatemenus
     if (length(segmentos)>1) {
@@ -758,6 +758,7 @@ gt_pa_bruta_gar_exi_por_producto <- function(datos,fixedrange=FALSE,boton_activo
       summarise(VALOR_1=round(sum(POSICION_BRUTA_VALORADA)/1e+12,6),
                 VALOR_2=round(sum(GARANTIA_EXIGIDA)/1e+12,6),
                 VALOR_3=VALOR_2/VALOR_1,.groups = "drop_last") %>%
+      replace_na(list(VALOR_3=0)) %>%
       mutate(TEXTO_1=paste(VALOR_1,"Billones","/",dt_porcentaje_caracter(proportions(VALOR_1))),
              TEXTO_2=paste(VALOR_2,"Billones","/",dt_porcentaje_caracter(proportions(VALOR_2))),
              TEXTO_3=dt_porcentaje_caracter(VALOR_2/VALOR_1)) %>% ungroup() %>%

@@ -10,7 +10,7 @@
 #' para renderizar la tabla. Por defecto "bootstrap4"
 #' @export
 
-gt_pa_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4",dom=NULL){
+gt_pa_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
   # Manipulación de datos
   datos <- datos  %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
@@ -29,9 +29,9 @@ gt_pa_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4",
               "Posición Abierta Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_PROMEDIO_MENSUAL/1e+6,
               "Posición Abierta Promedio Diario Periodo M-COP"=POSICION_ABIERTA_PROMEDIO_PERIODO/1e+6)
 
-  # Se crea la tabla posicion abierta
+  # Se crea la tabla
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
-                     options = list(dom=dom,searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
                                     columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
     formatPercentage(4,digits = 2) %>% formatCurrency(c(5,6,7), '$',digits = 0)
 

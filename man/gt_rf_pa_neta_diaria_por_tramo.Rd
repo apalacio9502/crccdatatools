@@ -8,7 +8,7 @@ gt_rf_pa_neta_diaria_por_tramo(datos, colores, fixedrange = FALSE)
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
 por la función \code{\link{dt_colores}}}
@@ -18,5 +18,4 @@ por la función \code{\link{dt_colores}}}
 \description{
 Esta función crea la gráfica de la posición abierta neta diaria por tramo
 en formato de lineas
-La información se muestra acorde a la agrupación relacionada con cada botón
 }

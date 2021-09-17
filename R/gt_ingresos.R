@@ -13,9 +13,8 @@
 gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
   # Manipulación de datos
-  datos <- datos  %>% filter(TARIFA_SANCION!=1) %>%
-    bind_rows(datos %>% filter(TARIFA_SANCION!=1) %>%
-                mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
+  datos <- datos  %>%
+    bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
     group_by(FECHA,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
     summarise(TARIFA=sum(TARIFA,na.rm=TRUE),.groups="drop") %>%
     mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
@@ -79,7 +78,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
     tipos <- tipos %>% mutate(POSICION=row_number(),VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1) %>% mutate(VALOR=TARIFA) %>%
+    datos_completos <- datos %>% mutate(VALOR=TARIFA) %>%
       select(c(tipos$TIPO,"VALOR")) %>%
       pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>% group_by(TIPO,ID) %>%
       summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
@@ -154,7 +153,7 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
     tipos <- tipos %>% mutate(POSICION=row_number(),VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1) %>%
+    datos_completos <- datos %>%
       mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO), TARIFA,.fun=sum,.desc=T),
              GENERAL="General", VALOR=TARIFA) %>%
       select(c("MIEMBRO_ID_SEUDONIMO",tipos$TIPO,"VALOR")) %>%
@@ -239,15 +238,18 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
     tipos <- tipos %>% mutate(POSICION=row_number(),VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1) %>%
-      mutate(GENERAL="General", VALOR=TARIFA) %>%
+    datos_completos <- datos %>%
+      mutate(MIEMBRO_ID_SEUDONIMO=factor(MIEMBRO_ID_SEUDONIMO),GENERAL="General", VALOR=TARIFA) %>%
       select(c("FECHA","MIEMBRO_ID_SEUDONIMO",tipos$TIPO,"VALOR")) %>%
-      pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>%
+      pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID",
+                   names_transform = list(TIPO = factor),
+                   values_transform = list(ID = factor)) %>%
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO,ID,FECHA) %>% summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
       summarise(across(VALOR, ~round(mean(.x),6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO),VALOR,.fun=sum,.desc=T),
+      mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(MIEMBRO_ID_SEUDONIMO,VALOR,.fun=sum,.desc=T),
+             ID=as.character(ID),
              COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
@@ -326,7 +328,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
     tipos <- tipos %>% mutate(POSICION=row_number(),VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1) %>%
+    datos_completos <- datos  %>%
       mutate(GENERAL="General",VALOR=TARIFA) %>%
       group_by(across(c("FECHA",tipos$TIPO)))  %>% summarise(across(VALOR,.fns = sum),.groups = "drop") %>%
       pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>%
@@ -355,7 +357,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
     # Se crea la gráfica
-    plot <- plot_ly(data= datos_completos %>% mutate(ID=as.character(ID)) ,x=~FECHA,
+    plot <- plot_ly(data= datos_completos,x=~FECHA,
                     colors = colores,color=~COLOR_ID,alpha = 1,
                     textposition = 'none') %>%
       add_lines(y=~VALOR,text=~TEXTO,visible=~VISIBLE,name=~ID,line = list(color = 'transparent'),
@@ -419,7 +421,7 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
     }
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1) %>%
+    datos_completos <- datos %>%
       mutate(GENERAL="General",FECHA_FORMATO=format(FECHA,fecha_formato$FORMATO_DATOS),VALOR=TARIFA) %>%
       group_by(across(c("FECHA","FECHA_FORMATO",tipos$TIPO)))  %>% summarise(across(VALOR,.fns = sum),.groups = "drop") %>%
       pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>%
@@ -512,7 +514,7 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
     }
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(TARIFA_SANCION!=1,CUENTA_GARANTIA_TIPO!="GE") %>%
+    datos_completos <- datos %>% filter(CUENTA_GARANTIA_TIPO!="GE") %>%
       rename(TIPO="CUENTA_GARANTIA_TIPO",ID="PRODUCTO_SUBTIPO")  %>%
       mutate(FECHA_FORMATO=format(FECHA,fecha_formato$FORMATO_DATOS),VALOR=TARIFA) %>%
       select(c("FECHA","FECHA_FORMATO","TIPO","ID","VALOR")) %>%
@@ -695,4 +697,186 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
 }
 
 
+#' Gráfica el comportamiento de los ingresos promedio diario por mes, producto y miembro (treemap)
+#'
+#' Esta función crea la gráfica del comportamiento de los ingresos promedio diario por mes, producto y miembro en
+#' formato treemap
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' @export
 
+gt_ing_promedio_diario_por_mes_producto_miembro<- function(datos){
+
+  # Se filtran los datos y se crea la columna FECHA_ANO_MES
+  datos <- datos %>% filter(SEGMENTO_ID!="GE") %>%
+    mutate(FECHA_ANO_MES=format(FECHA,"%Y-%m"))
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0 & length(datos %>% distinct(FECHA_ANO_MES) %>% pull(FECHA_ANO_MES))>1) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%  mutate(VALOR=TARIFA) %>%
+      group_by(MIEMBRO_ID_SEUDONIMO,PRODUCTO_SUBTIPO,FECHA_ANO_MES,FECHA)  %>%
+      summarise(across(VALOR, ~sum(.x)/1e+6),.groups="drop_last") %>%
+      summarise(across(VALOR, ~mean(.x)),.groups="drop_last")%>%
+      mutate(VALOR_ANTERIOR=lag(VALOR),CAMBIO_VALOR=VALOR-VALOR_ANTERIOR) %>% ungroup() %>%
+      filter(FECHA_ANO_MES!=min(FECHA_ANO_MES)) %>%
+      group_by(FECHA_ANO_MES,PRODUCTO_SUBTIPO) %>%
+      mutate(TOTAL_CAMBIO_VALOR=sum(CAMBIO_VALOR,na.rm=TRUE)) %>% ungroup() %>%
+      mutate(GRUPO_CAMBIO=case_when(TOTAL_CAMBIO_VALOR>0~"Incremento",TOTAL_CAMBIO_VALOR<0~"Decrecimiento", TRUE~"Estable"),
+             SUBGRUPO_CAMBIO=case_when(TOTAL_CAMBIO_VALOR>0 & TOTAL_CAMBIO_VALOR<=0.5~"0 a 0.5 Millones",
+                                       TOTAL_CAMBIO_VALOR>0.5 & TOTAL_CAMBIO_VALOR<=1~"0.5 a 1 Millones",
+                                       TOTAL_CAMBIO_VALOR>1 & TOTAL_CAMBIO_VALOR<=3~"1 a 3 Millones",
+                                       TOTAL_CAMBIO_VALOR>3 & TOTAL_CAMBIO_VALOR<=5~"3 a 5 Millones",
+                                       TOTAL_CAMBIO_VALOR>5 ~"> 5 Millones",
+                                       TOTAL_CAMBIO_VALOR<0 & TOTAL_CAMBIO_VALOR>=(-0.5)~"0 a -0.5 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-0.5) & TOTAL_CAMBIO_VALOR>=(-1)~"-0.5 a -1 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-1) & TOTAL_CAMBIO_VALOR>=(-3)~"-1 a -3 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-3) & TOTAL_CAMBIO_VALOR>=(-5)~"-3 a -5 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-5) ~"< -5 Millones",TRUE~"0 Millones"))
+
+    # Se modifica el data.frame datos_completos
+    datos_completos <- datos_completos  %>% group_by(LABEL="Ingresos",PARENT="") %>%
+      summarise(NIVEL=1,N=n_distinct(FECHA_ANO_MES,PRODUCTO_SUBTIPO),.groups="drop") %>%
+      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Ingresos") %>%
+                  summarise(NIVEL=2,N=n_distinct(PRODUCTO_SUBTIPO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,GRUPO_CAMBIO),PARENT=FECHA_ANO_MES) %>%
+                  summarise(NIVEL=3,N=n_distinct(PRODUCTO_SUBTIPO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,SUBGRUPO_CAMBIO),PARENT=paste(FECHA_ANO_MES,GRUPO_CAMBIO)) %>%
+                  summarise(NIVEL=4,N=n_distinct(PRODUCTO_SUBTIPO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,PRODUCTO_SUBTIPO),PARENT=paste(FECHA_ANO_MES,SUBGRUPO_CAMBIO)) %>%
+                  summarise(NIVEL=5,N=1,
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO,PRODUCTO_SUBTIPO),PARENT=paste(FECHA_ANO_MES,PRODUCTO_SUBTIPO)) %>%
+                  summarise(NIVEL=6,N=1,
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop") %>%
+                  group_by(PARENT) %>% mutate(N=N/sum(N)) %>% ungroup()) %>%
+      mutate(TEXTO=case_when(NIVEL<=1 ~ "",NIVEL<=4 ~paste0("Num Productos: ",N,"\n","Prom Diario: ",VALOR," Millones","\n","Variación: ",CAMBIO_VALOR," Millones / ",dt_porcentaje_caracter(CAMBIO_VALOR_P) ),
+                             TRUE ~paste0("Prom Diario: ",VALOR," Millones","\n","Variación: ",CAMBIO_VALOR," Millones/ ",dt_porcentaje_caracter(CAMBIO_VALOR_P))),
+             COLOR=case_when(NIVEL<=1 ~ "#FFFFFF",CAMBIO_VALOR>0 ~"#2ca25f",CAMBIO_VALOR<0 ~"#e34a33",CAMBIO_VALOR==0 ~"#bdbdbd"))
+
+    # Se crea la gráfica
+    plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~N,text=~TEXTO,
+                    textinfo="text+label+name",branchvalues="total",hoverinfo="label+percent parent",
+                    maxdepth=2,domain=list(column=0),
+                    marker=list(colors=~COLOR)) %>%
+      layout(margin=list(l=0, r=0, b=0, t=0)) %>%
+      config(displaylogo = F,locale = "es")
+
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
+
+
+#' Gráfica el comportamiento de los ingresos promedio diario por mes, miembro y producto (treemap)
+#'
+#' Esta función crea la gráfica del comportamiento de los ingresos promedio diario por mes, miembro y producto en
+#' formato treemap
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' @export
+
+gt_ing_promedio_diario_por_mes_miembro_producto<- function(datos){
+
+  # Se filtran los datos y se crea la columna FECHA_ANO_MES
+  datos <- datos %>% filter(SEGMENTO_ID!="GE") %>%
+    mutate(FECHA_ANO_MES=format(FECHA,"%Y-%m"))
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0 & length(datos %>% distinct(FECHA_ANO_MES) %>% pull(FECHA_ANO_MES))>1) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>% mutate(VALOR=TARIFA) %>%
+      group_by(MIEMBRO_ID_SEUDONIMO,PRODUCTO_SUBTIPO,FECHA_ANO_MES,FECHA)  %>%
+      summarise(across(VALOR, ~sum(.x)/1e+6),.groups="drop_last") %>%
+      summarise(across(VALOR, ~mean(.x)),.groups="drop_last")%>%
+      mutate(VALOR_ANTERIOR=lag(VALOR),CAMBIO_VALOR=VALOR-VALOR_ANTERIOR) %>% ungroup() %>%
+      filter(FECHA_ANO_MES!=min(FECHA_ANO_MES)) %>%
+      group_by(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO) %>%
+      mutate(TOTAL_CAMBIO_VALOR=sum(CAMBIO_VALOR,na.rm=TRUE)) %>% ungroup() %>%
+      mutate(GRUPO_CAMBIO=case_when(TOTAL_CAMBIO_VALOR>0~"Incremento",TOTAL_CAMBIO_VALOR<0~"Decrecimiento", TRUE~"Estable"),
+             SUBGRUPO_CAMBIO=case_when(TOTAL_CAMBIO_VALOR>0 & TOTAL_CAMBIO_VALOR<=0.5~"0 a 0.5 Millones",
+                                       TOTAL_CAMBIO_VALOR>0.5 & TOTAL_CAMBIO_VALOR<=1~"0.5 a 1 Millones",
+                                       TOTAL_CAMBIO_VALOR>1 & TOTAL_CAMBIO_VALOR<=3~"1 a 3 Millones",
+                                       TOTAL_CAMBIO_VALOR>3 & TOTAL_CAMBIO_VALOR<=5~"3 a 5 Millones",
+                                       TOTAL_CAMBIO_VALOR>5 ~"> 5 Millones",
+                                       TOTAL_CAMBIO_VALOR<0 & TOTAL_CAMBIO_VALOR>=(-0.5)~"0 a -0.5 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-0.5) & TOTAL_CAMBIO_VALOR>=(-1)~"-0.5 a -1 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-1) & TOTAL_CAMBIO_VALOR>=(-3)~"-1 a -3 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-3) & TOTAL_CAMBIO_VALOR>=(-5)~"-3 a -5 Millones",
+                                       TOTAL_CAMBIO_VALOR<(-5) ~"< -5 Millones",TRUE~"0 Millones"))
+
+    # Se modifica el data.frame datos_completos
+    datos_completos <- datos_completos  %>% group_by(LABEL="Ingresos",PARENT="") %>%
+      summarise(NIVEL=1,N=n_distinct(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO),.groups="drop") %>%
+      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Ingresos") %>%
+                  summarise(NIVEL=2,N=n_distinct(MIEMBRO_ID_SEUDONIMO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,GRUPO_CAMBIO),PARENT=FECHA_ANO_MES) %>%
+                  summarise(NIVEL=3,N=n_distinct(MIEMBRO_ID_SEUDONIMO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,SUBGRUPO_CAMBIO),PARENT=paste(FECHA_ANO_MES,GRUPO_CAMBIO)) %>%
+                  summarise(NIVEL=4,N=n_distinct(MIEMBRO_ID_SEUDONIMO),
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO),PARENT=paste(FECHA_ANO_MES,SUBGRUPO_CAMBIO)) %>%
+                  summarise(NIVEL=5,N=1,
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop")) %>%
+      bind_rows(datos_completos %>% group_by(LABEL=paste(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO,PRODUCTO_SUBTIPO),PARENT=paste(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO)) %>%
+                  summarise(NIVEL=6,N=1,
+                            VALOR=round(sum(VALOR),6),
+                            VALOR_ANTERIOR=round(sum(VALOR),6),
+                            CAMBIO_VALOR=round(sum(CAMBIO_VALOR),6),
+                            CAMBIO_VALOR_P=CAMBIO_VALOR/VALOR_ANTERIOR,.groups="drop") %>%
+                  group_by(PARENT) %>% mutate(N=N/sum(N)) %>% ungroup()) %>%
+      mutate(TEXTO=case_when(NIVEL<=1 ~ "",NIVEL<=4 ~paste0("Num Miembros: ",N,"\n","Prom Diario: ",VALOR," Millones","\n","Variación: ",CAMBIO_VALOR," Millones / ",dt_porcentaje_caracter(CAMBIO_VALOR_P) ),
+                             TRUE ~paste0("Prom Diario: ",VALOR," Millones","\n","Variación: ",CAMBIO_VALOR," Millones/ ",dt_porcentaje_caracter(CAMBIO_VALOR_P))),
+             COLOR=case_when(NIVEL<=1 ~ "#FFFFFF",CAMBIO_VALOR>0 ~"#2ca25f",CAMBIO_VALOR<0 ~"#e34a33",CAMBIO_VALOR==0 ~"#bdbdbd"))
+
+    # Se crea la gráfica
+    plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~N,text=~TEXTO,
+                    textinfo="text+label+name",branchvalues="total",hoverinfo="label+percent parent",
+                    maxdepth=2,domain=list(column=0),
+                    marker=list(colors=~COLOR)) %>%
+      layout(margin=list(l=0, r=0, b=0, t=0)) %>%
+      config(displaylogo = F,locale = "es")
+
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}

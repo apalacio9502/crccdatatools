@@ -2,7 +2,7 @@
 #'
 #' Esta función crea la posición abierta por tramo en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -43,10 +43,10 @@ gt_rf_pa_por_tramo_resumen<- function(datos,fecha_analisis,pageLength=100,style=
 #' en formato de heatmap.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("Posición Abierta Neta", "PV01", "Garantías", "PBS Cubiertos"). Por defecto NULL
 #' @export
 
 gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=NULL){
@@ -55,11 +55,11 @@ gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=N
   if (nrow(datos)>0) {
 
     # Verificación boton_activo
-    if (is.null(boton_activo)) {boton_activo <- "Posición Neta"}
+    if (is.null(boton_activo)) {boton_activo <- "Posición Abierta Neta"}
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("POSICION NETA","PV01","GARANTIAS","PBS CUBIERTOS"),
-                        BOTON=c("Posición Neta","PV01","Garantías","PBS Cubiertos"),
+    tipos <- data.frame(TIPO=c("POSICION ABIERTA NETA","PV01","GARANTIAS","PBS CUBIERTOS"),
+                        BOTON=c("Posición Abierta Neta","PV01","Garantías","PBS Cubiertos"),
                         UNIDAD=c("Miles M","Millones","Miles M","PBS")) %>%
       mutate(VISIBLE=BOTON==boton_activo)
 
@@ -85,7 +85,7 @@ gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=N
     }
 
 
-    # Se grafica el resumen por tramo y miembro
+    # Se crea la gráfica
     plot <- plot_ly(data=datos_completos, y=~MIEMBRO_ID_SEUDONIMO, x=~TRAMO) %>%
       add_heatmap(z=~VALOR_1,text=~TEXTO_1,hoverinfo="text+x+y",visible=tipos$VISIBLE[1],colorscale='YlGnBu',colorbar=list(len =1,y =1,title =list(text=tipos$UNIDAD[1]))) %>%
       add_heatmap(z=~VALOR_2,text=~TEXTO_2,hoverinfo="text+x+y",visible=tipos$VISIBLE[2],colorscale='YlGnBu',colorbar=list(len =1,y =1,title =list(text=tipos$UNIDAD[2]))) %>%
@@ -110,12 +110,12 @@ gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=N
 #' en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("General", "Tramo"). Por defecto NULL
 #' @export
 
 gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL){
@@ -167,7 +167,7 @@ gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,
     colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica los dias al vencimiento por miembro
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors=colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
@@ -202,12 +202,12 @@ gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,
 #' en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("General", "Tramo"). Por defecto NULL
 #' @export
 
 gt_rf_dur_mod_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL){
@@ -260,7 +260,7 @@ gt_rf_dur_mod_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo
     colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica la duración modificada por miembro
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors=colores,color=~COLOR_ID,
                     transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
                     textposition = 'none') %>%
@@ -297,10 +297,10 @@ gt_rf_dur_mod_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo
 #' en formato de lineas
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("Días al Vencimiento", "Duración Modificada"). Por defecto NULL
 #' @export
 
 gt_rf_dias_al_vecimiento_dur_mod_diaria<- function(datos,fixedrange=FALSE,boton_activo=NULL){
@@ -331,7 +331,7 @@ gt_rf_dias_al_vecimiento_dur_mod_diaria<- function(datos,fixedrange=FALSE,boton_
 
 
 
-    # Se grafica los dias al vencimiento y duración modificada por periodo
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos ,x=~FECHA) %>%
       add_lines(y=~VALOR_1,visible=~tipos$VISIBLE[1],name="Duración",fill = 'tozeroy') %>%
       add_lines(y=~VALOR_2,visible=~tipos$VISIBLE[2],name="Duración Modificada",fill = 'tozeroy') %>%
@@ -361,7 +361,7 @@ gt_rf_dias_al_vecimiento_dur_mod_diaria<- function(datos,fixedrange=FALSE,boton_
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
-#' \code{\link{dt_dv_curva_fwd}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_curva_tes}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -380,8 +380,9 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
       arrange(DURACION_ANOS_HOY)
 
     # Se crea el plot con los datos_base
-    plot <- plot_ly(data = datos_base,textposition = 'none') %>%
-      add_trace(x =~ DURACION_ANOS_HOY, y =~ TASA_HOY/100, text =~ NEMOTECNICO, name = "Curva Hoy",type = 'scatter',mode = 'lines+markers')
+    plot <- plot_ly(data = datos_base,textposition = 'none',colors=c("#1f77b4","#e34a33")) %>%
+      add_trace(x =~ DURACION_ANOS_HOY, y =~ TASA_HOY/100, text =~ NEMOTECNICO,
+                name = "Curva Hoy",type = 'scatter',mode = 'lines+markers',color="1")
 
     # Se crea la lista_plaza
     lista_plazos <- c()
@@ -407,8 +408,10 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
 
         # Se agregan los traces relacionados con los datos_provisional
         plot <- plot %>% add_data(data = datos_provisional) %>%
-          add_trace(x =~ DURACION_ANOS, y=~ TASA/100, text =~ NEMOTECNICO, name = glue("Curva {i}D"),visible=ifelse(i==7,TRUE,FALSE),type = 'scatter',mode = 'lines+markers') %>%
-          add_bars(x =~ DURACION_ANOS_HOY,y=~ PBS_VAR_TASA, text =~ NEMOTECNICO, name = "Var pbs", visible=ifelse(i==7,TRUE,FALSE),yaxis = "y2")
+          add_trace(x =~ DURACION_ANOS, y=~ TASA/100, text =~ NEMOTECNICO, name = glue("Curva {i}D"),
+                    visible=ifelse(i==7,TRUE,FALSE),type = 'scatter',mode = 'lines+markers',color="2") %>%
+          add_bars(x =~ DURACION_ANOS_HOY,y=~ PBS_VAR_TASA, text =~ NEMOTECNICO,
+                   name = "Var pbs", visible=ifelse(i==7,TRUE,FALSE),yaxis = "y2",color="1")
       }
     }
 
@@ -423,7 +426,7 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
 
       # Se le agrega el layout al plot
       plot <- plot %>%
-        subplot(nrows = 2, shareX = T,shareY = F,heights = c(0.8, 0.20)) %>%
+        subplot(nrows = 2, shareX = T,shareY = F,heights = c(0.6, 0.40)) %>%
         layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
                updatemenus=list(
                  list(active = 0,type= 'dropdown',direction = "down",xanchor = 'center',
@@ -455,9 +458,8 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica de la posición abierta neta diaria por tramo
 #' en formato de lineas
-#' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -515,9 +517,8 @@ gt_rf_pa_neta_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica del pv01 diario por tramo
 #' en formato de lineas
-#' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -551,7 +552,7 @@ gt_rf_pv01_diario_por_tramo<- function(datos,colores,fixedrange=FALSE){
     colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica el PV01 por tramo
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos  ,x=~FECHA,colors=colores,hoverinfo="text+x+name",alpha = 1) %>%
       add_lines(color=~COLOR_ID,y=~VALOR_1,text=~TEXTO_1,name=~ID,line = list(color = 'transparent'),
                 fill = 'tonexty',stackgroup="1",legendgroup=~ID) %>%
@@ -576,9 +577,8 @@ gt_rf_pv01_diario_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica de la garantía exigida diaria por tramo
 #' en formato de lineas
-#' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -609,7 +609,7 @@ gt_rf_gar_exi_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
     colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se graficala garantía exigida por tramo
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos  ,x=~FECHA,colors=colores,hoverinfo="text+x+name",alpha = 1) %>%
       add_lines(color=~COLOR_ID, y=~VALOR,text=~TEXTO,name=~ID,line = list(color = 'transparent'),
                 fill = 'tonexty',stackgroup="1",legendgroup=~ID) %>%
@@ -632,9 +632,8 @@ gt_rf_gar_exi_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica de los PBS cubiertos diarios por tramo
 #' en formato de lineas
-#' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -665,7 +664,7 @@ gt_rf_pbs_cubiertos_diarios_por_tramo<- function(datos,colores,fixedrange=FALSE)
     colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
       left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
 
-    # Se grafica el volumen operado mensual promedio
+    # Se crea la gráfica
     plot <- plot_ly(data= datos_completos  ,x=~FECHA,colors=colores,hoverinfo="text+x+name",alpha = 1) %>%
       add_lines(color=~COLOR_ID,y=~VALOR,text=~TEXTO,name=~ID,line = list(color = 'transparent'),
                 fill = 'tonexty',stackgroup="1",legendgroup=~ID) %>%

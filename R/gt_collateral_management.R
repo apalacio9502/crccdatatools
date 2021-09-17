@@ -336,7 +336,7 @@ gt_gar_dep_promedio_diario_por_titulo_miembro_tipocuenta<- function(datos){
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Títulos",PARENT="") %>%
-      summarise(VALOR=round(sum(VALOR,na.rm = TRUE),6),TEXTO=paste(VALOR,"Miles M") ,.groups="drop")  %>%
+      summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M"),.groups="drop")  %>%
       bind_rows(datos %>% group_by(LABEL=ACTIVO_DESCRIPCION,PARENT="Títulos") %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M"),.groups="drop")) %>%
       bind_rows(datos %>% group_by(LABEL=paste(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO),PARENT=ACTIVO_DESCRIPCION) %>%
@@ -596,7 +596,7 @@ gt_gar_dep_promedio_diario_por_accion_miembro_tipocuenta<- function(datos){
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Acciones",PARENT="") %>%
-      summarise(VALOR=round(sum(VALOR,na.rm = TRUE),6),TEXTO=paste(VALOR,"Miles M") ,.groups="drop")  %>%
+      summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M") ,.groups="drop")  %>%
       bind_rows(datos %>% group_by(LABEL=ACTIVO_DESCRIPCION,PARENT="Acciones") %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M"),.groups="drop")) %>%
       bind_rows(datos %>% group_by(LABEL=paste(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO),PARENT=ACTIVO_DESCRIPCION) %>%
@@ -642,7 +642,7 @@ gt_gar_dep_promedio_diario_por_miembro_accion_tipocuenta<- function(datos){
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Miembros",PARENT="") %>%
-      summarise(VALOR=round(sum(VALOR,na.rm = TRUE),6),TEXTO=paste(VALOR,"Miles M") ,.groups="drop")  %>%
+      summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M") ,.groups="drop")  %>%
       bind_rows(datos %>% group_by(LABEL=MIEMBRO_ID_SEUDONIMO,PARENT="Miembros") %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Miles M"),.groups="drop"))  %>%
       bind_rows(datos %>% group_by(LABEL=paste(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION),PARENT=MIEMBRO_ID_SEUDONIMO) %>%

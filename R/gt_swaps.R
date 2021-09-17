@@ -2,7 +2,7 @@
 #'
 #' Esta función crea la posición abierta por rango en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -44,12 +44,12 @@ gt_sw_pa_por_rango_resumen<- function(datos,fecha_analisis,pageLength=100,style=
 #' en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("Sensibilidad", "Posición Abierta Neta"). Por defecto NULL
 #' @export
 
 gt_sw_sen_pa_neta_por_nodo_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL){
@@ -62,7 +62,7 @@ gt_sw_sen_pa_neta_por_nodo_miembro<- function(datos,colores,fixedrange=FALSE,bot
 
       # Se crea el data.frame tipos
       tipos <- data.frame(TIPO=c("SENSIBILIDAD","POSICION_NETA_VALORADA"),
-                          BOTON=c("Sensibilidad","Posición Neta"),
+                          BOTON=c("Sensibilidad","Posición Abierta Neta"),
                           UNIDAD=c("Millones-COP","Miles M-COP")) %>%
         mutate(VISIBLE=BOTON==boton_activo)
 
@@ -117,10 +117,10 @@ gt_sw_sen_pa_neta_por_nodo_miembro<- function(datos,colores,fixedrange=FALSE,bot
 #' diaria por miembro en formato de boxplot
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_lmc_consumo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("Sensibilidad", "Posición Abierta Neta"). Por defecto NULL
 #' @export
 
 gt_sw_distribucion_sen_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,boton_activo=NULL){
@@ -163,11 +163,11 @@ gt_sw_distribucion_sen_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,b
     # Se grafica el comportamiento de la sensibilidad
     plot <- plot_ly(data=datos_completos, x=~MIEMBRO_ID_SEUDONIMO) %>%
       add_boxplot(y=~VALOR_1,name="Sensibilidad",visible=tipos$VISIBLE[1]) %>%
-      add_boxplot(y=~VALOR_2,name="Posición Abierta Neta",visible=tipos$VISIBLE[2]) %>%
+      add_boxplot(y=~VALOR_2,name="PA Neta",visible=tipos$VISIBLE[2]) %>%
       add_data(datos_ultimos) %>%
-      add_markers(y=~VALOR_LAST_1,name="Ultimo",marker = list(color = "black"),
+      add_markers(y=~VALOR_LAST_1,name="Sensibilidad Último Dato",marker = list(color = "black"),
                   visible=tipos$VISIBLE[1]) %>%
-      add_markers(y=~VALOR_LAST_2,name="Ultimo",marker = list(color = "black"),
+      add_markers(y=~VALOR_LAST_2,name="PA Neta Último Dato",marker = list(color = "black"),
                   visible=tipos$VISIBLE[2]) %>%
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5),
              updatemenus=list(
@@ -190,10 +190,10 @@ gt_sw_distribucion_sen_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,b
 #' en formato de heatmap.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
-#' con un botón seleccionado en especifico. Por defecto NULL
+#' con un botón seleccionado en especifico ("Sensibilidad", "Posición Abierta Neta"). Por defecto NULL
 #' @export
 
 gt_sw_sen_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=NULL){
@@ -206,7 +206,7 @@ gt_sw_sen_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_act
 
     # Se crea el data.frame tipos
     tipos <- data.frame(TIPO=c("SENSIBILIDAD","POSICION_NETA_VALORADA"),
-                        BOTON=c("Sensibilidad","Posición Neta"),
+                        BOTON=c("Sensibilidad","Posición Abierta Neta"),
                         UNIDAD=c("Millones-COP","Miles M-COP")) %>%
       mutate(VISIBLE=BOTON==boton_activo)
 
@@ -244,3 +244,102 @@ gt_sw_sen_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_act
     return(gt_mensaje_error)
   }
 }
+
+
+#' Grafica la curva swaps (lineas + barras)
+#'
+#' Esta función crea la gráfica de la curva swaps en formato de lineas y barras.
+#' La información se muestra acorde a la agrupación relacionada con cada botón
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
+#' \code{\link{dt_sw_curva}} o tener una estructura igual a dichos datos
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @export
+
+gt_sw_curva<- function(datos,fecha_analisis,fixedrange=FALSE){
+
+  # Se verifica si existen datos
+  if (nrow(datos %>% filter(FECHA==fecha_analisis))>0) {
+
+    # Se modifica el data.frame datos
+    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(fecha_analisis,FECHA,units="days")),
+                              NODO=fct_reorder(factor(NODO),.fun = min,NODO_DIAS))
+
+    # Se crea el data.frame datos_base
+    datos_base <-datos  %>% filter(DISTANCIA_HOY_DIAS==0) %>%
+      transmute(NODO=NODO,TASA_HOY=TASA)
+
+    # Se crea el plot con los datos_base
+    plot <- plot_ly(data = datos_base,textposition = 'none',x =~ NODO,colors=c("#1f77b4","#e34a33")) %>%
+      add_trace(y =~ TASA_HOY, name = "Curva Hoy",type = 'scatter',mode = 'lines+markers',color="1")
+
+    # Se crea la lista_plaza
+    lista_plazos <- c()
+
+    # Se agrega programaticamente las curvas
+    for(i in c(7,30,60,90)){
+
+      # Se crea el data.frame datos_provisional
+      datos_provisional <- datos %>% filter(DISTANCIA_HOY_DIAS>=i)
+
+      # Se verifica si el data.frame datos_provisional contiene datos
+      if (nrow(datos_provisional)>0) {
+
+        # Se modifica el data.frame datos_provisional
+        datos_provisional <- datos_base %>%
+          full_join(datos_provisional %>%
+                      mutate(FECHA_MAXIMA=max(FECHA)) %>% filter(FECHA==FECHA_MAXIMA) %>%
+                      transmute(CURVA=glue("Curva {i}D"),NODO,TASA),by = "NODO") %>%
+          mutate(PBS_VAR_TASA = (TASA_HOY - TASA)*10000)
+
+        # Se agrea el plazo a la lista_plazos
+        lista_plazos <- c(lista_plazos,i)
+
+        # Se agregan los traces relacionados con los datos_provisional
+        plot <- plot %>% add_data(data = datos_provisional) %>%
+          add_trace(y=~ TASA, name = ~CURVA,visible=ifelse(i==7,TRUE,FALSE),type = 'scatter',mode = 'lines+markers',color="2") %>%
+          add_bars(y=~ PBS_VAR_TASA, name = "Var pbs", visible=ifelse(i==7,TRUE,FALSE),yaxis = "y2",color="1")
+      }
+    }
+
+    # Se verifica si la grafica tendra botones
+    if (length(lista_plazos)>0) {
+      # Se crean los botones
+      botones <- foreach(i=lista_plazos,.combine = append) %do% {
+        visible <- i==lista_plazos
+        list(list(label = paste0(i,"D"),method = "restyle",
+                  args = list(list(visible = as.logical(c(TRUE,rep(visible,2)))))))
+      }
+
+      # Se le agrega el layout al plot
+      plot <- plot %>%
+        subplot(nrows = 2, shareX = T,shareY = F,heights = c(0.8, 0.20)) %>%
+        layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
+               updatemenus=list(
+                 list(active = 0,type= 'dropdown',direction = "down",xanchor = 'center',
+                      yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+               xaxis = list(title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange),
+               yaxis2 = list(title = "PBS",fixedrange=fixedrange))%>%
+        config(displaylogo = F,locale = "es")
+
+    }else{
+
+      # Se le agrega el layout al plot
+      plot <- plot  %>%
+        layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
+               xaxis = list( title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange))%>%
+        config(displaylogo = F,locale = "es")
+
+    }
+
+
+    saveWidget(plot,"curva_swap_3.html")
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+

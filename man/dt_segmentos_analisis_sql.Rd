@@ -4,12 +4,10 @@
 \alias{dt_segmentos_analisis_sql}
 \title{Convertir segmentos_analisis a formato SQL (system)}
 \usage{
-dt_segmentos_analisis_sql(segmentos_analisis, proveedor = "MySQL")
+dt_segmentos_analisis_sql(segmentos_analisis)
 }
 \arguments{
 \item{segmentos_analisis}{clase array character. Debe contener la lista de segmentos análisis}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 }
 \description{
 Esta función convierte una lista de segmentos a formato SQL

@@ -4,15 +4,22 @@
 \alias{gt_rv_pa_valorada_importe_diario}
 \title{Grafica la posición abierta valorada vs el importe (lineas)}
 \usage{
-gt_rv_pa_valorada_importe_diario(datos, fixedrange = FALSE)
+gt_rv_pa_valorada_importe_diario(
+  datos,
+  fixedrange = FALSE,
+  top_terceros = FALSE
+)
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rv_concentracion_repos_por_activo}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
+
+\item{top_terceros}{clase boolean. TRUE si se desea mostrar la lista de botones del top 10. Por defecto FALSE}
 }
 \description{
 Esta función crea la gráfica la posición abierta valorada vs el importe diario
-en formato de lineas
+en formato de lineas.
+La información se muestra acorde a la agrupación relacionada con cada botón
 }

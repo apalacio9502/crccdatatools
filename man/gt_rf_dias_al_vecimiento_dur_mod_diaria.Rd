@@ -12,12 +12,12 @@ gt_rf_dias_al_vecimiento_dur_mod_diaria(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
-con un botón seleccionado en especifico. Por defecto NULL}
+con un botón seleccionado en especifico ("Días al Vencimiento", "Duración Modificada"). Por defecto NULL}
 }
 \description{
 Esta función crea la gráfica de los días al vencimiento y la duración modificada diaria

@@ -28,10 +28,10 @@ dt_gen_ing_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
                                            SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
                                            MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,PRODUCTO_NOMBRE,PRODUCTO_TIPO,PRODUCTO_SUBTIPO,
-                                           PRODUCTO_ORIGEN,TARIFA_CONCEPTO, TARIFA_SANCION, TARIFA
+                                           PRODUCTO_ORIGEN,TARIFA_CONCEPTO, TARIFA
                                            FROM GEN_INGRESOS_RESUMEN
                                            WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
-                                           AND {periodo_analisis_sql[2]}"))
+                                           AND {periodo_analisis_sql[2]} AND TARIFA_SANCION=0"))
 
   # Se convierte la fecha de los datos en un date
   datos <- datos %>% mutate(FECHA=ymd(FECHA))
@@ -46,7 +46,7 @@ dt_gen_ing_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
   datos <- datos %>%
     complete(FECHA,nesting(SEGMENTO_ID, SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO,MIEMBRO_TIPO, CUENTA_GARANTIA_TIPO,
                            PRODUCTO_NOMBRE, PRODUCTO_TIPO,PRODUCTO_SUBTIPO,
-                           PRODUCTO_ORIGEN,TARIFA_CONCEPTO, TARIFA_SANCION),
+                           PRODUCTO_ORIGEN,TARIFA_CONCEPTO),
              fill = list(TARIFA=0))
 
   return(datos)

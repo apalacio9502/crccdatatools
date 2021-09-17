@@ -1,3 +1,38 @@
+#' Descarga los datos dv_reverse_gap
+#'
+#' Esta función descarga los datos de la tabla dv_reverse_gap para un periodo de análisis y
+#' con base en los parametros ingresados
+#' @param conexion clase formal. Conexión base de datos
+#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
+#' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
+#' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
+#' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
+#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @export
+
+dt_dv_reverse_gap <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+
+  # Se verifica si la descarga va hacer para una fecha de análisis
+  if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
+
+  # Se covierte el periodo de analisis a SQL
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+
+  # Descarga datos
+  datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+                                       CUENTA_GARANTIA_ID, CUENTA_GARANTIA_TIPO,  FLUCTUACION, DELTA_GARANTIA,
+                                       REVERSE_GAP_GARANTIA_T1, RIESGO_T1, REVERSE_GAP_GARANTIA_T2, RIESGO_T2
+                                       FROM DV_REVERSE_GAP WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
+                                       {periodo_analisis_sql[2]}"))
+
+  # Se convierte la fecha de los datos en un date
+  datos <- datos %>% mutate(FECHA=ymd(FECHA))
+
+  return(datos)
+}
+
+
 #' Descarga los datos dv_posicion_abierta_por_rango
 #'
 #' Esta función descarga los datos de la tabla dv_posicion_abierta_por_rango para un periodo de análisis y
@@ -21,7 +56,7 @@ dt_dv_pa_por_rango <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
-                                            PRODUCTO_TIPO, RANGO, POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,
+                                            CUENTA_GARANTIA_TIPO, PRODUCTO_TIPO, RANGO, POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,
                                             POSICION_NETA_VALORADA FROM DV_POSICION_ABIERTA_POR_RANGO
                                             WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                             {periodo_analisis_sql[2]}"))
@@ -31,6 +66,7 @@ dt_dv_pa_por_rango <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,
 
   return(datos)
 }
+
 
 #' Descarga los datos dv_curva_fwd
 #'

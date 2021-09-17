@@ -1,3 +1,73 @@
+#' Grafica el reverse gap por miembro (barras)
+#'
+#' Esta función crea la gráfica del reverse gap por miembro en formato de barras
+#' La información se muestra acorde a la agrupación relacionada con cada botón
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_dv_pa_por_rango}} o tener una estructura igual a dichos datos
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @param boton_activo clase character. Si se desea que la gráfica se inicialice
+#' con un botón seleccionado en especifico ("Vencimiento hasta 1 día", "Vencimiento hasta 2 días"). Por defecto NULL
+#' @export
+
+
+gt_dv_reverse_gap_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=NULL){
+
+  # Se filtran los datos
+  datos <- datos %>% filter(RIESGO_T1=="SI" | RIESGO_T2 =="SI")
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Verificación inputs
+    if (is.null(boton_activo)) {boton_activo <- "Vencimiento hasta 1 día"}
+
+    # Se crea la lista vencimientos
+    vencimientos <- c("Vencimiento hasta 1 día","Vencimiento hasta 2 días")
+
+    # Se modifica el data.frame datos
+    datos <- datos  %>% group_by(MIEMBRO_ID_SEUDONIMO) %>%
+      summarise(VALUE_1=round(sum(abs(DELTA_GARANTIA[RIESGO_T1=="SI"]))/1e+6,6),
+                VALUE_2=round(sum(abs(REVERSE_GAP_GARANTIA_T1[RIESGO_T1=="SI"]))/1e+6,6),
+                VALUE_3=round(sum(abs(DELTA_GARANTIA[RIESGO_T2=="SI"]))/1e+6,6),
+                VALUE_4=round(sum(abs(REVERSE_GAP_GARANTIA_T2[RIESGO_T2=="SI"]))/1e+6,6),
+                TEXT_1=paste(VALUE_1,"Millones"),
+                TEXT_2=paste(VALUE_2,"Millones"),
+                TEXT_3=paste(VALUE_3,"Millones"),
+                TEXT_4=paste(VALUE_4,"Millones"),.groups="drop")
+
+    # Se crean los botones
+    botones <- foreach(i=1:length(vencimientos),.combine = append) %do% {
+      visible <- vencimientos[i]==vencimientos
+      list(list(label = vencimientos[i],method = "restyle",
+                args = list(list(boton_activo=vencimientos[i],
+                                 visible = as.logical(c(rep(visible[1],2),rep(visible[2],2)))))))
+    }
+
+    # Se grafica el Reverse GAP
+    plot <- plot_ly(data= datos ,x=~MIEMBRO_ID_SEUDONIMO,colors=c("#1f77b4","#e34a33"),
+                    transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
+                    hoverinfo="text+x+name",textposition = 'none') %>%
+      add_bars(y=~VALUE_1,text=~TEXT_1,name="Delta Garantía",visible=vencimientos[1]==boton_activo,color="1") %>%
+      add_bars(y=~VALUE_2,text=~TEXT_2,name="Reverse GAP",visible=vencimientos[1]==boton_activo,color="2") %>%
+      add_bars(y=~VALUE_3,text=~TEXT_3,name="Delta Garantía",visible=vencimientos[2]==boton_activo,color="1") %>%
+      add_bars(y=~VALUE_4,text=~TEXT_4,name="Reverse GAP",visible=vencimientos[2]==boton_activo,color="2") %>%
+      layout(barmode="relative",hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2),
+             updatemenus=list(
+               list(active = which(vencimientos == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+                    yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+             xaxis = list(title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Millones-USD",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es")
+
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
+
 #' Tabla posición abierta por rango resumen
 #'
 #' Esta función crea la posición abierta por rango en formato html
@@ -73,8 +143,9 @@ gt_dv_pa_neta_por_rango_miembro<- function(datos,colores,fixedrange=FALSE,boton_
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO=PRODUCTO_TIPO,ID=RANGO) %>%
       summarise(VALOR=round(POSICION_NETA_VALORADA/1e+12,6),
                 TEXTO=paste(VALOR,"Billones"),.groups = "drop") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(TIPO),"-",
-                             dt_num_char(factor(paste0(TIPO,"-",ID)))),
+      mutate(ID=fct_drop(factor(ID,c("0S-1S","1S-2S","2S-1M","1M-2M","2M-3M","3M-6M","6M-9M","9M-12M","12M-18M"))),
+             COLOR_ID=paste0(dt_num_char(TIPO),"-",
+                             dt_num_char(ID)),
              VISIBLE=if_else(TIPO==boton_activo,TRUE,FALSE)) %>% arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -165,7 +236,7 @@ gt_dv_distribucion_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,boton
                     split = ~PRODUCTO_TIPO) %>%
       add_boxplot(y=~VALOR,name="PA Neta",visible=~VISIBLE) %>%
       add_data(datos_ultimos) %>%
-      add_markers(split = ~PRODUCTO_TIPO,y=~VALOR_LAST,name="PA Neta Último Día",
+      add_markers(split = ~PRODUCTO_TIPO,y=~VALOR_LAST,name="PA Neta Último Dato",
                   marker = list(color = "black"),visible=~VISIBLE) %>%
       layout(hovermode = 'x',
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2),
@@ -246,6 +317,8 @@ gt_dv_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=
   }
 }
 
+
+
 #' Grafica la curva forward (lineas + barras)
 #'
 #' Esta función crea la gráfica de la curva forward en formato de lineas y barras.
@@ -270,8 +343,9 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
       transmute(NODO=NODO,PF_HOY=PF,DEVALUACION_HOY=DEVALUACION)
 
     # Se crea el plot con los datos_base
-    plot <- plot_ly(data = datos_base,textposition = 'none',x =~ NODO) %>%
-      add_trace(y =~ DEVALUACION_HOY, text =~ paste(round(PF_HOY,2),"PF"), name = "Curva Hoy",type = 'scatter',mode = 'lines+markers')
+    plot <- plot_ly(data = datos_base,textposition = 'none',x =~ NODO,colors=c("#1f77b4","#e34a33")) %>%
+      add_trace(y =~ DEVALUACION_HOY, text =~ paste(round(PF_HOY,2),"PF"),
+                name = "Curva Hoy",type = 'scatter',mode = 'lines+markers')
 
     # Se crea la lista_plaza
     lista_plazos <- c()
@@ -297,8 +371,9 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
 
         # Se agregan los traces relacionados con los datos_provisional
         plot <- plot %>% add_data(data = datos_provisional) %>%
-          add_trace(y=~ DEVALUACION, text =~ paste(round(PF,2),"PF"), name = glue("Curva {i}D"),visible=ifelse(i==7,TRUE,FALSE),type = 'scatter',mode = 'lines+markers') %>%
-          add_bars(y=~ PBS_VAR_TASA, name = "Var pbs", visible=ifelse(i==7,TRUE,FALSE),yaxis = "y2")
+          add_trace(y=~ DEVALUACION, text =~ paste(round(PF,2),"PF"), name = glue("Curva {i}D"),
+                    visible=ifelse(i==7,TRUE,FALSE),type = 'scatter',mode = 'lines+markers',color="2") %>%
+          add_bars(y=~ PBS_VAR_TASA, name = "Var pbs", visible=ifelse(i==7,TRUE,FALSE),yaxis = "y2",color="1")
       }
     }
 

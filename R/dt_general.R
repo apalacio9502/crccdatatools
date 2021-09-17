@@ -38,13 +38,12 @@ dt_fecha_analisis_sql<- function(fecha_analisis,proveedor="MySQL"){
 #'
 #' Esta función convierte una lista de segmentos a formato SQL
 #' @param segmentos_analisis clase array character. Debe contener la lista de segmentos análisis
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 
-dt_segmentos_analisis_sql<- function(segmentos_analisis,proveedor="MySQL"){
+dt_segmentos_analisis_sql<- function(segmentos_analisis){
   # Se verifica si segmentos_analisis es nulo
   if (is.null(segmentos_analisis)) {
     # Se crea la variable segmentos_analisis_sql
-    segmentos_analisis_sql <- glue("SEGMENTO_ID NOT IN ('')")
+    segmentos_analisis_sql <- glue("SEGMENTO_ID NOT IN (' ')")
   }else{
     # Se crea la variable segmentos_analisis_sql
     segmentos_analisis_sql <- glue("SEGMENTO_ID IN ('{paste0(segmentos_analisis,collapse = \"','\")}')")

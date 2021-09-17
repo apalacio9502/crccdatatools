@@ -10,7 +10,7 @@
 #' para renderizar la tabla. Por defecto "bootstrap4"
 #' @export
 
-gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALSE,style="bootstrap4",dom=NULL){
+gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALSE,style="bootstrap4"){
 
   # Manipulación de datos
   datos <- datos  %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
@@ -33,9 +33,9 @@ gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALS
               "Volumen Promedio Diario Periodo M-COP"=VOLUMEN_DIARIO_PROMEDIO_PERIODO/1e+6,
               "Volumen Acumulado Periodo M-COP"=VOLUMEN_ACUMULADO_PERIODO/1e+6)
 
-  # Se crea la tabla volumen operado
+  # Se crea la tabla
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
-                     options = list(dom=dom,searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
                                     columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
     formatPercentage(4,digits = 2) %>% formatCurrency(c(5,6,7,8,9), '$',digits = 0)
 
