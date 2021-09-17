@@ -179,7 +179,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
     }
 
     # Se crea la grafica
-    plot <- plot_ly(data= datos_prueba ,x=~FECHA,split=~dt_num_char(CUENTA_GARANTIA_TITULAR),hoverinfo="text+x+name") %>%
+    plot <- plot_ly(data= datos_completos ,x=~FECHA,split=~dt_num_char(CUENTA_GARANTIA_TITULAR),hoverinfo="text+x+name") %>%
       add_lines(y=~VALOR_1, text=~TEXTO_1,visible=~VISIBLE, name="Títulos Objeto Operación") %>%
       add_lines(y=~VALOR_2, text=~TEXTO_2,visible=~VISIBLE, name="Importe Efectivo Títulos") %>%
       add_lines(y=~VALOR_3, text=~TEXTO_3,visible=~VISIBLE, name="Haircut",yaxis="y2") %>%
