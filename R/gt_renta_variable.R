@@ -145,7 +145,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
              CUENTA_GARANTIA_TITULAR=if_else(as.numeric(ORDENADOR)>10,"Otros",CUENTA_GARANTIA_TITULAR)) %>%
       bind_rows(datos %>% mutate(CUENTA_GARANTIA_TITULAR="General")) %>%
       filter(case_when(top_terceros==FALSE~CUENTA_GARANTIA_TITULAR=="General",
-                       TRUE~CUENTA_GARANTIA_TITULAR=="")) %>%
+                       TRUE~CUENTA_GARANTIA_TITULAR!="")) %>%
       group_by(FECHA,CUENTA_GARANTIA_TITULAR) %>%
       summarise(VALOR_1=round(sum(TITULOS_OBJETO_OPERACION,na.rm = TRUE)/1e+9,6),
                 VALOR_2=round(sum(IMPORTE_EFECTIVO_REPOS,na.rm = TRUE)/1e+9,6),

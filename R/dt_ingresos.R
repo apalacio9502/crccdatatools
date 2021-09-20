@@ -79,7 +79,7 @@ dt_gen_ing_cumplimiento_presupuesto<- function(conexion,datos,periodo_analisis=N
 
   # Se modifica el dataframe datos
   datos <- datos %>% distinct(FECHA) %>% mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>% left_join(datos_provisional,by="FECHA_ANO_MES") %>%
-    left_join(datos %>% filter(TARIFA_CONCEPTO %in% c("Tarifa compensacion y liquidacion","Tarifa ajuste compensacion y liquidacion divisas"),TARIFA_SANCION==0 )%>%
+    left_join(datos %>% filter(TARIFA_CONCEPTO %in% c("Tarifa compensacion y liquidacion","Tarifa ajuste compensacion y liquidacion divisas") )%>%
         group_by(FECHA,SEGMENTO_ID,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO,PRODUCTO_ORIGEN) %>%
         summarise(TARIFA=sum(TARIFA),.groups="drop")) %>%
     replace_na(list(TARIFA=0))
