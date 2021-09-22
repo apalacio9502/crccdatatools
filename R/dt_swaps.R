@@ -1,6 +1,6 @@
-#' Descarga los datos sw_sensibilidad_posicion_abierta
+#' Descarga los datos sw_sens_pa
 #'
-#' Esta función descarga los datos de la tabla sw_sensibilidad_posicion_abierta para un periodo de análisis y
+#' Esta función descarga los datos de la tabla sw_sens_pa para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -24,7 +24,7 @@ dt_sw_sen_pa<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_a
                                         MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO, MIEMBRO_NOMBRE,
                                         MIEMBRO_TIPO, CUENTA_GARANTIA_TIPO, NODO,RANGO, SENSIBILIDAD,
                                         POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,POSICION_NETA_VALORADA
-                                        FROM SW_SENSIBILIDAD_POSICION_ABIERTA
+                                        FROM SW_SENS_PA
                                         WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                         AND {periodo_analisis_sql[2]}"))
 

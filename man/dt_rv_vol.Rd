@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_renta_variable.R
 \name{dt_rv_vol}
 \alias{dt_rv_vol}
-\title{Descarga los datos rv_volumen}
+\title{Descarga los datos rv_vol}
 \usage{
 dt_rv_vol(
   conexion,
@@ -22,6 +22,6 @@ dt_rv_vol(
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 }
 \description{
-Esta función descarga los datos de la tabla rv_volumen para un periodo de análisis y
+Esta función descarga los datos de la tabla rv_vol para un periodo de análisis y
 con base en los parametros ingresados
 }

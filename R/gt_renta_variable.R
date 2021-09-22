@@ -188,7 +188,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
              updatemenus=updatemenus,
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange),
-             yaxis2 = list(title = "% Haricut",tickformat="%",fixedrange=fixedrange)) %>%
+             yaxis2 = list(title = "% Haricut",tickformat=".2%",fixedrange=fixedrange)) %>%
       config(displaylogo = F,locale = "es")
 
     return(plot)

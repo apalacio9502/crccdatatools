@@ -388,7 +388,7 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
 
       # Se le agrega el layout al plot
       plot <- plot %>%
-        subplot(nrows = 2, shareX = T,shareY = F,heights = c(0.8, 0.20)) %>%
+        subplot(nrows = 2, shareX = T,shareY = F,heights = c(0.6, 0.40)) %>%
         layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
                updatemenus=list(
                  list(active = 0,type= 'dropdown',direction = "down",xanchor = 'center',

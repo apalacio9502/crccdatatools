@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_garantia.R
 \name{dt_gen_gar_ggl_ind_fgc_liq}
 \alias{dt_gen_gar_ggl_ind_fgc_liq}
-\title{Descarga los datos gen_garantia_ggl_ind_fgc_liq}
+\title{Descarga los datos gen_gar_ggl_ind_fgc_liq}
 \usage{
 dt_gen_gar_ggl_ind_fgc_liq(
   conexion,
@@ -30,6 +30,6 @@ de los cuales se desea descargar la información. Por defecto descarga la inform
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla gen_garantia_ggl_ind_fgc_liq para un periodo de análisis y
+Esta función descarga los datos de la tabla gen_gar_ggl_ind_fgc_liq para un periodo de análisis y
 con base en los parametros ingresados
 }

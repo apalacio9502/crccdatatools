@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_derivados.R
 \name{dt_dv_pa_por_rango}
 \alias{dt_dv_pa_por_rango}
-\title{Descarga los datos dv_posicion_abierta_por_rango}
+\title{Descarga los datos dv_pa_por_rango}
 \usage{
 dt_dv_pa_por_rango(
   conexion,
@@ -26,6 +26,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla dv_posicion_abierta_por_rango para un periodo de análisis y
+Esta función descarga los datos de la tabla dv_pa_por_rango para un periodo de análisis y
 con base en los parametros ingresados
 }

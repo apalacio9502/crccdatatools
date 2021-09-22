@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_posicion_abierta.R
 \name{dt_gen_pa_resumen}
 \alias{dt_gen_pa_resumen}
-\title{Descarga los datos gen_posicion_abierta_resumen}
+\title{Descarga los datos gen_pa_resumen}
 \usage{
 dt_gen_pa_resumen(
   conexion,
@@ -36,6 +36,6 @@ caso contrario sera igual al "ID". Por defecto FALSE}
 \item{importe}{clase boolean. TRUE si se desea descargar la posición abierta importe. Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla gen_posicion_abierta_resumen para un periodo de análisis y
+Esta función descarga los datos de la tabla gen_pa_resumen para un periodo de análisis y
 con base en los parametros ingresados
 }

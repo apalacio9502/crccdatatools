@@ -1,6 +1,6 @@
-#' Descarga los datos gen_posicion_abierta_resumen
+#' Descarga los datos gen_pa_resumen
 #'
-#' Esta función descarga los datos de la tabla gen_posicion_abierta_resumen para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_pa_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -52,7 +52,7 @@ dt_gen_pa_resumen <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
                                     SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
                                     MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,PRODUCTO_NOMBRE,PRODUCTO_TIPO,PRODUCTO_SUBTIPO,PRODUCTO_ORIGEN
-                                    {campos_sql} FROM GEN_POSICION_ABIERTA_RESUMEN
+                                    {campos_sql} FROM GEN_PA_RESUMEN
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 

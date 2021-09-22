@@ -1,6 +1,6 @@
-#' Descarga los datos gen_garantia_depositada_exigida
+#' Descarga los datos gen_gar_dep_exi
 #'
-#' Esta función descarga los datos de la tabla gen_garantia_depositada_exigida para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_gar_dep_exi para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -13,7 +13,7 @@
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_gar_dep_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_exi<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -29,7 +29,7 @@ dt_gen_gar_dep_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisi
                                     SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
                                     MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,GARANTIA_DEPOSITADA,
                                     GARANTIA_EXIGIDA,POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
-                                    POSICION_BRUTA_VALORADA FROM GEN_GARANTIA_DEPOSITADA_EXIGIDA
+                                    POSICION_BRUTA_VALORADA FROM GEN_GAR_DEP_EXI
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 
@@ -53,9 +53,9 @@ dt_gen_gar_dep_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisi
   return(datos)
 }
 
-#' Descarga los datos gen_garantia_depositada_exigida_liq
+#' Descarga los datos gen_gar_dep_exi_liq
 #'
-#' Esta función descarga los datos de la tabla gen_garantia_depositada_exigida_liq para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_gar_dep_exi_liq para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -85,7 +85,7 @@ dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NU
                                     MIEMBRO_LIQ_TIPO,GARANTIA_DEPOSITADA,GARANTIA_EXIGIDA,
                                     POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
                                     POSICION_BRUTA_VALORADA, RIESGO_ST, PATRIMONIO
-                                    FROM GEN_GARANTIA_DEPOSITADA_EXIGIDA_LIQ
+                                    FROM GEN_GAR_DEP_EXI_LIQ
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 
@@ -109,9 +109,9 @@ dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NU
   return(datos)
 }
 
-#' Descarga los datos gen_garantia_exigida_resumen
+#' Descarga los datos gen_gar_exi_resumen
 #'
-#' Esta función descarga los datos de la tabla gen_garantia_exigida_resumen para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_gar_exi_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -141,7 +141,7 @@ dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NU
                                        MIEMBRO_TIPO,PRODUCTO_DETALLE,GARANTIA_EXIGIDA,
                                        POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
                                        POSICION_BRUTA_VALORADA
-                                       FROM GEN_GARANTIA_EXIGIDA_RESUMEN
+                                       FROM GEN_GAR_EXI_RESUMEN
                                        WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                        AND {periodo_analisis_sql[2]}"))
 
@@ -165,9 +165,9 @@ dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NU
 }
 
 
-#' Descarga los datos gen_garantia_ggl_ind_fgc_liq
+#' Descarga los datos gen_gar_ggl_ind_fgc_liq
 #'
-#' Esta función descarga los datos de la tabla gen_garantia_ggl_ind_fgc_liq para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_gar_ggl_ind_fgc_liq para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -194,7 +194,7 @@ dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,proveedor="MySQL",periodo_analisi
   # Descarga datos
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
                                     SEGMENTO_NOMBRE, MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
-                                    MIEMBRO_LIQ_TIPO, GARANTIA_TIPO, IMPORTE FROM GEN_GARANTIA_GGL_IND_FGC_LIQ
+                                    MIEMBRO_LIQ_TIPO, GARANTIA_TIPO, IMPORTE FROM GEN_GAR_GGL_IND_FGC_LIQ
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 

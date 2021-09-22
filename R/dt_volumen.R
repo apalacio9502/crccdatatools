@@ -1,6 +1,6 @@
-#' Descarga los datos gen_volumen_resumen
+#' Descarga los datos gen_vol_resumen
 #'
-#' Esta función descarga los datos de la tabla gen_volumen_resumen para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_vol_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -29,7 +29,7 @@ dt_gen_vol_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
                                       SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
                                       MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,PRODUCTO_NOMBRE,PRODUCTO_TIPO,PRODUCTO_SUBTIPO,
                                       PRODUCTO_ORIGEN,EFECTIVO_COMPRA,
-                                      EFECTIVO_VENTA FROM GEN_VOLUMEN_RESUMEN
+                                      EFECTIVO_VENTA FROM GEN_VOL_RESUMEN
                                       WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                       AND {periodo_analisis_sql[2]}"))
 

@@ -33,9 +33,9 @@ dt_dv_reverse_gap <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
 }
 
 
-#' Descarga los datos dv_posicion_abierta_por_rango
+#' Descarga los datos dv_pa_por_rango
 #'
-#' Esta función descarga los datos de la tabla dv_posicion_abierta_por_rango para un periodo de análisis y
+#' Esta función descarga los datos de la tabla dv_pa_por_rango para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -57,7 +57,7 @@ dt_dv_pa_por_rango <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
                                             CUENTA_GARANTIA_TIPO, PRODUCTO_TIPO, RANGO, POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,
-                                            POSICION_NETA_VALORADA FROM DV_POSICION_ABIERTA_POR_RANGO
+                                            POSICION_NETA_VALORADA FROM DV_PA_POR_RANGO
                                             WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                             {periodo_analisis_sql[2]}"))
 
@@ -99,9 +99,9 @@ dt_dv_curva_fwd <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fec
   return(datos)
 }
 
-#' Descarga los datos dv_liquidaciones_resumen
+#' Descarga los datos dv_liq_resumen
 #'
-#' Esta función descarga los datos de la tabla dv_liquidaciones_resumen para un periodo de análisis y
+#' Esta función descarga los datos de la tabla dv_liq_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -125,7 +125,7 @@ dt_dv_liq_resumen <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
                                         MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                         MIEMBRO_LIQ_TIPO, CUENTA_GARANTIA_TIPO, PRODUCTO_NOMBRE,
                                         PRODUCTO_TIPO, PRODUCTO_SUBTIPO, PRODUCTO_ORIGEN, LIQUIDACION
-                                        FROM DV_LIQUIDACIONES_RESUMEN
+                                        FROM DV_LIQ_RESUMEN
                                         WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                         AND {periodo_analisis_sql[2]}"))
 

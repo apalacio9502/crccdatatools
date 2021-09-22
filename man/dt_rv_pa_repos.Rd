@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_renta_variable.R
 \name{dt_rv_pa_repos}
 \alias{dt_rv_pa_repos}
-\title{Descarga los datos gen_posicion_abierta para el producto repos}
+\title{Descarga los datos gen_pa para el producto repos}
 \usage{
 dt_rv_pa_repos(
   conexion,
@@ -35,6 +35,6 @@ caso contrario sera igual al "ID". Por defecto FALSE}
 \item{importe}{clase boolean. TRUE si se desea descargar la posición abierta importe. Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla gen_posicion_abierta para el producto repos, un periodo de análisis y
+Esta función descarga los datos de la tabla gen_pa para el producto repos, un periodo de análisis y
 con base en los parametros ingresados
 }

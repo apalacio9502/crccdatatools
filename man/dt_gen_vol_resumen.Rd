@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_volumen.R
 \name{dt_gen_vol_resumen}
 \alias{dt_gen_vol_resumen}
-\title{Descarga los datos gen_volumen_resumen}
+\title{Descarga los datos gen_vol_resumen}
 \usage{
 dt_gen_vol_resumen(
   conexion,
@@ -30,6 +30,6 @@ de los cuales se desea descargar la información. Por defecto descarga la inform
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla gen_volumen_resumen para un periodo de análisis y
+Esta función descarga los datos de la tabla gen_vol_resumen para un periodo de análisis y
 con base en los parametros ingresados
 }

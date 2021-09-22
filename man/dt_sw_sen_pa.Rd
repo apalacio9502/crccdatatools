@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_swaps.R
 \name{dt_sw_sen_pa}
 \alias{dt_sw_sen_pa}
-\title{Descarga los datos sw_sensibilidad_posicion_abierta}
+\title{Descarga los datos sw_sens_pa}
 \usage{
 dt_sw_sen_pa(
   conexion,
@@ -26,6 +26,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla sw_sensibilidad_posicion_abierta para un periodo de análisis y
+Esta función descarga los datos de la tabla sw_sens_pa para un periodo de análisis y
 con base en los parametros ingresados
 }

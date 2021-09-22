@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_collateral_management.R
 \name{dt_gen_gar_dep_resumen}
 \alias{dt_gen_gar_dep_resumen}
-\title{Descarga los datos gen_garantia_depositada_resumen}
+\title{Descarga los datos gen_gar_depo_resumen}
 \usage{
 dt_gen_gar_dep_resumen(
   conexion,
@@ -30,6 +30,6 @@ de los cuales se desea descargar la información. Por defecto descarga la inform
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla gen_garantia_depositada_resumen para un periodo de análisis y
+Esta función descarga los datos de la tabla gen_gar_depo_resumen para un periodo de análisis y
 con base en los parametros ingresados
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_renta_fija.R
 \name{dt_rf_pa_por_tramo}
 \alias{dt_rf_pa_por_tramo}
-\title{Descarga los datos rf_posicion_abierta_por_tramo}
+\title{Descarga los datos rf_pa_por_tramo}
 \usage{
 dt_rf_pa_por_tramo(
   conexion,
@@ -26,6 +26,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla rf_posicion_abierta_por_tramo para un periodo de análisis y
+Esta función descarga los datos de la tabla rf_pa_por_tramo para un periodo de análisis y
 con base en los parametros ingresados
 }

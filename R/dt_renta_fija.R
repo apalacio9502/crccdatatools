@@ -1,6 +1,6 @@
-#' Descarga los datos rf_posicion_abierta_por_tramo
+#' Descarga los datos rf_pa_por_tramo
 #'
-#' Esta función descarga los datos de la tabla rf_posicion_abierta_por_tramo para un periodo de análisis y
+#' Esta función descarga los datos de la tabla rf_pa_por_tramo para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
@@ -26,7 +26,7 @@ dt_rf_pa_por_tramo <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,
                                           DUR_POSICION_COMPRADORA_VALORADA, DUR_POSICION_VENDEDORA_VALORADA,
                                           DUR_POSICION_NETA_VALORADA, DUR_MOD_POSICION_COMPRADORA_VALORADA,
                                           DUR_MOD_POSICION_VENDEDORA_VALORADA, DUR_MOD_POSICION_NETA_VALORADA,
-                                          PV01, GARANTIA_EXIGIDA FROM RF_POSICION_ABIERTA_POR_TRAMO
+                                          PV01, GARANTIA_EXIGIDA FROM RF_PA_POR_TRAMO
                                           WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                           {periodo_analisis_sql[2]}"))
 

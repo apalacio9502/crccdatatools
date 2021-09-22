@@ -2,7 +2,7 @@
 % Please edit documentation in R/dt_derivados.R
 \name{dt_dv_liq_resumen}
 \alias{dt_dv_liq_resumen}
-\title{Descarga los datos dv_liquidaciones_resumen}
+\title{Descarga los datos dv_liq_resumen}
 \usage{
 dt_dv_liq_resumen(
   conexion,
@@ -26,6 +26,6 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 caso contrario sera igual al "ID". Por defecto FALSE}
 }
 \description{
-Esta función descarga los datos de la tabla dv_liquidaciones_resumen para un periodo de análisis y
+Esta función descarga los datos de la tabla dv_liq_resumen para un periodo de análisis y
 con base en los parametros ingresados
 }
