@@ -3,7 +3,6 @@
 #' Esta función descarga los datos de la tabla rf_pa_por_tramo para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -11,13 +10,13 @@
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_rf_pa_por_tramo <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_rf_pa_por_tramo <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
@@ -41,7 +40,6 @@ dt_rf_pa_por_tramo <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,
 #' Esta función descarga los datos de la tabla rf_curva_tes para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -53,7 +51,7 @@ dt_rf_curva_tes <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fec
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA, NEMOTECNICO, FECHA_VENCIMIENTO, DURACION_ANOS, TASA

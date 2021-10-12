@@ -3,7 +3,6 @@
 #' Esta función descarga los datos de la tabla gen_ingresos_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -13,13 +12,13 @@
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_ing_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_ing_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -32,9 +31,6 @@ dt_gen_ing_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
                                            FROM GEN_INGRESOS_RESUMEN
                                            WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                            AND {periodo_analisis_sql[2]} AND TARIFA_SANCION=0"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
@@ -73,7 +69,7 @@ dt_gen_ing_cumplimiento_presupuesto<- function(conexion,datos,periodo_analisis=N
   datos_provisional <- dbGetQuery(conexion , glue("SELECT  FECHA_ANO_MES, SEGMENTO_ID,
                                                   SEGMENTO_NOMBRE, PRODUCTO_TIPO, PRODUCTO_NOMBRE,
                                                   PRODUCTO_ORIGEN, PROYECCION_DIARIA
-                                                  FROM PARAMS_GEN_PROYECCION_INGRESOS
+                                                  FROM PA_GEN_PROYECCION_INGRESOS
                                                   WHERE FECHA_ANO_MES BETWEEN '{format(periodo_analisis[1], '%Y-%m')}'
                                                   AND '{format(periodo_analisis[2], '%Y-%m')}'"))
 

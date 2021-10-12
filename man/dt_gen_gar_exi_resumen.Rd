@@ -6,7 +6,6 @@
 \usage{
 dt_gen_gar_exi_resumen(
   conexion,
-  proveedor = "MySQL",
   periodo_analisis = NULL,
   fecha_analisis = NULL,
   segmentos_analisis = NULL,
@@ -15,8 +14,6 @@ dt_gen_gar_exi_resumen(
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 

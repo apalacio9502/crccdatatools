@@ -15,7 +15,8 @@ Depends:
     glue (>= 1.4.2),
     plotly (>= 4.9.4),
     DBI (>= 1.1.1),
-    formattable (>= 0.2.1)
+    formattable (>= 0.2.1),
+    odbc (>= 1.3.2)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

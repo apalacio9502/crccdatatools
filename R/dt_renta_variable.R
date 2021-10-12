@@ -3,19 +3,18 @@
 #' Esta función descarga los datos de la tabla rv_vol para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_vol <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_vol <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_VOL WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
@@ -38,13 +37,13 @@ dt_rv_vol <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_ana
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_activos_elegibles_repo <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_activos_elegibles_repo <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_ACTIVOS_ELEGIBLES_REPOS WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
@@ -62,7 +61,6 @@ dt_rv_activos_elegibles_repo <- function(conexion,proveedor="MySQL",periodo_anal
 #' Esta función descarga los datos de la tabla gen_pa para el producto repos, un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -73,14 +71,14 @@ dt_rv_activos_elegibles_repo <- function(conexion,proveedor="MySQL",periodo_anal
 #' @param importe clase boolean. TRUE si se desea descargar la posición abierta importe. Por defecto FALSE
 #' @export
 
-dt_rv_pa_repos <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,
+dt_rv_pa_repos <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
                            ficticio=FALSE,nominal=FALSE,valorada=TRUE,importe=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se crea la campos_sql
   campos_sql <- ''
@@ -134,19 +132,18 @@ dt_rv_pa_repos <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fech
 #' Esta función descarga los datos de la tabla rv_conc_repos_por_activo para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_conc_repos_por_activo <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_conc_repos_por_activo <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_CONC_REPOS_POR_ACTIVO
@@ -165,19 +162,18 @@ dt_rv_conc_repos_por_activo <- function(conexion,proveedor="MySQL",periodo_anali
 #' Esta función descarga los datos de la tabla rv_conc_repos_por_tercero para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_conc_repos_por_tercero <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_conc_repos_por_tercero <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_CONC_REPOS_POR_TERCERO
@@ -196,19 +192,18 @@ dt_rv_conc_repos_por_tercero <- function(conexion,proveedor="MySQL",periodo_anal
 #' Esta función descarga los datos de la tabla rv_haircuts para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_haircuts <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_rv_haircuts <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_HAIRCUTS

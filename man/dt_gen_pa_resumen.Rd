@@ -6,19 +6,14 @@
 \usage{
 dt_gen_pa_resumen(
   conexion,
-  proveedor = "MySQL",
   periodo_analisis = NULL,
   fecha_analisis = NULL,
   segmentos_analisis = NULL,
-  ficticio = FALSE,
-  valorada = TRUE,
-  importe = FALSE
+  ficticio = FALSE
 )
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 
@@ -30,10 +25,6 @@ de los cuales se desea descargar la información. Por defecto descarga la inform
 
 \item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
 caso contrario sera igual al "ID". Por defecto FALSE}
-
-\item{valorada}{clase boolean. TRUE si se desea descargar la posición abierta valorada. Por defecto TRUE}
-
-\item{importe}{clase boolean. TRUE si se desea descargar la posición abierta importe. Por defecto FALSE}
 }
 \description{
 Esta función descarga los datos de la tabla gen_pa_resumen para un periodo de análisis y

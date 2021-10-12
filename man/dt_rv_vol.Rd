@@ -4,17 +4,10 @@
 \alias{dt_rv_vol}
 \title{Descarga los datos rv_vol}
 \usage{
-dt_rv_vol(
-  conexion,
-  proveedor = "MySQL",
-  periodo_analisis = NULL,
-  fecha_analisis = NULL
-)
+dt_rv_vol(conexion, periodo_analisis = NULL, fecha_analisis = NULL)
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 

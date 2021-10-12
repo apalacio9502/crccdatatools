@@ -4,12 +4,10 @@
 \alias{dt_abrir_conexion}
 \title{Abrir conexion de la base de datos}
 \usage{
-dt_abrir_conexion(config, proveedor = "MySQL")
+dt_abrir_conexion(config)
 }
 \arguments{
 \item{config}{clase data.frame. Configuración de la conexión}
-
-\item{proveedor}{clase character. Se debe especificar le proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 }
 \description{
 Esta función abre la conexion de la base de datos

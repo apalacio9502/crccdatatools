@@ -3,7 +3,6 @@
 #' Esta función descarga los datos de la tabla gen_gar_dep_exi para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -13,13 +12,13 @@
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_gar_dep_exi<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_exi<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -39,7 +38,7 @@ dt_gen_gar_dep_exi<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,proveedor=proveedor,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -58,7 +57,6 @@ dt_gen_gar_dep_exi<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
 #' Esta función descarga los datos de la tabla gen_gar_dep_exi_liq para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -68,13 +66,13 @@ dt_gen_gar_dep_exi<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,f
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -96,7 +94,7 @@ dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NU
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,proveedor=proveedor,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -114,7 +112,6 @@ dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NU
 #' Esta función descarga los datos de la tabla gen_gar_exi_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -124,13 +121,13 @@ dt_gen_gar_dep_exi_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NU
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -151,7 +148,7 @@ dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NU
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,proveedor=proveedor,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -170,7 +167,6 @@ dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NU
 #' Esta función descarga los datos de la tabla gen_gar_ggl_ind_fgc_liq para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -180,13 +176,13 @@ dt_gen_gar_exi_resumen<- function(conexion,proveedor="MySQL",periodo_analisis=NU
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -209,7 +205,6 @@ dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,proveedor="MySQL",periodo_analisi
 #' Esta función descarga los datos de la tabla gen_lmc_consumo para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -217,7 +212,7 @@ dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,proveedor="MySQL",periodo_analisi
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_gen_lmc_consumo<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_lmc_consumo<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)

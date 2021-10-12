@@ -122,7 +122,7 @@ gt_vol<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inact
                list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              yaxis = list(title = "",tickangle = 270,fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE),
-             xaxis=list(title="",tickformat = "%",fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE)) %>%
+             xaxis=list(title="",tickformat = ".2%",fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE)) %>%
       config(displaylogo = F,locale = "es")
 
     return(plot)

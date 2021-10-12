@@ -3,7 +3,6 @@
 #' Esta función descarga los datos de la tabla sw_sens_pa para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -11,13 +10,13 @@
 #' caso contrario sera igual al "ID". Por defecto FALSE
 #' @export
 
-dt_sw_sen_pa<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_sw_sen_pa<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA,SEGMENTO_ID, SEGMENTO_NOMBRE,
@@ -39,19 +38,18 @@ dt_sw_sen_pa<- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_a
 #' Esta función descarga los datos de la tabla sw_curva para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_sw_curva <- function(conexion,proveedor="MySQL",periodo_analisis=NULL,fecha_analisis=NULL){
+dt_sw_curva <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA, NODO, NODO_DIAS ,TASA

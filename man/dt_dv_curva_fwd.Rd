@@ -4,17 +4,10 @@
 \alias{dt_dv_curva_fwd}
 \title{Descarga los datos dv_curva_fwd}
 \usage{
-dt_dv_curva_fwd(
-  conexion,
-  proveedor = "MySQL",
-  periodo_analisis = NULL,
-  fecha_analisis = NULL
-)
+dt_dv_curva_fwd(conexion, periodo_analisis = NULL, fecha_analisis = NULL)
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 
 \item{periodo_analisis}{clase array date. Debe contener la fecha inicio y fin del análisis}
 

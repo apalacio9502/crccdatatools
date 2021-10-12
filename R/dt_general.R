@@ -2,17 +2,12 @@
 #'
 #' Esta función convierte un periodo de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 
-dt_periodo_analisis_sql<- function(periodo_analisis,proveedor="MySQL"){
-  # Se verifica si el proveedor es Oracle
-  if (proveedor=="Oracle") {
-    # Se crea la lista periodo_analisis_sql
-    periodo_analisis_sql <- c(glue("TO_DATE('{periodo_analisis[1]}','YYYY-MM-DD')"), glue("TO_DATE('{periodo_analisis[2]}','YYYY-MM-DD')"))
-  }else{
-    # Se crea la lista periodo_analisis_sql
-    periodo_analisis_sql <- c(glue("'{periodo_analisis[1]}'"), glue("'{periodo_analisis[2]}'"))
-  }
+dt_periodo_analisis_sql<- function(periodo_analisis){
+
+  # Se crea la lista periodo_analisis_sql
+  periodo_analisis_sql <- c(glue("TO_DATE('{periodo_analisis[1]}','YYYY-MM-DD')"), glue("TO_DATE('{periodo_analisis[2]}','YYYY-MM-DD')"))
+
   return(periodo_analisis_sql)
 }
 
@@ -20,17 +15,12 @@ dt_periodo_analisis_sql<- function(periodo_analisis,proveedor="MySQL"){
 #'
 #' Esta función convierte una fecha de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 
-dt_fecha_analisis_sql<- function(fecha_analisis,proveedor="MySQL"){
-  # Se verifica si el proveedor es Oracle
-  if (proveedor=="Oracle") {
-    # Se crea la variable fecha_analisis_sql
-    fecha_analisis_sql <- glue("TO_DATE('{fecha_analisis}','YYYY-MM-DD')")
-  }else{
-    # Se crea la variable fecha_analisis_sql
-    fecha_analisis_sql <-glue("'{fecha_analisis}'")
-  }
+dt_fecha_analisis_sql<- function(fecha_analisis){
+
+  # Se crea la variable fecha_analisis_sql
+  fecha_analisis_sql <- glue("TO_DATE('{fecha_analisis}','YYYY-MM-DD')")
+
   return(fecha_analisis_sql)
 }
 
@@ -95,16 +85,15 @@ dt_num_char <- function(x){
 #'
 #' Esta función descarga los datos de la tabla adm_fechas para un periodo de análisis
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 
-dt_fechas<- function(conexion,proveedor="MySQL",periodo_analisis){
+dt_fechas<- function(conexion,periodo_analisis){
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
-  datos <- dbGetQuery(conexion, glue("SELECT FECHA FROM ADM_FECHAS WHERE
+  datos <- dbGetQuery(conexion, glue("SELECT FECHA FROM ADM_GEN_FECHAS WHERE
                                           DIA_SEMANA NOT IN (6,7) AND FESTIVO<>1 AND
                                           FECHA BETWEEN {periodo_analisis_sql[1]}
                                           AND {periodo_analisis_sql[2]}"))
@@ -163,15 +152,15 @@ dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NUL
   return(datos)
 }
 
-#' Descarga los datos adm_colores
+#' Descarga los datos adm_gen_colores
 #'
 #' Esta función descarga los datos de la tabla adm_colores
 #' @export
 
-dt_colores<- function(conexion){
+dt_adm_gen_colores<- function(conexion){
 
   # Descarga datos
-  datos <- dbReadTable(conexion,"ADM_COLORES")
+  datos <- dbReadTable(conexion,"ADM_GEN_COLORES")
 
   return(datos)
 }
@@ -180,18 +169,15 @@ dt_colores<- function(conexion){
 #'
 #' Esta función abre la conexion de la base de datos
 #' @param config clase data.frame. Configuración de la conexión
-#' @param proveedor clase character. Se debe especificar le proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @export
 
-dt_abrir_conexion <- function(config,proveedor="MySQL"){
-  if (proveedor=="Oracle") {
-    # Se crea la conexión con la bodega de datos
-    conexion <- dbConnect(ROracle::Oracle(),username=config$username,password=config$password,dbname=config$dbname)
-  }else{
-    # Se crea la conexión con la bodega de datos
-    conexion <- dbConnect(drv= RMySQL::MySQL() , port=config$port, host=config$host, username=config$username,
-                                    dbname=config$dbname, password=config$password)
-  }
+dt_abrir_conexion <- function(config){
+
+  # Se crea la conexión con la bodega de datos
+  conexion <-  dbConnect(drv = odbc::odbc(),timezone = "America/Bogota",timezone_out="America/Bogota",
+                         Driver="Oracle",Host=config$host,SVC=config$dbname,
+                         UID=config$username,  PWD=config$password,Port = config$port)
+
 }
 
 

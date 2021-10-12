@@ -687,7 +687,7 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis=list(title=NA,fixedrange=fixedrange,tickmode="array",tickvals=datos_completos$ORDENADOR,
                         ticktext =datos_completos$ID),
-             yaxis = list(title = "Cumplimiento",tickformat = "%",fixedrange=fixedrange)) %>%
+             yaxis = list(title = "Cumplimiento",tickformat = ".2%",fixedrange=fixedrange)) %>%
       config(displaylogo = F,locale = "es")
 
     return(plot)
