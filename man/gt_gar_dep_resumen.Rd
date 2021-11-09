@@ -13,7 +13,7 @@ gt_gar_dep_resumen(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos}
+\code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos}
 
 \item{fecha_analisis}{clase date. Fecha en la que se realiza el análisis (Último día de los datos)}
 

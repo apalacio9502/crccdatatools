@@ -12,7 +12,7 @@ gt_rv_pa_valorada_importe_diario(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_rv_concentracion_repos_por_activo}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rv_conc_repos_por_tercero}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

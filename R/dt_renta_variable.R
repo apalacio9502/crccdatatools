@@ -6,9 +6,11 @@
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param origen_emision_analisis clase array character. Lista de origen emisión ("CHILE","COLOMBIA","ESTADOS UNIDOS","IRLANDA-REINO UNIDO")
+#' de los cuales se desea descargar la información. Por defecto descarga la información de Colombia.
 #' @export
 
-dt_rv_vol <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_vol <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,origen_emision_analisis="COLOMBIA"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -18,10 +20,8 @@ dt_rv_vol <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Descarga datos
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_VOL WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
-                                       {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
+                                       {periodo_analisis_sql[2]} AND
+                                       ORIGEN_EMISION IN ('{paste0(origen_emision_analisis,collapse = \"','\")}')"))
 
   return(datos)
 }
@@ -31,7 +31,6 @@ dt_rv_vol <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 #' Esta función descarga los datos de la tabla rv_activos_elegibles_repo para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
-#' @param proveedor clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
@@ -49,9 +48,6 @@ dt_rv_activos_elegibles_repo <- function(conexion,periodo_analisis=NULL,fecha_an
   datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_ACTIVOS_ELEGIBLES_REPOS WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   return(datos)
 }
 
@@ -64,15 +60,14 @@ dt_rv_activos_elegibles_repo <- function(conexion,periodo_analisis=NULL,fecha_an
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @param nominal clase boolean. TRUE si se desea descargar la posición abierta nominal Por defecto TRUE
 #' @param valorada clase boolean. TRUE si se desea descargar la posición abierta valorada. Por defecto TRUE
 #' @param importe clase boolean. TRUE si se desea descargar la posición abierta importe. Por defecto FALSE
 #' @export
 
 dt_rv_pa_repos <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
-                           ficticio=FALSE,nominal=FALSE,valorada=TRUE,importe=FALSE){
+                           seudonimo="REAL",nominal=FALSE,valorada=TRUE,importe=FALSE){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -111,16 +106,16 @@ dt_rv_pa_repos <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
   }
 
   # Descarga datos
-  datos <-  dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
-                                    MIEMBRO_TIPO, CUENTA_GARANTIA_TITULAR, CONTRATO_DESCRIPCION
-                                    {campos_sql} FROM GEN_PA
+  datos <-  dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO, MIEMBRO_TIPO,
+                                    {dt_cuenta_garantia_titular_seudonimo_sql(seudonimo)} AS CUENTA_GARANTIA_TITULAR_SEUDONIMO,
+                                    {dt_cuenta_garantia_identificacion_seudonimo_sql(seudonimo)} AS CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,
+                                    CONTRATO_DESCRIPCION {campos_sql} FROM GEN_PA
                                     WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]} AND PRODUCTO_NOMBRE='Repos'"))
 
   # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA)) %>%
-    filter(!is.na(MIEMBRO_ID_SEUDONIMO)) %>%
-    group_by(FECHA,MIEMBRO_ID_SEUDONIMO,MIEMBRO_TIPO,CUENTA_GARANTIA_TITULAR,CONTRATO_DESCRIPCION) %>%
+  datos <- datos %>% filter(!is.na(MIEMBRO_ID_SEUDONIMO)) %>%
+    group_by(FECHA,MIEMBRO_ID_SEUDONIMO,MIEMBRO_TIPO,CUENTA_GARANTIA_TITULAR_SEUDONIMO,CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,CONTRATO_DESCRIPCION) %>%
     summarise(across(fill_campos %>% names(),.fns = sum),.groups="drop")
 
   return(datos)
@@ -150,8 +145,6 @@ dt_rv_conc_repos_por_activo <- function(conexion,periodo_analisis=NULL,fecha_ana
                                        WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                        {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }
@@ -165,9 +158,10 @@ dt_rv_conc_repos_por_activo <- function(conexion,periodo_analisis=NULL,fecha_ana
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_rv_conc_repos_por_tercero <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
+dt_rv_conc_repos_por_tercero <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -176,12 +170,13 @@ dt_rv_conc_repos_por_tercero <- function(conexion,periodo_analisis=NULL,fecha_an
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
-  datos <-   dbGetQuery(conexion, glue("SELECT * FROM RV_CONC_REPOS_POR_TERCERO
+  datos <-   dbGetQuery(conexion, glue("SELECT FECHA,
+                                       {dt_cuenta_garantia_titular_seudonimo_sql(seudonimo)} AS CUENTA_GARANTIA_TITULAR_SEUDONIMO,
+                                       {dt_cuenta_garantia_identificacion_seudonimo_sql(seudonimo)} AS CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,
+                                       IMPORTE_EFECTIVO_REPOS, TITULOS_OBJETO_OPERACION
+                                       FROM RV_CONC_REPOS_POR_TERCERO
                                        WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                        {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }
@@ -197,7 +192,7 @@ dt_rv_conc_repos_por_tercero <- function(conexion,periodo_analisis=NULL,fecha_an
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_rv_haircuts <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_rv_haircuts <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)

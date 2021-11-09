@@ -9,7 +9,8 @@ dt_filtro_datos(
   fecha_analisis = NULL,
   segmentos = NULL,
   miembros = NULL,
-  cuentas = NULL
+  cuentas = NULL,
+  activos = NULL
 )
 }
 \arguments{

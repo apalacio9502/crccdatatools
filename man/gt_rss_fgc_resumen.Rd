@@ -8,7 +8,7 @@ gt_rss_fgc_resumen(datos, pageLength = 100, style = "bootstrap4")
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_gen_rss_fgc}} o tener una estructura igual a dichos datos}
 
 \item{pageLength}{clase number. Número de filas por hoja que alojara
 la tabla. Por defecto 100}
@@ -17,5 +17,5 @@ la tabla. Por defecto 100}
 para renderizar la tabla. Por defecto "bootstrap4"}
 }
 \description{
-Esta función crea la tabla ingresos en formato html
+Esta función crea la tabla fgc en formato html
 }

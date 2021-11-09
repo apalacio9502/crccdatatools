@@ -46,7 +46,7 @@ gt_sw_pa_por_rango_resumen<- function(datos,fecha_analisis,pageLength=100,style=
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_sw_sen_pa}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Sensibilidad", "Posición Abierta Neta"). Por defecto NULL

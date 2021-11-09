@@ -8,7 +8,7 @@ dt_dv_indicador_liquidez(
   conexion,
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  ficticio = FALSE
+  seudonimo = "REAL"
 )
 }
 \arguments{
@@ -19,8 +19,7 @@ dt_dv_indicador_liquidez(
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
-\item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-caso contrario sera igual al "ID". Por defecto FALSE}
+\item{seudonimo}{clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"}
 }
 \description{
 Esta función descarga los datos de la tabla dv_indicador_liquidez para un periodo de análisis y

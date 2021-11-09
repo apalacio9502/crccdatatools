@@ -6,11 +6,10 @@
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_rss_promedio<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_rss_promedio<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -20,7 +19,7 @@ dt_gen_rss_promedio<- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,SEGMENTO_NOMBRE,
-                                        MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                        MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                         MIEMBRO_LIQ_TIPO, MIEMBRO_LIQ_COLETIVIZADOR , POSICION, RIESGO_ST,
                                         RIESGO_ST_PROMEDIO, GARANTIA_EXIGIDA, GARANTIA_EXIGIDA_FGC
                                         FROM GEN_RSS_PROMEDIO
@@ -38,11 +37,10 @@ dt_gen_rss_promedio<- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_rss_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_rss_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -52,7 +50,7 @@ dt_gen_rss_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,fic
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,SEGMENTO_NOMBRE,
-                                        MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                        MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                         MIEMBRO_LIQ_NOMBRE,
                                         MIEMBRO_LIQ_TIPO, MIEMBRO_LIQ_COLETIVIZADOR , TAMANO_MINIMO, POSICION,
                                         RIESGO_ST_PROMEDIO, APORTACION_MINIMA, APORTACION_ACTUAL,
@@ -72,11 +70,10 @@ dt_gen_rss_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,fic
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_rss_test_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_rss_test_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -86,8 +83,8 @@ dt_gen_rss_test_fgc<- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID, SEGMENTO_NOMBRE,
-                                        MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)}_1 AS MIEMBRO_LIQ_ID_SEUDONIMO_1,
-                                        MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)}_2 AS MIEMBRO_LIQ_ID_SEUDONIMO_2,
+                                        MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)}_1 AS MIEMBRO_LIQ_ID_SEUDONIMO_1,
+                                        MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)}_2 AS MIEMBRO_LIQ_ID_SEUDONIMO_2,
                                         RIESGO_ST_1, RIESGO_ST_2, GARANTIA_GIST,
                                         GARANTIA_GGL, GARANTIA_GPT, GARANTIA_FGC, GARANTIA_FGG_CRCC
                                         FROM GEN_RSS_TEST_FGC

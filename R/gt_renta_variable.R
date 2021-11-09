@@ -77,8 +77,8 @@ gt_rv_pa_volumen_por_activo_diario<- function(datos,fixedrange=FALSE){
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10))),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = list(text="Efectivo \n Negociado",font=list(size=12)),fixedrange=fixedrange),
-             yaxis2 = list(title =list(text="Dispersión \n VMD",font=list(size=12)) ,tickformat='%',fixedrange=fixedrange),
-             yaxis3 = list(title=list(text= "Marcación \n Precio",font=list(size=12)),tickformat='%',fixedrange=fixedrange))%>%
+             yaxis2 = list(title =list(text="Dispersión \n VMD",font=list(size=12)) ,tickformat='.0%',fixedrange=fixedrange),
+             yaxis3 = list(title=list(text= "Marcación \n Precio",font=list(size=12)),tickformat='.0%',fixedrange=fixedrange))%>%
       config(displaylogo = F,locale = "es")
 
     return(plot)
@@ -129,7 +129,7 @@ gt_rv_activos_elegibles_repo<- function(datos,fecha_analisis,pageLength=100,styl
 #' en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_rv_concentracion_repos_por_activo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_rv_conc_repos_por_tercero}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param top_terceros clase boolean. TRUE si se desea mostrar la lista de botones del top 10. Por defecto FALSE
 #' @export
@@ -139,26 +139,31 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
   # Se verifica si existen datos
   if (nrow(datos)>0) {
 
+    # Se  modifica la granularidad de los datos
+    datos <- datos %>%
+      mutate(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=ifelse(CUENTA_GARANTIA_TITULAR_SEUDONIMO=="No Aplica",CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,paste(CUENTA_GARANTIA_TITULAR_SEUDONIMO,CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO)))
+
+
     # Se crea el data.frame datos_completos
     datos_completos <- datos %>%   arrange(FECHA) %>%
-      mutate(ORDENADOR=as.numeric(fct_reorder(factor(CUENTA_GARANTIA_TITULAR),.x = IMPORTE_EFECTIVO_REPOS,.fun = last,.desc = TRUE)),
-             CUENTA_GARANTIA_TITULAR=if_else(as.numeric(ORDENADOR)>10,"Otros",CUENTA_GARANTIA_TITULAR)) %>%
-      bind_rows(datos %>% mutate(CUENTA_GARANTIA_TITULAR="General")) %>%
-      filter(case_when(top_terceros==FALSE~CUENTA_GARANTIA_TITULAR=="General",
-                       TRUE~CUENTA_GARANTIA_TITULAR!="")) %>%
-      group_by(FECHA,CUENTA_GARANTIA_TITULAR) %>%
+      mutate(ORDENADOR=as.numeric(fct_reorder(factor(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO),.x = IMPORTE_EFECTIVO_REPOS,.fun = last,.desc = TRUE)),
+             CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=if_else(as.numeric(ORDENADOR)>10,"Otros",CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO)) %>%
+      bind_rows(datos %>% mutate(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO="General")) %>%
+      filter(case_when(top_terceros==FALSE~CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=="General",
+                       TRUE~CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO!="")) %>%
+      group_by(FECHA,CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO) %>%
       summarise(VALOR_1=round(sum(TITULOS_OBJETO_OPERACION,na.rm = TRUE)/1e+9,6),
                 VALOR_2=round(sum(IMPORTE_EFECTIVO_REPOS,na.rm = TRUE)/1e+9,6),
                 VALOR_3=(1-(VALOR_2/VALOR_1)),
                 TEXTO_1=paste(VALOR_1,"Miles M"),
                 TEXTO_2=paste(VALOR_2,"Miles M"),
                 TEXTO_3=dt_porcentaje_caracter(VALOR_3),.groups = "drop") %>%
-      mutate(CUENTA_GARANTIA_TITULAR=fct_reorder(factor(CUENTA_GARANTIA_TITULAR),.x = VALOR_2,.fun = last,.desc = TRUE),
-             VISIBLE=ifelse(CUENTA_GARANTIA_TITULAR=="General",TRUE,FALSE)) %>%
-      arrange(CUENTA_GARANTIA_TITULAR)
+      mutate(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=fct_reorder(factor(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO),.x = VALOR_2,.fun = last,.desc = TRUE),
+             VISIBLE=ifelse(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=="General",TRUE,FALSE)) %>%
+      arrange(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO)
 
     # Se crea el vector de titulares
-    titulares <- levels(datos_completos$CUENTA_GARANTIA_TITULAR)
+    titulares <- levels(datos_completos$CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO)
 
     # Se verifica si se debe crear el updatemenus
     if (length(titulares)>1) {
@@ -179,7 +184,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
     }
 
     # Se crea la grafica
-    plot <- plot_ly(data= datos_completos ,x=~FECHA,split=~dt_num_char(CUENTA_GARANTIA_TITULAR),hoverinfo="text+x+name") %>%
+    plot <- plot_ly(data= datos_completos ,x=~FECHA,split=~dt_num_char(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO),hoverinfo="text+x+name") %>%
       add_lines(y=~VALOR_1, text=~TEXTO_1,visible=~VISIBLE, name="Títulos Objeto Operación") %>%
       add_lines(y=~VALOR_2, text=~TEXTO_2,visible=~VISIBLE, name="Importe Efectivo Títulos") %>%
       add_lines(y=~VALOR_3, text=~TEXTO_3,visible=~VISIBLE, name="Haircut",yaxis="y2") %>%
@@ -213,7 +218,8 @@ gt_rv_pa_repos_por_activo_miembro_titular_garantia<- function(datos){
 
     # Se filtra y modifica la granularidad de los datos
     datos <- datos %>% filter(POSICION_COMPRADORA_IMPORTE>0 ) %>%
-      mutate(VALOR=POSICION_COMPRADORA_IMPORTE/1e+6)
+      mutate(VALOR=POSICION_COMPRADORA_IMPORTE/1e+6,
+             CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=ifelse(CUENTA_GARANTIA_TITULAR_SEUDONIMO=="No Aplica",CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,paste(CUENTA_GARANTIA_TITULAR_SEUDONIMO,CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO, sep = "\n")))
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Posición Repos",PARENT="") %>%
@@ -222,7 +228,7 @@ gt_rv_pa_repos_por_activo_miembro_titular_garantia<- function(datos){
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop")) %>%
       bind_rows(datos %>% group_by(LABEL = paste(CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO, sep = "\n"),PARENT = CONTRATO_DESCRIPCION) %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop")) %>%
-      bind_rows(datos %>% group_by(LABEL = paste(CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_TITULAR, sep = "\n"),PARENT = paste(CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO, sep = "\n")) %>%
+      bind_rows(datos %>% group_by(LABEL = paste(CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO, sep = "\n"),PARENT = paste(CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO, sep = "\n")) %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),TEXTO=paste(round(VALOR,6),"Millones"), .groups = "drop"))
 
 
@@ -254,24 +260,25 @@ gt_rv_pa_repos_por_titular_garantia_activo_miembro<- function(datos){
 
     # Se filtra y modifica la granularidad de los datos
     datos <- datos %>% filter(POSICION_COMPRADORA_IMPORTE>0 ) %>%
-      mutate(VALOR=POSICION_COMPRADORA_IMPORTE/1e+6)
+      mutate(VALOR=POSICION_COMPRADORA_IMPORTE/1e+6,
+             CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=ifelse(CUENTA_GARANTIA_TITULAR_SEUDONIMO=="No Aplica",CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO,paste(CUENTA_GARANTIA_TITULAR_SEUDONIMO,CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO, sep = "\n")))
 
     # Se genera el top 10
     datos <- datos %>%
-      left_join(datos %>% group_by(CUENTA_GARANTIA_TITULAR) %>%
+      left_join(datos %>% group_by(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO) %>%
                   summarise(VALOR=sum(VALOR,na.rm = TRUE),.groups="drop") %>%
-                  slice_max(n=10,order_by =VALOR ) %>% transmute(CUENTA_GARANTIA_TITULAR,TOP_10=TRUE),
-                by="CUENTA_GARANTIA_TITULAR") %>%
-      mutate(CUENTA_GARANTIA_TITULAR=ifelse(is.na(TOP_10),"Otros",CUENTA_GARANTIA_TITULAR),.keep="unused")
+                  slice_max(n=10,order_by =VALOR ) %>% transmute(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO,TOP_10=TRUE),
+                by=c("CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO")) %>%
+      mutate(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO=ifelse(is.na(TOP_10),"Otros",CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO),.keep="unused")
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos%>% group_by(LABEL="Posición Repos",PARENT="") %>%
       summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop") %>%
-      bind_rows(datos %>% group_by(LABEL = CUENTA_GARANTIA_TITULAR,PARENT = "Posición Repos") %>%
-                  summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop")) %>%
-      bind_rows(datos %>% group_by( LABEL = paste(CUENTA_GARANTIA_TITULAR,CONTRATO_DESCRIPCION, sep = "\n"),PARENT = CUENTA_GARANTIA_TITULAR) %>%
-                  summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop")) %>%
-      bind_rows(datos %>% group_by( LABEL = paste(CUENTA_GARANTIA_TITULAR,CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO, sep = "\n"),PARENT = paste(CUENTA_GARANTIA_TITULAR,CONTRATO_DESCRIPCION, sep = "\n")) %>%
+      bind_rows(datos %>% group_by(LABEL = CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO,PARENT = "Posición Repos") %>%
+                  summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop"))%>%
+      bind_rows(datos %>% group_by( LABEL = paste(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO,CONTRATO_DESCRIPCION, sep = "\n"),PARENT = CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO) %>%
+                  summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop"))%>%
+      bind_rows(datos %>% group_by( LABEL = paste(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO,CONTRATO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO, sep = "\n"),PARENT = paste(CUENTA_GARANTIA_TITULAR_IDENTIFICACION_SEUDONIMO,CONTRATO_DESCRIPCION, sep = "\n")) %>%
                   summarise(VALOR=sum(VALOR),TEXTO=paste(round(VALOR,6),"Millones"),.groups = "drop"))
 
     # Se grafica la garantia depositada por titulo, miembro y tipo de cuenta promedio diario
@@ -316,7 +323,7 @@ gt_rv_vol_haircut_por_activo_diario<- function(datos,fixedrange=FALSE){
                list(active = 0,type= 'dropdown',direction = "down",xanchor = 'center',
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10))),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
-             yaxis = list(title =list(text="Porcentaje",font=list(size=12)) ,tickformat='%',fixedrange=fixedrange) ,
+             yaxis = list(title =list(text="Porcentaje",font=list(size=12)) ,tickformat='.0%',fixedrange=fixedrange) ,
              yaxis2 =list(title = list(text="Millones-COP",font=list(size=12)),fixedrange=fixedrange))%>%
       config(displaylogo = F,locale = "es")
 

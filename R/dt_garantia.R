@@ -8,11 +8,10 @@
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_dep_exi<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_exi<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -25,20 +24,17 @@ dt_gen_gar_dep_exi<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 
   # Descarga datos
   datos <-  dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,
-                                    SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+                                    SEGMENTO_NOMBRE, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                     MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,GARANTIA_DEPOSITADA,
                                     GARANTIA_EXIGIDA,POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
                                     POSICION_BRUTA_VALORADA FROM GEN_GAR_DEP_EXI
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -62,11 +58,10 @@ dt_gen_gar_dep_exi<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -79,7 +74,7 @@ dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 
   # Descarga datos
   datos <-  dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,
-                                    SEGMENTO_NOMBRE, MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                    SEGMENTO_NOMBRE, MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                     MIEMBRO_LIQ_TIPO,GARANTIA_DEPOSITADA,GARANTIA_EXIGIDA,
                                     POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
                                     POSICION_BRUTA_VALORADA, RIESGO_ST, PATRIMONIO
@@ -87,14 +82,10 @@ dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
 
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -117,11 +108,10 @@ dt_gen_gar_dep_exi_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -134,7 +124,7 @@ dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 
   # Descarga datos
   datos <-  dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,
-                                       SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+                                       SEGMENTO_NOMBRE, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                        MIEMBRO_TIPO,PRODUCTO_DETALLE,GARANTIA_EXIGIDA,
                                        POSICION_COMPRADORA_VALORADA, POSICION_VENDEDORA_VALORADA,
                                        POSICION_BRUTA_VALORADA
@@ -142,13 +132,10 @@ dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
                                        WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                        AND {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -172,11 +159,10 @@ dt_gen_gar_exi_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -189,13 +175,10 @@ dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,periodo_analisis=NULL,fecha_anali
 
   # Descarga datos
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
-                                    SEGMENTO_NOMBRE, MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                    SEGMENTO_NOMBRE, MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                     MIEMBRO_LIQ_TIPO, GARANTIA_TIPO, IMPORTE FROM GEN_GAR_GGL_IND_FGC_LIQ
                                     WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }
@@ -208,29 +191,25 @@ dt_gen_gar_ggl_ind_fgc_liq<- function(conexion,periodo_analisis=NULL,fecha_anali
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis. Por defecto NULL
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_lmc_consumo<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_lmc_consumo<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis,proveedor)
+  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
   datos <-  dbGetQuery(conexion , glue("SELECT FECHA,
-                                    MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                    MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                     MIEMBRO_LIQ_TIPO,LIMITE, RIESGO, GARANTIA_DEPOSITADA,
                                     GARANTIA_EXIGIDA, LIMITE_AJUSTADO, CONSUMO_LIMITE
                                     FROM GEN_LMC_CONSUMO
                                     WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                     AND {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }

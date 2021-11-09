@@ -8,7 +8,7 @@ dt_rv_pa_repos(
   conexion,
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  ficticio = FALSE,
+  seudonimo = "REAL",
   nominal = FALSE,
   valorada = TRUE,
   importe = FALSE
@@ -22,8 +22,7 @@ dt_rv_pa_repos(
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
-\item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-caso contrario sera igual al "ID". Por defecto FALSE}
+\item{seudonimo}{clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"}
 
 \item{nominal}{clase boolean. TRUE si se desea descargar la posición abierta nominal Por defecto TRUE}
 

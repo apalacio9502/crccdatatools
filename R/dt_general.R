@@ -41,15 +41,42 @@ dt_segmentos_analisis_sql<- function(segmentos_analisis){
   return(segmentos_analisis_sql)
 }
 
-#' ID Miembros SQL (system)
+#' ID_SEUDONIMO Miembros
 #'
-#' Esta función devuelve el ID correspondiente acorde a la condición.
-#' @param ficticio clase boolean. TRUE si se desea descargar el 'ID_FICTICIO' de los miembros en
-#' caso contrario se descargara el 'ID'. Por defecto FALSE
+#' Esta función devuelve el ID_SEUDONIMO correspondiente acorde a la condición.
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
 
-dt_ficticio_sql<- function(ficticio){
-  if_else(ficticio==TRUE,"ID_FICTICIO","ID")
+dt_id_seudonimo<- function(seudonimo){
+  if_else(seudonimo=="REAL","ID","ID_FICTICIO")
 }
+
+#' NOMBRE_SEUDONIMO Miembros
+#'
+#' Esta función devuelve el NOMBRE_ABREVIACION_SEUDONIMO correspondiente acorde a la condición.
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+
+dt_nombre_abreviacion_seudonimo<- function(seudonimo){
+  if_else(seudonimo=="REAL","NOMBRE_ABREVIACION","NOMBRE_ABREVIACION_FICTICIO")
+}
+
+#' Devuelve el sql para extraer CUENTA_GARANTIA_TITULAR_SEUDONIMO
+#'
+#' Esta función devuelve el sql para extraer la CUENTA_GARANTIA_TITULAR_SEUDONIMO acorde a la condición.
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+
+dt_cuenta_garantia_titular_seudonimo_sql<- function(seudonimo){
+  if_else(seudonimo=="REAL","CUENTA_GARANTIA_TITULAR","'No Aplica'")
+}
+
+#' Devuelve el sql para extraer CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO
+#'
+#' Esta función devuelve el sql para extraer la CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO acorde a la condición.
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+
+dt_cuenta_garantia_identificacion_seudonimo_sql<- function(seudonimo){
+  if_else(seudonimo=="REAL","CUENTA_GARANTIA_IDENTIFICACION","TRANSLATE(CUENTA_GARANTIA_IDENTIFICACION, '0123456789','ZXYABCLMNK')")
+}
+
 
 #' Convertir un numero a porcentaje (system)
 #'
@@ -81,30 +108,6 @@ dt_num_char <- function(x){
   paste0(if_else(str_length(x)==1,"0",""),x)
 }
 
-#' Descargar los datos adm_fechas
-#'
-#' Esta función descarga los datos de la tabla adm_fechas para un periodo de análisis
-#' @param conexion clase formal. Conexión base de datos
-#' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
-
-dt_fechas<- function(conexion,periodo_analisis){
-
-  # Se covierte el periodo de analisis a SQL
-  periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
-
-  # Descarga datos
-  datos <- dbGetQuery(conexion, glue("SELECT FECHA FROM ADM_GEN_FECHAS WHERE
-                                          DIA_SEMANA NOT IN (6,7) AND FESTIVO<>1 AND
-                                          FECHA BETWEEN {periodo_analisis_sql[1]}
-                                          AND {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
-
-  return(datos)
-}
-
 #' Filtrar el data.frame con base en los inputs
 #'
 #' Esta función filtra el data.frame con base en los inputs segmentos, miembros y cuentas
@@ -115,7 +118,7 @@ dt_fechas<- function(conexion,periodo_analisis){
 #' @param cuentas clase array character. Debe contener los cuentas que se desean filtrar. Por defecto NULL
 #' @export
 
-dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NULL,cuentas=NULL){
+dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NULL,cuentas=NULL,activos=NULL){
 
   # Se crea la lista de las columnas de los datos
   columnas <- colnames(datos)
@@ -149,18 +152,12 @@ dt_filtro_datos<- function(datos,fecha_analisis=NULL,segmentos=NULL,miembros=NUL
     # Se modifica el dataframe datos
     datos <- datos  %>% filter(CUENTA_GARANTIA_TIPO %in% cuentas)
   }
-  return(datos)
-}
 
-#' Descarga los datos adm_gen_colores
-#'
-#' Esta función descarga los datos de la tabla adm_colores
-#' @export
-
-dt_adm_gen_colores<- function(conexion){
-
-  # Descarga datos
-  datos <- dbReadTable(conexion,"ADM_GEN_COLORES")
+  # Se verifica si se debe filtrar por ACTIVO_DESCRIPCION
+  if (!is.null(activos) & "ACTIVO_DESCRIPCION" %in% columnas) {
+    # Se modifica el dataframe datos
+    datos <- datos  %>% filter(ACTIVO_DESCRIPCION %in% activos)
+  }
 
   return(datos)
 }
@@ -179,7 +176,6 @@ dt_abrir_conexion <- function(config){
                          UID=config$username,  PWD=config$password,Port = config$port)
 
 }
-
 
 
 

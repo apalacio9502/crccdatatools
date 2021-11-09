@@ -8,7 +8,7 @@ gt_rss_fgc_diario(datos, colores, fixedrange = FALSE)
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos}
+\code{\link{dt_gen_rss_fgc}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
 #' por la función colores}

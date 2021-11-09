@@ -7,7 +7,8 @@
 dt_rv_conc_repos_por_tercero(
   conexion,
   periodo_analisis = NULL,
-  fecha_analisis = NULL
+  fecha_analisis = NULL,
+  seudonimo = "REAL"
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ dt_rv_conc_repos_por_tercero(
 
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
+
+\item{seudonimo}{clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"}
 }
 \description{
 Esta función descarga los datos de la tabla rv_conc_repos_por_tercero para un periodo de análisis y

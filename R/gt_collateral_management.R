@@ -2,7 +2,7 @@
 #'
 #' Esta función crea la tabla garantía depositada en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -41,9 +41,9 @@ gt_gar_dep_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstr
 #'
 #' Esta función crea la gráfica de la garantía depositada tipo activo en formato de pie
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_fecha}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @export
 
 gt_gar_dep <- function(datos,colores){
@@ -85,9 +85,9 @@ gt_gar_dep <- function(datos,colores){
 #' Esta función crea la gráfica de la garantía depositada por tipo activo y miembro para una
 #' fecha de análisis en formato de barras
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_fecha}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -131,9 +131,9 @@ gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica de la garantía depositada diaria en formato de lineas
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función \code{\link{dt_colores}}
+#' #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -176,9 +176,9 @@ gt_gar_dep_diaria<- function(datos,colores,fixedrange=FALSE){
 #'
 #' Esta función crea la gráfica de la garantía depositada promedio diario en formato de barras.
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función \code{\link{dt_colores}}
+#' #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @export
@@ -234,7 +234,7 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_cm_promedio_diario}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función \code{\link{dt_colores}}
+#' #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Nominal", "Efectivo Cover 2", "Nominal Cover 2"). Por defecto NULL
@@ -408,7 +408,7 @@ gt_gar_dep_promedio_diario_por_miembro_titulo_tipocuenta<- function(datos){
 #'
 #' Esta función crea la gráfica del ratio periodo de liquidación por título en formato heatmap
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_cm_titulos_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_cm_titulos}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("General", "MEC+SEN", "Simultaneas", "General Cover 2",
@@ -494,7 +494,7 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_cm_promedio_diario}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' #' por la función \code{\link{dt_colores}}
+#' #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Acciones", "Efectivo Cover 2", "Acciones Cover 2"). Por defecto NULL
@@ -670,7 +670,7 @@ gt_gar_dep_promedio_diario_por_miembro_accion_tipocuenta<- function(datos){
 #'
 #' Esta función crea la gráfica del ratio periodo de liquidación por título en formato heatmap
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_cm_acciones_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("General", "Contado", "ADR", "General Cover 2", "Contado Cover 2", "ADR Cover 2").

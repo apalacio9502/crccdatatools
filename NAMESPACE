@@ -2,6 +2,10 @@
 
 export(dt_abrir_conexion)
 export(dt_adm_gen_colores)
+export(dt_adm_gen_cuentas)
+export(dt_adm_gen_fechas)
+export(dt_adm_gen_miembros)
+export(dt_adm_gen_segmentos)
 export(dt_dv_curva_fwd)
 export(dt_dv_indicador_liquidez)
 export(dt_dv_liq_resumen)

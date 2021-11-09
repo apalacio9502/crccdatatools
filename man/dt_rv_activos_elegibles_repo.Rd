@@ -17,8 +17,6 @@ dt_rv_activos_elegibles_repo(
 
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
-
-\item{proveedor}{clase character. Proveedor de la base de datos ("Oracle", "MySQL"). Por defecto "MySQL"}
 }
 \description{
 Esta función descarga los datos de la tabla rv_activos_elegibles_repo para un periodo de análisis y

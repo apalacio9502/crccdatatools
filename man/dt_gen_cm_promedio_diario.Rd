@@ -8,7 +8,7 @@ dt_gen_cm_promedio_diario(datos)
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_cm_titulos_periodo}} / \code{\link{dt_gen_cm_acciones_periodo}} o tener una estructura igual a dichos datos}
+\code{\link{dt_gen_cm_titulos}} / \code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos}
 }
 \description{
 Esta función calcula el promedio diario de los datos gen_cm_titulos o gen_cm_acciones.

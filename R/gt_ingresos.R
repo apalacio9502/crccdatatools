@@ -50,7 +50,7 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
@@ -124,7 +124,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
@@ -212,7 +212,7 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
@@ -302,7 +302,7 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
@@ -387,7 +387,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -483,7 +483,7 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -590,12 +590,19 @@ gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLeng
               CUMPLIMENTO_MENSUAL=sum(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")])-sum(PROYECCION[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
               CUMPLIMENTO_PERIODO=sum(TARIFA)-sum(PROYECCION),
               .groups = "drop") %>%
-    arrange(desc(CUMPLIMENTO_PERIODO)) %>%
     transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
               "Producto"=PRODUCTO_NOMBRE,
               "Cumplimiento Último Día"=CUMPLIMENTO_DIARIO,
               "Cumplimiento Último Mes"=CUMPLIMENTO_MENSUAL,
               "Cumplimiento Periodo"=CUMPLIMENTO_PERIODO)
+
+  if (nrow(datos)>0) {
+    datos <- datos %>%
+      mutate(Segmento=relevel(factor(Segmento),"Consolidado"),
+             Producto=relevel(factor(Producto),"Consolidado"),
+             `Tipo Producto`=relevel(factor(`Tipo Producto`),"Consolidado")) %>%
+      arrange(Segmento)
+  }
 
   # Se crea la tabla cumplimento del presupuesto
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
@@ -638,9 +645,9 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
     tipos <- tipos %>% mutate(POSICION=row_number(),VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>%
-      bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="General",PRODUCTO_TIPO="General",
-                                 PRODUCTO_NOMBRE="General",PRODUCTO_ORIGEN="General")) %>%
+    datos_completos <- datos %>% filter(SEGMENTO_NOMBRE!="General") %>%
+      bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado",
+                                 PRODUCTO_NOMBRE="Consolidado",PRODUCTO_ORIGEN="Consolidado")) %>%
       select(c("FECHA","FECHA_ANO_MES",tipos$TIPO,"TARIFA","PROYECCION_DIARIA")) %>%
       pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>%
       group_by(FECHA,FECHA_ANO_MES,TIPO,ID) %>%
@@ -659,7 +666,7 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
              TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
              TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=paste0(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"General")),sep="-")) %>%
+      mutate(ORDENADOR=paste0(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="-")) %>%
       arrange(ORDENADOR) %>%
       replace_na(list(VALOR_1=0,VALOR_2=0,VALOR_3=0))
 

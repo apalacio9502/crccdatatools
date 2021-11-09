@@ -12,34 +12,66 @@
 
 gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALSE,style="bootstrap4"){
 
-  # Manipulación de datos
-  datos <- datos  %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
-    group_by(FECHA,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
-    summarise(EFECTIVO_COMPRA=sum(EFECTIVO_COMPRA,na.rm=TRUE),.groups="drop") %>%
-    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
-    group_by(SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
-    summarise(VOLUMEN_DIARIO=sum(EFECTIVO_COMPRA[FECHA==fecha_analisis]),
-              VOLUMEN_DIARIO_PROMEDIO_MENSUAL=mean(EFECTIVO_COMPRA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-              VOLUMEN_ACUMULADO_MENSUAL=sum(EFECTIVO_COMPRA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-              VOLUMEN_DIARIO_PROMEDIO_PERIODO=mean(EFECTIVO_COMPRA),
-              VOLUMEN_ACUMULADO_PERIODO=sum(EFECTIVO_COMPRA),.groups = "drop")  %>%
-    arrange(desc(VOLUMEN_DIARIO)) %>%
-    transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
-              "Producto"=PRODUCTO_NOMBRE,
-              "%"=if_else(SEGMENTO_NOMBRE=="Consolidado",1,VOLUMEN_DIARIO/sum(VOLUMEN_DIARIO[SEGMENTO_NOMBRE!="Consolidado"])),
-              "Volumen Último Día M-COP"=VOLUMEN_DIARIO/1e+6,
-              "Volumen Promedio Diario Último Mes M-COP"=VOLUMEN_DIARIO_PROMEDIO_MENSUAL/1e+6,
-              "Volumen Acumulado Último Mes M-COP"=VOLUMEN_ACUMULADO_MENSUAL/1e+6,
-              "Volumen Promedio Diario Periodo M-COP"=VOLUMEN_DIARIO_PROMEDIO_PERIODO/1e+6,
-              "Volumen Acumulado Periodo M-COP"=VOLUMEN_ACUMULADO_PERIODO/1e+6)
 
-  # Se crea la tabla
-  table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
-                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
-                                    columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-    formatPercentage(4,digits = 2) %>% formatCurrency(c(5,6,7,8,9), '$',digits = 0)
+  if (sum(datos$EFECTIVO_COMPRA)==sum(datos$EFECTIVO_VENTA)) {
+    # Manipulación de datos
+    datos <- datos  %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
+      group_by(FECHA,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
+      summarise(EFECTIVO_COMPRA=sum(EFECTIVO_COMPRA,na.rm=TRUE),.groups="drop") %>%
+      mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
+      group_by(SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
+      summarise(VOLUMEN_DIARIO=sum(EFECTIVO_COMPRA[FECHA==fecha_analisis]),
+                VOLUMEN_DIARIO_PROMEDIO_MENSUAL=mean(EFECTIVO_COMPRA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                VOLUMEN_ACUMULADO_MENSUAL=sum(EFECTIVO_COMPRA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                VOLUMEN_DIARIO_PROMEDIO_PERIODO=mean(EFECTIVO_COMPRA),
+                VOLUMEN_ACUMULADO_PERIODO=sum(EFECTIVO_COMPRA),.groups = "drop")  %>%
+      arrange(desc(VOLUMEN_DIARIO)) %>%
+      transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
+                "Producto"=PRODUCTO_NOMBRE,
+                "%"=if_else(SEGMENTO_NOMBRE=="Consolidado",1,VOLUMEN_DIARIO/sum(VOLUMEN_DIARIO[SEGMENTO_NOMBRE!="Consolidado"])),
+                "Volumen Último Día M-COP"=VOLUMEN_DIARIO/1e+6,
+                "Volumen Promedio Diario Último Mes M-COP"=VOLUMEN_DIARIO_PROMEDIO_MENSUAL/1e+6,
+                "Volumen Acumulado Último Mes M-COP"=VOLUMEN_ACUMULADO_MENSUAL/1e+6,
+                "Volumen Promedio Diario Periodo M-COP"=VOLUMEN_DIARIO_PROMEDIO_PERIODO/1e+6,
+                "Volumen Acumulado Periodo M-COP"=VOLUMEN_ACUMULADO_PERIODO/1e+6)
 
+    # Se crea la tabla
+    table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                       options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                                      columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+      formatPercentage(4,digits = 2) %>% formatCurrency(c(5,6,7,8,9), '$',digits = 0)
 
+  }else{
+    # Manipulación de datos
+    datos <- datos  %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",PRODUCTO_NOMBRE="Consolidado",PRODUCTO_TIPO="Consolidado")) %>%
+      group_by(FECHA,SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
+      summarise(EFECTIVO_COMPRA=sum(EFECTIVO_COMPRA,na.rm=TRUE),
+                EFECTIVO_VENTA=sum(EFECTIVO_VENTA,na.rm=TRUE),.groups="drop") %>%
+      mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
+      group_by(SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
+      summarise(VOLUMEN_COMPRA_DIARIO=sum(EFECTIVO_COMPRA[FECHA==fecha_analisis]),
+                VOLUMEN_VENTA_DIARIO=sum(EFECTIVO_VENTA[FECHA==fecha_analisis]),
+                VOLUMEN_COMPRA_DIARIO_PROMEDIO_MENSUAL=mean(EFECTIVO_COMPRA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                VOLUMEN_VENTA_DIARIO_PROMEDIO_MENSUAL=mean(EFECTIVO_VENTA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                VOLUMEN_COMPRA_DIARIO_PROMEDIO_PERIODO=mean(EFECTIVO_COMPRA),
+                VOLUMEN_VENTA_DIARIO_PROMEDIO_PERIODO=mean(EFECTIVO_VENTA),.groups = "drop")  %>%
+      arrange(desc(VOLUMEN_COMPRA_DIARIO)) %>%
+      transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
+                "Producto"=PRODUCTO_NOMBRE,
+                "Volumen Compra Último Día M-COP"=VOLUMEN_COMPRA_DIARIO/1e+6,
+                "Volumen Venta Último Día M-COP"=VOLUMEN_VENTA_DIARIO/1e+6,
+                "Volumen Compra Promedio Diario Último Mes M-COP"=VOLUMEN_COMPRA_DIARIO_PROMEDIO_MENSUAL/1e+6,
+                "Volumen Venta Promedio Diario Último Mes M-COP"=VOLUMEN_VENTA_DIARIO_PROMEDIO_MENSUAL/1e+6,
+                "Volumen Compra Promedio Diario Periodo M-COP"=VOLUMEN_COMPRA_DIARIO_PROMEDIO_PERIODO/1e+6,
+                "Volumen Venta Promedio Diario Periodo M-COP"=VOLUMEN_VENTA_DIARIO_PROMEDIO_PERIODO/1e+6)
+
+    # Se crea la tabla
+    table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                       options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                                      columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+      formatCurrency(c(4,5,6,7,8,9), '$',digits = 0)
+
+  }
 
   return(table)
 }
@@ -52,7 +84,7 @@ gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALS
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
@@ -140,7 +172,7 @@ gt_vol<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inact
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
@@ -236,7 +268,7 @@ gt_vol_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dash_board clase boolean. TRUE si se desea monstrar en la agrupaciones simetricas unicamente el eje positivo. Por defecto TRUE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -326,7 +358,7 @@ gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_ac
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dash_board clase boolean. TRUE si se desea monstrar en la agrupaciones simetricas unicamente el eje positivo. Por defecto TRUE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
@@ -429,7 +461,7 @@ gt_vol_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -522,7 +554,7 @@ gt_vol_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("General", "Derivados OTC", "Divisas",
@@ -603,7 +635,7 @@ gt_vol_ranking_miembros <- function(datos,colores,fixedrange=FALSE,boton_activo=
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_vol_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 

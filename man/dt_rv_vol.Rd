@@ -4,7 +4,12 @@
 \alias{dt_rv_vol}
 \title{Descarga los datos rv_vol}
 \usage{
-dt_rv_vol(conexion, periodo_analisis = NULL, fecha_analisis = NULL)
+dt_rv_vol(
+  conexion,
+  periodo_analisis = NULL,
+  fecha_analisis = NULL,
+  origen_emision_analisis = "COLOMBIA"
+)
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
@@ -13,6 +18,9 @@ dt_rv_vol(conexion, periodo_analisis = NULL, fecha_analisis = NULL)
 
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
+
+\item{origen_emision_analisis}{clase array character. Lista de origen emisión ("CHILE","COLOMBIA","ESTADOS UNIDOS","IRLANDA-REINO UNIDO")
+de los cuales se desea descargar la información. Por defecto descarga la información de Colombia.}
 }
 \description{
 Esta función descarga los datos de la tabla rv_vol para un periodo de análisis y

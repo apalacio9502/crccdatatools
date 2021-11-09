@@ -6,11 +6,10 @@
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_dv_reverse_gap <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_dv_reverse_gap <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -19,7 +18,7 @@ dt_dv_reverse_gap <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
-  datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+  datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                        CUENTA_GARANTIA_ID, CUENTA_GARANTIA_TIPO,  FLUCTUACION, DELTA_GARANTIA,
                                        REVERSE_GAP_GARANTIA_T1, RIESGO_T1, REVERSE_GAP_GARANTIA_T2, RIESGO_T2
                                        FROM DV_REVERSE_GAP WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
@@ -40,11 +39,10 @@ dt_dv_reverse_gap <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_dv_pa_por_rango <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_dv_pa_por_rango <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -53,7 +51,7 @@ dt_dv_pa_por_rango <- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
-  datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+  datos <-   dbGetQuery(conexion, glue("SELECT FECHA, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                             CUENTA_GARANTIA_TIPO, PRODUCTO_TIPO, RANGO, POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,
                                             POSICION_NETA_VALORADA FROM DV_PA_POR_RANGO
                                             WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
@@ -104,11 +102,10 @@ dt_dv_curva_fwd <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_dv_liq_resumen <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_dv_liq_resumen <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -118,7 +115,7 @@ dt_dv_liq_resumen <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA,
-                                        MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
+                                        MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_LIQ_ID_SEUDONIMO,
                                         MIEMBRO_LIQ_TIPO, CUENTA_GARANTIA_TIPO, PRODUCTO_NOMBRE,
                                         PRODUCTO_TIPO, PRODUCTO_SUBTIPO, PRODUCTO_ORIGEN, LIQUIDACION
                                         FROM DV_LIQ_RESUMEN
@@ -143,11 +140,10 @@ dt_dv_liq_resumen <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_dv_indicador_liquidez <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_dv_indicador_liquidez <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -157,8 +153,8 @@ dt_dv_indicador_liquidez <- function(conexion,periodo_analisis=NULL,fecha_analis
 
   # Descarga datos
   datos <-  dbGetQuery(conexion, glue("SELECT FECHA,
-                                      MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)}_1 AS MIEMBRO_LIQ_ID_SEUDONIMO_1,
-                                      MIEMBRO_LIQ_{dt_ficticio_sql(ficticio)}_2 AS MIEMBRO_LIQ_ID_SEUDONIMO_2,
+                                      MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)}_1 AS MIEMBRO_LIQ_ID_SEUDONIMO_1,
+                                      MIEMBRO_LIQ_{dt_id_seudonimo(seudonimo)}_2 AS MIEMBRO_LIQ_ID_SEUDONIMO_2,
                                       LIQUIDACION_1, LIQUIDACION_2, LIQUIDACION_ESTRESADA_1, LIQUIDACION_ESTRESADA_2,
                                       GARANTIAS_CASH_1, GARANTIAS_CASH_2, GARANTIAS_TES_1, GARANTIAS_TES_2,
                                       GARANTIAS_CASH_DISPONIBLES, TITULOS_APT, LNC_BCO_BOGOTA, LNC_BANCOLOMBIA, LNC_DAVIVIENDA, CTA_APT

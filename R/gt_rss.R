@@ -84,9 +84,9 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
 
 #' Tabla fgc resumen
 #'
-#' Esta función crea la tabla ingresos en formato html
+#' Esta función crea la tabla fgc en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_rss_fgc}} o tener una estructura igual a dichos datos
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
 #' @param style clase character. Estilo boostrap que se debe utilizar
@@ -125,7 +125,7 @@ gt_rss_fgc_resumen<- function(datos,pageLength=100,style="bootstrap4"){
 #'
 #' Esta función crea la gráfica del fgc diario en formato de lineas
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_resumen_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_rss_fgc}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' #' por la función colores
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE

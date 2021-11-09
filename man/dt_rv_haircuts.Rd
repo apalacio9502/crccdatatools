@@ -4,12 +4,7 @@
 \alias{dt_rv_haircuts}
 \title{Descarga los datos rv_haircuts}
 \usage{
-dt_rv_haircuts(
-  conexion,
-  periodo_analisis = NULL,
-  fecha_analisis = NULL,
-  ficticio = FALSE
-)
+dt_rv_haircuts(conexion, periodo_analisis = NULL, fecha_analisis = NULL)
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}

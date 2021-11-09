@@ -4,9 +4,9 @@
 #' en formato de barras horizantales.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_exi}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
@@ -87,9 +87,9 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
 #' en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_exi}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dos_ejes clase boolean. TRUE si se desea que la garantia depositada y exigida se muestren en ejes distintos. Por defecto TRUE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -245,9 +245,9 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
 #' Esta función crea la gráfica de la garantía depositada (eje y1) vs. exigida (eje y2) diaria  en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_exi}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param dos_ejes clase boolean. TRUE si se desea que la garantia depositada y exigida se muestren en ejes distintos. Por defecto TRUE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -393,9 +393,9 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
 #' Esta función crea la gráfica de la garantía depositada (eje y1) vs. exigida (eje y2) promedio diario en formato de barras
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_gar_dep_exi_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_gar_dep_exi}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -492,7 +492,7 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_gar_ggl_ind_fgc_liq}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 

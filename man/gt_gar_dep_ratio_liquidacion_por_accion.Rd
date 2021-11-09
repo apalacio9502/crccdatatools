@@ -12,7 +12,7 @@ gt_gar_dep_ratio_liquidacion_por_accion(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_cm_acciones_periodo}} o tener una estructura igual a dichos datos}
+\code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos}
 
 \item{fixedrange}{clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE}
 

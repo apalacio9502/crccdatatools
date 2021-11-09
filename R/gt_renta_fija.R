@@ -112,7 +112,7 @@ gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=N
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("General", "Tramo"). Por defecto NULL
@@ -204,7 +204,7 @@ gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("General", "Tramo"). Por defecto NULL
@@ -461,7 +461,7 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -520,7 +520,7 @@ gt_rf_pa_neta_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -580,7 +580,7 @@ gt_rf_pv01_diario_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 
@@ -635,7 +635,7 @@ gt_rf_gar_exi_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_rf_pa_por_tramo}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
-#' por la función \code{\link{dt_colores}}
+#' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @export
 

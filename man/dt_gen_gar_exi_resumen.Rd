@@ -9,7 +9,7 @@ dt_gen_gar_exi_resumen(
   periodo_analisis = NULL,
   fecha_analisis = NULL,
   segmentos_analisis = NULL,
-  ficticio = FALSE
+  seudonimo = "REAL"
 )
 }
 \arguments{
@@ -23,8 +23,7 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 \item{segmentos_analisis}{clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.}
 
-\item{ficticio}{clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-caso contrario sera igual al "ID". Por defecto FALSE}
+\item{seudonimo}{clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"}
 }
 \description{
 Esta función descarga los datos de la tabla gen_gar_exi_resumen para un periodo de análisis y

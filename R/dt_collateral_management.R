@@ -8,11 +8,10 @@
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,ficticio=FALSE){
+dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -25,7 +24,7 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 
   # Descarga datos
   datos <- dbGetQuery(conexion , glue("SELECT FECHA, SEGMENTO_ID,
-                                           SEGMENTO_NOMBRE, MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
+                                           SEGMENTO_NOMBRE, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                            MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,ACTIVO_TIPO,
                                            VOLUMEN, IMPORTE_ANTES_HAIRCUT, IMPORTE
                                            FROM GEN_GAR_DEP_RESUMEN
@@ -35,7 +34,7 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
   # Se verifica si segmentos_analisis es diferente de nulo
   if (!is.null(segmentos_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
-    datos <- dt_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
@@ -54,11 +53,10 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -68,8 +66,8 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID, SEGMENTO_NOMBRE,
-                                     MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
-                                     CUENTA_GARANTIA_{dt_ficticio_sql(ficticio)} AS CUENTA_GARANTIA_ID_SEUDONIMO,
+                                     MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
+                                     REPLACE(CUENTA_GARANTIA_ID,MIEMBRO_ID,MIEMBRO_{dt_id_seudonimo(seudonimo)}) AS CUENTA_GARANTIA_ID_SEUDONIMO,
                                      CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION,
                                      VOLUMEN_GARANTIA, VOLUMEN_MEC_SEN, VOLUMEN_SIMULTANEAS,
                                      IMPORTE_GARANTIA_DESPUES_HAIRCUT,
@@ -113,11 +111,10 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
-#' @param ficticio clase boolean. TRUE si se desea que el "ID_SEUDONIMO" de los miembros se igua al "ID_FICTICIO"  en
-#' caso contrario sera igual al "ID". Por defecto FALSE
+#' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,ficticio=FALSE){
+dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
@@ -127,8 +124,8 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
-                                    MIEMBRO_{dt_ficticio_sql(ficticio)} AS MIEMBRO_ID_SEUDONIMO,
-                                    CUENTA_GARANTIA_{dt_ficticio_sql(ficticio)} AS CUENTA_GARANTIA_ID_SEUDONIMO,
+                                    MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
+                                    REPLACE(CUENTA_GARANTIA_ID,MIEMBRO_ID,MIEMBRO_{dt_id_seudonimo(seudonimo)}) AS CUENTA_GARANTIA_ID_SEUDONIMO,
                                     CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION,
                                     VOLUMEN_GARANTIA, VOLUMEN_CONTADO, VOLUMEN_ADR,
                                     IMPORTE_GARANTIA_DESPUES_HAIRCUT,
@@ -169,7 +166,7 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 #'
 #' Esta función calcula el promedio diario de los datos gen_cm_titulos o gen_cm_acciones.
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_cm_titulos_periodo}} / \code{\link{dt_gen_cm_acciones_periodo}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_cm_titulos}} / \code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos
 #' @export
 
 dt_gen_cm_promedio_diario<- function(datos){
@@ -179,8 +176,6 @@ dt_gen_cm_promedio_diario<- function(datos){
     group_by(MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,
              CUENTA_GARANTIA_TIPO,ACTIVO_DESCRIPCION,UNIDAD,VARIABLE) %>%
     summarise(VALOR=mean(VALOR),.groups="drop")
-
-  return(datos)
 
   return(datos)
 }
