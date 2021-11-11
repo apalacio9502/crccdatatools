@@ -24,9 +24,6 @@ dt_dv_reverse_gap <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                        FROM DV_REVERSE_GAP WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                        {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   return(datos)
 }
 
@@ -57,9 +54,6 @@ dt_dv_pa_por_rango <- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
                                             WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                             {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
-
   return(datos)
 }
 
@@ -87,9 +81,6 @@ dt_dv_curva_fwd <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
                                            FROM DV_CURVA_FWD
                                            WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                            {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }
@@ -123,7 +114,7 @@ dt_dv_liq_resumen <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                         AND {periodo_analisis_sql[2]}"))
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
-  datos <- datos %>% mutate(FECHA=ymd(FECHA)) %>%
+  datos <- datos %>%
     complete(FECHA,nesting(MIEMBRO_LIQ_ID_SEUDONIMO,MIEMBRO_LIQ_TIPO, CUENTA_GARANTIA_TIPO,
                            PRODUCTO_NOMBRE, PRODUCTO_TIPO,PRODUCTO_SUBTIPO,PRODUCTO_ORIGEN),
              fill = list(LIQUIDACION=0)) %>%
@@ -161,9 +152,6 @@ dt_dv_indicador_liquidez <- function(conexion,periodo_analisis=NULL,fecha_analis
                                       FROM DV_INDICADOR_LIQUIDEZ
                                       WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                       AND {periodo_analisis_sql[2]}"))
-
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }

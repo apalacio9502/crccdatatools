@@ -53,12 +53,12 @@ gt_pa_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4")
       arrange(desc(POSICION_ABIERTA_COMPRADORA_DIARIA)) %>%
       transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
                 "Producto"=PRODUCTO_NOMBRE,
-                "Posición Compradora Abierta Último Día M-COP"=POSICION_ABIERTA_COMPRADORA_DIARIA/1e+6,
-                "Posición Vendedora Abierta Último Día M-COP"=POSICION_ABIERTA_VENDEDORA_DIARIA/1e+6,
-                "Posición Compradora Abierta Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_MENSUAL/1e+6,
-                "Posición Vendedora Abierta Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_MENSUAL/1e+6,
-                "Posición Compradora Abierta Promedio Diario Periodo M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_PERIODO/1e+6,
-                "Posición Vendedora Abierta Promedio Diario Periodo M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_PERIODO/1e+6)
+                "Posición Abierta Compradora Último Día M-COP"=POSICION_ABIERTA_COMPRADORA_DIARIA/1e+6,
+                "Posición Abierta Vendedora Último Día M-COP"=POSICION_ABIERTA_VENDEDORA_DIARIA/1e+6,
+                "Posición Abierta Compradora Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_MENSUAL/1e+6,
+                "Posición Abierta Vendedora Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_MENSUAL/1e+6,
+                "Posición Abierta Compradora Promedio Diario Periodo M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_PERIODO/1e+6,
+                "Posición Abierta Vendedora Promedio Diario Periodo M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_PERIODO/1e+6)
 
     # Se crea la tabla
     table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',

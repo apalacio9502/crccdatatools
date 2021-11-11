@@ -262,7 +262,7 @@ gt_sw_curva<- function(datos,fecha_analisis,fixedrange=FALSE){
   if (nrow(datos %>% filter(FECHA==fecha_analisis))>0) {
 
     # Se modifica el data.frame datos
-    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(fecha_analisis,FECHA,units="days")),
+    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(ymd(fecha_analisis,tz="America/Bogota"),FECHA,units="days")),
                               NODO=fct_reorder(factor(NODO),.fun = min,NODO_DIAS))
 
     # Se crea el data.frame datos_base
@@ -334,8 +334,6 @@ gt_sw_curva<- function(datos,fecha_analisis,fixedrange=FALSE){
 
     }
 
-
-    saveWidget(plot,"curva_swap_3.html")
     return(plot)
 
   }else{

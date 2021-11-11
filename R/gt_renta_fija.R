@@ -372,7 +372,7 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
   if (nrow(datos %>% filter(FECHA==fecha_analisis))>0) {
 
     # Se modifica el data.frame datos
-    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(fecha_analisis,FECHA,units="days")),.after="DURACION_ANOS")
+    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(ymd(fecha_analisis,tz="America/Bogota"),FECHA,units="days")),.after="DURACION_ANOS")
 
     # Se crea el data.frame datos_base
     datos_base <-datos  %>% filter(DISTANCIA_HOY_DIAS==0) %>%

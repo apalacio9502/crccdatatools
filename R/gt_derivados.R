@@ -82,29 +82,65 @@ gt_dv_reverse_gap_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=NUL
 
 gt_dv_pa_por_rango_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
-  # Manipulación de datos
-  datos <- datos %>%
-    mutate(RANGO=factor(RANGO,c("0S-1S","1S-2S","2S-1M","1M-2M","2M-3M","3M-6M","6M-9M","9M-12M","12M-18M"))) %>%
-    group_by(FECHA,PRODUCTO_TIPO,RANGO) %>%
-    summarise(POSICION_COMPRADORA_VALORADA=sum(POSICION_COMPRADORA_VALORADA),.groups="drop") %>%
-    complete(FECHA,nesting(PRODUCTO_TIPO,RANGO),fill = list(POSICION_COMPRADORA_VALORADA=0)) %>%
-    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
-    group_by(PRODUCTO_TIPO,RANGO) %>%
-    summarise(POSICION_ABIERTA_ULTIMO_DIA=sum(POSICION_COMPRADORA_VALORADA[FECHA==fecha_analisis]),
-              POSICION_ABIERTA_PROMEDIO_DIARIO_ULTIMO_MES=mean(POSICION_COMPRADORA_VALORADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-              POSICION_ABIERTA_PROMEDIO_DIARIO_PERIODO=mean(POSICION_COMPRADORA_VALORADA),.groups="drop") %>%
-    arrange(PRODUCTO_TIPO,RANGO) %>%
-    transmute("Producto"=PRODUCTO_TIPO,
-              "Rango Meses"=RANGO,
-              "Posición Abierta Último Día M-COP"=POSICION_ABIERTA_ULTIMO_DIA/1e+6,
-              "Posición Abierta Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_PROMEDIO_DIARIO_ULTIMO_MES/1e+6,
-              "Posición Abierta Promedio Diario Periodo M-COP"=POSICION_ABIERTA_PROMEDIO_DIARIO_PERIODO/1e+6)
+  if (sum(datos$POSICION_COMPRADORA_VALORADA)==sum(datos$POSICION_VENDEDORA_VALORADA)) {
 
-  # Se crea la tabla volumen operado
-  table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
-                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
-                                    columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-    formatCurrency(c(3,4,5), '$',digits = 0)
+    # Manipulación de datos
+    datos <- datos %>%
+      mutate(RANGO=factor(RANGO,c("0S-1S","1S-2S","2S-1M","1M-2M","2M-3M","3M-6M","6M-9M","9M-12M","12M-18M"))) %>%
+      group_by(FECHA,PRODUCTO_TIPO,RANGO) %>%
+      summarise(POSICION_COMPRADORA_VALORADA=sum(POSICION_COMPRADORA_VALORADA),.groups="drop") %>%
+      complete(FECHA,nesting(PRODUCTO_TIPO,RANGO),fill = list(POSICION_COMPRADORA_VALORADA=0)) %>%
+      mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
+      group_by(PRODUCTO_TIPO,RANGO) %>%
+      summarise(POSICION_ABIERTA_ULTIMO_DIA=sum(POSICION_COMPRADORA_VALORADA[FECHA==fecha_analisis]),
+                POSICION_ABIERTA_PROMEDIO_DIARIO_ULTIMO_MES=mean(POSICION_COMPRADORA_VALORADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                POSICION_ABIERTA_PROMEDIO_DIARIO_PERIODO=mean(POSICION_COMPRADORA_VALORADA),.groups="drop") %>%
+      arrange(PRODUCTO_TIPO,RANGO) %>%
+      transmute("Producto"=PRODUCTO_TIPO,
+                "Rango Meses"=RANGO,
+                "Posición Abierta Último Día M-COP"=POSICION_ABIERTA_ULTIMO_DIA/1e+6,
+                "Posición Abierta Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_PROMEDIO_DIARIO_ULTIMO_MES/1e+6,
+                "Posición Abierta Promedio Diario Periodo M-COP"=POSICION_ABIERTA_PROMEDIO_DIARIO_PERIODO/1e+6)
+
+    # Se crea la tabla volumen operado
+    table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                       options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                                      columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+      formatCurrency(c(3,4,5), '$',digits = 0)
+
+  }else{
+
+    # Manipulación de datos
+    datos <- datos %>%
+      mutate(RANGO=factor(RANGO,c("0S-1S","1S-2S","2S-1M","1M-2M","2M-3M","3M-6M","6M-9M","9M-12M","12M-18M"))) %>%
+      group_by(FECHA,PRODUCTO_TIPO,RANGO) %>%
+      summarise(POSICION_COMPRADORA_VALORADA=sum(POSICION_COMPRADORA_VALORADA),
+                POSICION_VENDEDORA_VALORADA=sum(POSICION_VENDEDORA_VALORADA),.groups="drop") %>%
+      complete(FECHA,nesting(PRODUCTO_TIPO,RANGO),fill = list(POSICION_COMPRADORA_VALORADA=0,POSICION_VENDEDORA_VALORADA=0)) %>%
+      mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
+      group_by(PRODUCTO_TIPO,RANGO) %>%
+      summarise(POSICION_ABIERTA_COMPRADORA_ULTIMO_DIA=sum(POSICION_COMPRADORA_VALORADA[FECHA==fecha_analisis]),
+                POSICION_ABIERTA_VENDEDORA_ULTIMO_DIA=sum(POSICION_VENDEDORA_VALORADA[FECHA==fecha_analisis]),
+                POSICION_ABIERTA_COMPRADORA_PROMEDIO_DIARIO_ULTIMO_MES=mean(POSICION_COMPRADORA_VALORADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                POSICION_ABIERTA_VENDEDORA_PROMEDIO_DIARIO_ULTIMO_MES=mean(POSICION_VENDEDORA_VALORADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                POSICION_ABIERTA_COMPRADORA_PROMEDIO_DIARIO_PERIODO=mean(POSICION_COMPRADORA_VALORADA),
+                POSICION_ABIERTA_VENDEDORA_PROMEDIO_DIARIO_PERIODO=mean(POSICION_VENDEDORA_VALORADA),.groups="drop") %>%
+      arrange(PRODUCTO_TIPO,RANGO) %>%
+      transmute("Producto"=PRODUCTO_TIPO,
+                "Rango Meses"=RANGO,
+                "Posición Abierta Compradora Último Día M-COP"=POSICION_ABIERTA_COMPRADORA_ULTIMO_DIA/1e+6,
+                "Posición Abierta Vendedora Último Día M-COP"=POSICION_ABIERTA_VENDEDORA_ULTIMO_DIA/1e+6,
+                "Posición Abierta Compradora Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_DIARIO_ULTIMO_MES/1e+6,
+                "Posición Abierta Vendedora Promedio Diario Último Mes M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_DIARIO_ULTIMO_MES/1e+6,
+                "Posición Abierta Compradora Promedio Diario Periodo M-COP"=POSICION_ABIERTA_COMPRADORA_PROMEDIO_DIARIO_PERIODO/1e+6,
+                "Posición Abierta Vendedora Promedio Diario Periodo M-COP"=POSICION_ABIERTA_VENDEDORA_PROMEDIO_DIARIO_PERIODO/1e+6)
+
+    # Se crea la tabla volumen operado
+    table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                       options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
+                                      columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+      formatCurrency(c(3,4,5,6,7,8), '$',digits = 0)
+  }
 
   return(table)
 }
@@ -335,7 +371,7 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
   if (nrow(datos %>% filter(FECHA==fecha_analisis))>0) {
 
     # Se modifica el data.frame datos
-    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(fecha_analisis,FECHA,units="days")),
+    datos <- datos %>% mutate(DISTANCIA_HOY_DIAS=as.numeric(difftime(ymd(fecha_analisis,tz="America/Bogota"),FECHA,units="days")),
                               NODO=fct_reorder(factor(NODO),.fun = min,NODO_DIAS))
 
     # Se crea el data.frame datos_base

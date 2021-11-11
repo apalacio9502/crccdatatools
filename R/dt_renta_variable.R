@@ -205,8 +205,6 @@ dt_rv_haircuts <- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL){
                                        WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND
                                        {periodo_analisis_sql[2]}"))
 
-  # Se convierte la fecha de los datos en un date
-  datos <- datos %>% mutate(FECHA=ymd(FECHA))
 
   return(datos)
 }
