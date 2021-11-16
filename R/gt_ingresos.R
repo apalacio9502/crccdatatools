@@ -108,7 +108,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
              updatemenus=list(
                list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones))) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -197,7 +197,7 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -286,7 +286,7 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -372,7 +372,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -468,7 +468,7 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -557,7 +557,7 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis=list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -695,7 +695,7 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
              xaxis=list(title=NA,fixedrange=fixedrange,tickmode="array",tickvals=datos_completos$ORDENADOR,
                         ticktext =datos_completos$ID),
              yaxis = list(title = "Cumplimiento",tickformat = ".2%",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -786,7 +786,7 @@ gt_ing_promedio_diario_por_mes_producto_miembro<- function(datos){
                     maxdepth=2,domain=list(column=0),
                     marker=list(colors=~COLOR)) %>%
       layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -879,7 +879,7 @@ gt_ing_promedio_diario_por_mes_miembro_producto<- function(datos){
                     maxdepth=2,domain=list(column=0),
                     marker=list(colors=~COLOR)) %>%
       layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 

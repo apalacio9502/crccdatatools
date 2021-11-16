@@ -38,7 +38,7 @@ gt_rv_volumen_diario<- function(datos,fixedrange=FALSE){
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = list(text="Diario \n (Miles de Millones-COP)",font=list(size=12)),fixedrange=fixedrange),
              yaxis2 = list(title =list(text="Promedio Movil \n  (Miles de Millones-COP)",font=list(size=12)),fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -79,7 +79,7 @@ gt_rv_pa_volumen_por_activo_diario<- function(datos,fixedrange=FALSE){
              yaxis = list(title = list(text="Efectivo \n Negociado",font=list(size=12)),fixedrange=fixedrange),
              yaxis2 = list(title =list(text="Dispersión \n VMD",font=list(size=12)) ,tickformat='.0%',fixedrange=fixedrange),
              yaxis3 = list(title=list(text= "Marcación \n Precio",font=list(size=12)),tickformat='.0%',fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -194,7 +194,7 @@ gt_rv_pa_valorada_importe_diario<- function(datos,fixedrange=FALSE,top_terceros=
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange),
              yaxis2 = list(title = "% Haricut",tickformat=".2%",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -236,7 +236,7 @@ gt_rv_pa_repos_por_activo_miembro_titular_garantia<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -285,7 +285,7 @@ gt_rv_pa_repos_por_titular_garantia_activo_miembro<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -325,7 +325,7 @@ gt_rv_vol_haircut_por_activo_diario<- function(datos,fixedrange=FALSE){
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title =list(text="Porcentaje",font=list(size=12)) ,tickformat='.0%',fixedrange=fixedrange) ,
              yaxis2 =list(title = list(text="Millones-COP",font=list(size=12)),fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 

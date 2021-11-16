@@ -155,7 +155,7 @@ gt_vol<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inact
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              yaxis = list(title = "",tickangle = 270,fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE),
              xaxis=list(title="",tickformat = ".2%",fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -252,7 +252,7 @@ gt_vol_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -342,7 +342,7 @@ gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_ac
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -444,7 +444,7 @@ gt_vol_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -538,7 +538,7 @@ gt_vol_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -619,7 +619,7 @@ gt_vol_ranking_miembros <- function(datos,colores,fixedrange=FALSE,boton_activo=
                     yanchor = "top",x=0.5,y=1.1,pad = list('r'= 0, 't'= 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -661,7 +661,7 @@ gt_miembros_operando<- function(datos,colores,fixedrange=FALSE){
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Número Miembros",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
     return(plot)
 
   }else{

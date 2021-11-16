@@ -58,7 +58,7 @@ gt_dv_reverse_gap_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=NUL
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-USD",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -210,7 +210,7 @@ gt_dv_pa_neta_por_rango_miembro<- function(datos,colores,fixedrange=FALSE,boton_
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
 
     return(plot)
@@ -281,7 +281,7 @@ gt_dv_distribucion_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,boton
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
 
     return(plot)
@@ -343,7 +343,7 @@ gt_dv_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,showgrid = F, zeroline = F,fixedrange=fixedrange),
              yaxis = list(title = NA,showgrid = F, zeroline = F,fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
 
     return(plot)
@@ -432,7 +432,7 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
                xaxis = list(title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange),
                yaxis2 = list(title = "PBS",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }else{
 
@@ -441,7 +441,7 @@ gt_dv_curva_forward<- function(datos,fecha_analisis,fixedrange=FALSE){
         layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
                xaxis = list( title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }
 
@@ -538,7 +538,7 @@ gt_dv_liq_por_miembro_liq<- function(datos,colores,fixedrange=FALSE,boton_activo
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -576,7 +576,7 @@ gt_dv_liq_diarias<- function(datos,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -619,7 +619,7 @@ gt_dv_indicador_liquidez<- function(datos,fixedrange=FALSE){
              xaxis = list(title = NA,categoryorder = "array",categoryarray = c("Liquidación","Liquidación Estresada","Recursos Liquidos","Lineas de Credito"),
                           fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 

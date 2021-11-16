@@ -102,7 +102,7 @@ gt_sw_sen_pa_neta_por_nodo_miembro<- function(datos,colores,fixedrange=FALSE,bot
                       yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
                xaxis = list(title = NA,fixedrange=fixedrange),
                yaxis = list(title = ifelse(tipos$VISIBLE[1]==TRUE,tipos$UNIDAD[1],tipos$UNIDAD[2]),fixedrange=fixedrange)) %>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
       return(plot)
 
@@ -175,7 +175,7 @@ gt_sw_distribucion_sen_pa_neta_por_miembro <-  function(datos,fixedrange=FALSE,b
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = "",fixedrange=fixedrange),
              yaxis = list(title =ifelse(tipos$VISIBLE[1]==TRUE,tipos$UNIDAD[1],tipos$UNIDAD[2]),fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -236,7 +236,7 @@ gt_sw_sen_pa_neta_diaria_por_miembro<- function(datos,fixedrange=FALSE,boton_act
              yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
         xaxis = list(type='date',tickformat = "%d-%b",title = "",showgrid = F, zeroline = F,fixedrange=fixedrange),
         yaxis = list(title = "",showgrid = F, zeroline = F,fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -321,7 +321,7 @@ gt_sw_curva<- function(datos,fecha_analisis,fixedrange=FALSE){
                xaxis = list(title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange),
                yaxis2 = list(title = "PBS",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }else{
 
@@ -330,7 +330,7 @@ gt_sw_curva<- function(datos,fecha_analisis,fixedrange=FALSE){
         layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
                xaxis = list( title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }
 

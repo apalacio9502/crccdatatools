@@ -72,7 +72,7 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
              updatemenus=updatemenus,
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -158,7 +158,7 @@ gt_rss_fgc_diario<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles M-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -243,7 +243,7 @@ gt_rss_test_fgc <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
              updatemenus=updatemenus,
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{

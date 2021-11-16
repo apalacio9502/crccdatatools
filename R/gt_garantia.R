@@ -73,7 +73,7 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              yaxis = list(title = "",tickangle = 270,categoryarray = c("Exigidas","Depositadas"),fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE),
              xaxis=list(title="",tickformat = ".2%",fixedrange=fixedrange,showgrid = FALSE,showline = FALSE,zeroline = FALSE)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -170,7 +170,7 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
                xaxis = list(title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Billones-COP \n (Dep.)",fixedrange=fixedrange),
                yaxis2 = list(title =  "Billones-COP \n (Exi.)",fixedrange=fixedrange)) %>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
       return(plot)
     }else{
@@ -228,7 +228,7 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
                updatemenus=updatemenus,
                xaxis = list(title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
       return(plot)
     }
@@ -321,7 +321,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
                xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Billones-COP \n (Dep.)",fixedrange=fixedrange),
                yaxis2 = list(title = "Billones-COP \n (Exi.)",fixedrange=fixedrange)) %>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
       return(plot)
     }else{
@@ -376,7 +376,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
                updatemenus=updatemenus,
                xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
       return(plot)
 
@@ -477,7 +477,7 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
              xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP \n (Dep.)",fixedrange=fixedrange),
              yaxis2 = list(title = "Billones-COP \n (Exi.)",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -531,7 +531,7 @@ gt_gar_ggl_ind_fgc_por_miembro_liq<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2,tracegroupgap=0),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -623,7 +623,7 @@ gt_pa_bruta_gar_exi_por_miembro <- function(datos,fixedrange=FALSE,boton_activo=
              yaxis = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis2 = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis3 = list(title="Porcentaje",tickformat=".2%",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -714,7 +714,7 @@ gt_pa_gar_exi_rss_por_miembro_liq <- function(datos,fixedrange=FALSE,boton_activ
              yaxis = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis2 = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis3 = list(title="Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -803,7 +803,7 @@ gt_pa_bruta_gar_exi_por_producto <- function(datos,fixedrange=FALSE,boton_activo
              yaxis = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis2 = list(title="Billones-COP",fixedrange=fixedrange),
              yaxis3 = list(title="Porcentaje",tickformat=".2%",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -832,7 +832,7 @@ gt_lmc_distribucion_consumo <- function(datos,fixedrange=FALSE){
       add_boxplot(y=~CONSUMO_LIMITE) %>%
       layout(xaxis = list(title = "",fixedrange=fixedrange),
              yaxis = list(title = "Porcentaje",tickformat=".2%",fixedrange=fixedrange))%>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 

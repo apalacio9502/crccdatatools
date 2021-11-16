@@ -72,7 +72,7 @@ gt_gar_dep <- function(datos,colores){
               marker = list(colors =colores),domain = list(x = c(0, 1), y = c(0.1, 0.95))) %>%
       layout(legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              margin=list("l"=50,"r"=50)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -119,7 +119,7 @@ gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2,tracegroupgap=0),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -164,7 +164,7 @@ gt_gar_dep_diaria<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -219,7 +219,7 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Billones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -308,7 +308,7 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -351,7 +351,7 @@ gt_gar_dep_promedio_diario_por_titulo_miembro_tipocuenta<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -395,7 +395,7 @@ gt_gar_dep_promedio_diario_por_miembro_titulo_tipocuenta<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -478,7 +478,7 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = "",type='date',tickformat = "%d-%b",showgrid = F, zeroline = F,fixedrange=fixedrange),
              yaxis = list(title = "",showgrid = F, zeroline = F,fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es") %>% event_register("plotly_restyle")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla)) %>% event_register("plotly_restyle")
 
     return(plot)
 
@@ -567,7 +567,7 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fix
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -612,7 +612,7 @@ gt_gar_dep_promedio_diario_por_accion_miembro_tipocuenta<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -657,7 +657,7 @@ gt_gar_dep_promedio_diario_por_miembro_accion_tipocuenta<- function(datos){
     plot <- plot_ly(data = datos_completos,type="treemap",labels=~LABEL,parents=~PARENT,values=~VALOR,text=~TEXTO,
                     textinfo="text+label+percent parent+name",branchvalues="total",hoverinfo="label+percent parent",
                     maxdepth=2,domain=list(column=0)) %>% layout(margin=list(l=0, r=0, b=0, t=0)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -740,7 +740,7 @@ gt_gar_dep_ratio_liquidacion_por_accion<- function(datos,fixedrange=FALSE,boton_
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = "",type='date',tickformat = "%d-%b",showgrid = F, zeroline = F,fixedrange=fixedrange),
              yaxis = list(title = "",showgrid = F, zeroline = F,fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 

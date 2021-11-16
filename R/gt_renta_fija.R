@@ -96,7 +96,7 @@ gt_rf_resumen_tramo_por_miembro<- function(datos,fixedrange=FALSE,boton_activo=N
              yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
         xaxis = list(title = "",fixedrange=fixedrange),
         yaxis = list(title = "",showgrid = F, zeroline = F,fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -188,7 +188,7 @@ gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Días al Vencimiento",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -282,7 +282,7 @@ gt_rf_dur_mod_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Duaración Modificada",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -346,7 +346,7 @@ gt_rf_dias_al_vecimiento_dur_mod_diaria<- function(datos,fixedrange=FALSE,boton_
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Valor",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
 
@@ -434,7 +434,7 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
                xaxis = list(dtick = 3, tick0 = 1, tickmode = "linear", title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange),
                yaxis2 = list(title = "PBS",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }else{
 
@@ -443,7 +443,7 @@ gt_rf_curva_tes<- function(datos,fecha_analisis,fixedrange=FALSE){
         layout(hovermode="x",legend = list(orientation = 'h',xanchor = "center",x = 0.5),
                xaxis = list(dtick = 3, tick0 = 1, tickmode = "linear", title = NA,fixedrange=fixedrange),
                yaxis = list(title = "Curva",tickformat=".2%",fixedrange=fixedrange))%>%
-        config(displaylogo = F,locale = "es")
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     }
 
@@ -505,7 +505,7 @@ gt_rf_pa_neta_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -565,7 +565,7 @@ gt_rf_pv01_diario_por_tramo<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Millones-COP (PV01)",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -620,7 +620,7 @@ gt_rf_gar_exi_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
@@ -674,7 +674,7 @@ gt_rf_pbs_cubiertos_diarios_por_tramo<- function(datos,colores,fixedrange=FALSE)
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
              yaxis = list(title = "PBS",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es")
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
     return(plot)
   }else{
