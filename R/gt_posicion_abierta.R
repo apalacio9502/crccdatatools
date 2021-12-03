@@ -116,7 +116,7 @@ gt_pa<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inacti
              VALOR_1=VALOR_1/sum(VALOR_1),
              VALOR_2=VALOR_2/sum(VALOR_2)) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -203,7 +203,7 @@ gt_pa_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,bo
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)),"P"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -296,7 +296,7 @@ gt_pa_diaria<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_act
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1,"C"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>% arrange(COLOR_ID)
 
     # Se crea el vector n_dist
     n_dist<- datos_completos %>% group_by(TIPO,POSICION) %>%
@@ -397,7 +397,7 @@ gt_pa_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1,"C"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -496,7 +496,7 @@ gt_pa_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prome
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1,"C"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2),"C") %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1-VALOR_2,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1-VALOR_2,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist

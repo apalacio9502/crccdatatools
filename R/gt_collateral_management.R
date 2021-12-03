@@ -271,7 +271,7 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
       mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
              ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(as.numeric(ID))==1,"0",""),as.numeric(ID))) %>% arrange(COLOR_ID)
+             COLOR_ID=paste(POSICION,if_else(nchar(as.numeric(ID))==1,"0",""),as.numeric(ID)),sep="-") %>% arrange(COLOR_ID)
 
 
     # Se crean los botones

@@ -84,7 +84,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
       summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-"),
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-"),
              TIPO=factor(TIPO,levels = tipos$TIPO)) %>% arrange(COLOR_ID)
 
     # Se crean los botones
@@ -161,7 +161,7 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO,ID) %>% summarise(across(VALOR, ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -250,7 +250,7 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
       mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(MIEMBRO_ID_SEUDONIMO,VALOR,.fun=sum,.desc=T),
              ID=as.character(ID),
-             COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+             COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -298,7 +298,6 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
 #'
 #' Esta función crea la gráfica de los ingresos diarios en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
-#' @param datos clase data.frame. Los datos deben tener las siguientes columnas
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
 #' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
@@ -336,7 +335,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -430,7 +429,7 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR, "C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
 
@@ -523,7 +522,7 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
       mutate(across(VALOR,~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>% group_by(FECHA_FORMATO,TIPO) %>%
       mutate(TEXTO=paste(VALOR,"Millones /",dt_porcentaje_caracter(VALOR/sum(VALOR)), "P /",CAMBIO_VALOR,"C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -666,7 +665,7 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
              TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
              TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=paste0(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="-")) %>%
+      mutate(ORDENADOR=paste(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="-")) %>%
       arrange(ORDENADOR) %>%
       replace_na(list(VALOR_1=0,VALOR_2=0,VALOR_3=0))
 

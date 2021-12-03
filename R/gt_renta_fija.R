@@ -148,7 +148,7 @@ gt_rf_dias_al_vencimiento_por_miembro<- function(datos,colores,fixedrange=FALSE,
       replace_na(list(VALOR_1=0,VALOR_2=0)) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
       mutate(ID=fct_reorder(factor(ID),ID,.fun=max,.desc=F),
-             COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+             COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
 
     # Se el data.frame n_dist
     n_dist<- datos_completos %>% group_by(TIPO) %>% summarise(N=n_distinct(ID),.groups="drop") %>% spread(TIPO,N)
@@ -241,7 +241,7 @@ gt_rf_dur_mod_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo
       replace_na(list(VALOR_1=0,VALOR_2=0,VALOR_5=0)) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
       mutate(ID=fct_reorder(factor(ID),ID,.fun=max,.desc=F),
-             COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+             COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
 
     # Se crea el data.frame n_dist
     n_dist<- datos_completos %>% group_by(TIPO) %>% summarise(N=n_distinct(ID),.groups="drop") %>% spread(TIPO,N)
@@ -480,7 +480,7 @@ gt_rf_pa_neta_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
       group_by(FECHA) %>%
       mutate(TEXTO_1=paste(VALOR_1,"Miles-M","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1))),
              TEXTO_2=paste(VALOR_2,"Miles-M","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)))) %>% ungroup() %>%
-      mutate(COLOR_ID=paste0(dt_num_char(factor(ID)),sep="-")) %>% arrange(COLOR_ID)
+      mutate(COLOR_ID=paste(dt_num_char(factor(ID)),sep="-")) %>% arrange(COLOR_ID)
 
     # Se crea el data.frame datos_complemento
     datos_complemento <- datos_completos %>%
@@ -539,7 +539,7 @@ gt_rf_pv01_diario_por_tramo<- function(datos,colores,fixedrange=FALSE){
       group_by(FECHA) %>%
       mutate(TEXTO_1=paste(VALOR_1,"Millones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1))),
              TEXTO_2=paste(VALOR_2,"Millones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)))) %>% ungroup() %>%
-      mutate(COLOR_ID=paste0(dt_num_char(factor(ID)),sep="-")) %>%
+      mutate(COLOR_ID=dt_num_char(factor(ID))) %>%
       arrange(COLOR_ID)
 
     # Se crea el data.frame datos_complemento
@@ -596,7 +596,7 @@ gt_rf_gar_exi_diaria_por_tramo<- function(datos,colores,fixedrange=FALSE){
       complete(FECHA,nesting(TIPO,ID), fill = list(VALOR=0)) %>%
       group_by(FECHA) %>%
       mutate(TEXTO=paste(VALOR,"Miles-M","/",dt_porcentaje_caracter(VALOR/sum(VALOR)))) %>% ungroup() %>%
-      mutate(COLOR_ID=paste0(dt_num_char(factor(ID)),sep="-")) %>%
+      mutate(COLOR_ID=dt_num_char(factor(ID))) %>%
       arrange(COLOR_ID)
 
     # Se crea el data.frame datos_complemento
@@ -651,7 +651,7 @@ gt_rf_pbs_cubiertos_diarios_por_tramo<- function(datos,colores,fixedrange=FALSE)
       complete(FECHA,nesting(TIPO,ID), fill = list(VALOR=0)) %>%
       group_by(FECHA) %>%
       mutate(TEXTO=paste(VALOR,"PBS","/",dt_porcentaje_caracter(VALOR/sum(VALOR)))) %>% ungroup() %>%
-      mutate(COLOR_ID=paste0(dt_num_char(factor(ID)),sep="-")) %>%
+      mutate(COLOR_ID=dt_num_char(factor(ID))) %>%
       arrange(COLOR_ID)
 
     # Se crea el data.frame datos_complemento

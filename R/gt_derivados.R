@@ -180,8 +180,7 @@ gt_dv_pa_neta_por_rango_miembro<- function(datos,colores,fixedrange=FALSE,boton_
       summarise(VALOR=round(POSICION_NETA_VALORADA/1e+12,6),
                 TEXTO=paste(VALOR,"Billones"),.groups = "drop") %>%
       mutate(ID=fct_drop(factor(ID,c("0S-1S","1S-2S","2S-1M","1M-2M","2M-3M","3M-6M","6M-9M","9M-12M","12M-18M"))),
-             COLOR_ID=paste0(dt_num_char(TIPO),"-",
-                             dt_num_char(ID)),
+             COLOR_ID=paste(dt_num_char(TIPO),dt_num_char(ID),sep="-"),
              VISIBLE=if_else(TIPO==boton_activo,TRUE,FALSE)) %>% arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -497,7 +496,7 @@ gt_dv_liq_por_miembro_liq<- function(datos,colores,fixedrange=FALSE,boton_activo
       mutate(TEXTO_1=paste(VALOR_1,"M Miles","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1))),
              TEXTO_2=paste(VALOR_2,"M Miles","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)))) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea la lista n_dist

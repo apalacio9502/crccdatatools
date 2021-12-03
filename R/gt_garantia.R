@@ -41,7 +41,7 @@ gt_gar_dep_exi<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
              VALOR_1=VALOR_1/sum(VALOR_1),
              VALOR_2=VALOR_2/sum(VALOR_2)) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
     # Se crea el vector n_dist
@@ -129,7 +129,7 @@ gt_gar_dep_exi_por_miembro<- function(datos,colores,fixedrange=FALSE,dos_ejes=TR
         mutate(TEXTO_1=paste(VALOR_1,"Billones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
                TEXTO_2=paste(VALOR_2,"Billones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)), "C")) %>% ungroup() %>%
         left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-        mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+        mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
         arrange(COLOR_ID)
 
       # Se crea el vector n_dist
@@ -284,7 +284,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
         mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1, "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
                TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2, "C")) %>% ungroup() %>%
         left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-        mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+        mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
         arrange(COLOR_ID)
 
       # Se crea el vector n_dist
@@ -388,7 +388,7 @@ gt_gar_dep_exi_diaria<- function(datos,colores,fixedrange=FALSE,dos_ejes=TRUE,bo
   }
 }
 
-#' Gráfica la garantía depositada vs. exigida promedio diario (barras)
+#' Gráfica la garantía depositada vs. exigida promedio diario por (Mes o Año) (barras)
 #'
 #' Esta función crea la gráfica de la garantía depositada (eje y1) vs. exigida (eje y2) promedio diario en formato de barras
 #' La información se muestra acorde a la agrupación relacionada con cada botón
@@ -438,7 +438,7 @@ gt_gar_dep_exi_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedi
       mutate(TEXTO_1=paste(VALOR_1,"Billones /",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)), "P /",CAMBIO_VALOR_1, "C /",dt_porcentaje_caracter(VALOR_3), "RC"),
              TEXTO_2=paste(VALOR_2,"Billones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)), "P /",CAMBIO_VALOR_2, "C")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
-      mutate(COLOR_ID=paste0(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
+      mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
       arrange(COLOR_ID)
 
 
