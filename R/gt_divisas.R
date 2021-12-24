@@ -2,7 +2,7 @@
 #'
 #' Esta función crea la tabla volumen, liquidacion y número operaciones en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_div_vol_liq_op}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -99,7 +99,7 @@ gt_div_vol_liq_op_resumen<- function(datos,fecha_analisis,pageLength=100,style="
 #' en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_div_vol_liq_op}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -141,7 +141,7 @@ gt_div_vol_liq_op_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_ac
              TEXTO_2=paste(VALOR_2,"Millones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P"),
              TEXTO_3=paste(VALOR_3,"Millones/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)), "P"),
              TEXTO_4=paste(VALOR_4,"Millones /",dt_porcentaje_caracter(VALOR_4/sum(VALOR_4)),"P"),
-             TEXTO_5=paste(VALOR_5,"op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
+             TEXTO_5=paste(VALOR_5,"Op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
              TEXTO_6=paste(VALOR_6,"Op. /",dt_porcentaje_caracter(VALOR_6/sum(VALOR_6)),"P /","C /",ifelse(is.nan(VALOR_2/VALOR_6),0,round(VALOR_2/VALOR_6,2)),"M Ticker Prom.")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
       mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
@@ -211,7 +211,7 @@ gt_div_vol_liq_op_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_ac
 #' Esta función crea la gráfica del volumen (eje y1) vs. liquidación (eje y2) vs. número operaciones diarias en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_div_vol_liq_op}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -251,7 +251,7 @@ gt_div_vol_liq_op_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TR
              TEXTO_2=paste(VALOR_2,"Millones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C"),
              TEXTO_3=paste(VALOR_3,"Millones/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)), "P /",CAMBIO_VALOR_3,"C /",dt_porcentaje_caracter(ifelse(is.nan(VALOR_3/VALOR_1),0,1-(VALOR_3/VALOR_1))),"Ahorro Liq."),
              TEXTO_4=paste(VALOR_4,"Millones /",dt_porcentaje_caracter(VALOR_4/sum(VALOR_4)),"P /",CAMBIO_VALOR_4,"C /",dt_porcentaje_caracter(ifelse(is.nan(VALOR_4/VALOR_2),0,1-(VALOR_4/VALOR_2))), "Ahorro Liq."),
-             TEXTO_5=paste(VALOR_5,"op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",CAMBIO_VALOR_5,"C /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
+             TEXTO_5=paste(VALOR_5,"Op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",CAMBIO_VALOR_5,"C /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
              TEXTO_6=paste(VALOR_6,"Op. /",dt_porcentaje_caracter(VALOR_6/sum(VALOR_6)),"P /",CAMBIO_VALOR_6,"C /",ifelse(is.nan(VALOR_2/VALOR_6),0,round(VALOR_2/VALOR_6,2)),"M Ticker Prom.")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
       mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%
@@ -310,8 +310,8 @@ gt_div_vol_liq_op_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TR
                list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
                     yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
              xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
-             yaxis = list(title = "Volumen \n Millones-USD",fixedrange=fixedrange),
-             yaxis2 = list(title = "Liquidación \n Millones-USD",fixedrange=fixedrange),
+             yaxis = list(title = "Volumen \n M-USD",fixedrange=fixedrange),
+             yaxis2 = list(title = "Liquidación \n M-USD",fixedrange=fixedrange),
              yaxis3 = list(title = "Número \n Op.",fixedrange=fixedrange)) %>%
       config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
 
@@ -328,7 +328,7 @@ gt_div_vol_liq_op_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TR
 #' Esta función crea la gráfica del volumen (eje y1) vs. liquidación (eje y2) vs. número operaciones promedio diario en formato de barras
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_div_vol_liq_op}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -378,7 +378,7 @@ gt_div_vol_liq_op_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash
              TEXTO_2=paste(VALOR_2,"Millones /",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C"),
              TEXTO_3=paste(VALOR_3,"Millones/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)), "P /",CAMBIO_VALOR_3,"C /",dt_porcentaje_caracter(ifelse(is.nan(VALOR_3/VALOR_1),0,1-(VALOR_3/VALOR_1))),"Ahorro Liq."),
              TEXTO_4=paste(VALOR_4,"Millones /",dt_porcentaje_caracter(VALOR_4/sum(VALOR_4)),"P /",CAMBIO_VALOR_4,"C /",dt_porcentaje_caracter(ifelse(is.nan(VALOR_4/VALOR_2),0,1-(VALOR_4/VALOR_2))), "Ahorro Liq."),
-             TEXTO_5=paste(VALOR_5,"op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",CAMBIO_VALOR_5,"C /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
+             TEXTO_5=paste(VALOR_5,"Op. /",dt_porcentaje_caracter(VALOR_5/sum(VALOR_5)), "P /",CAMBIO_VALOR_5,"C /",ifelse(is.nan(VALOR_1/VALOR_5),0,round(VALOR_1/VALOR_5,2)),"M Ticker Prom."),
              TEXTO_6=paste(VALOR_6,"Op. /",dt_porcentaje_caracter(VALOR_6/sum(VALOR_6)),"P /",CAMBIO_VALOR_6,"C /",ifelse(is.nan(VALOR_2/VALOR_6),0,round(VALOR_2/VALOR_6,2)),"M Ticker Prom.")) %>% ungroup() %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE_1,VISIBLE_2),by="TIPO") %>%
       mutate(COLOR_ID=paste(dt_num_char(POSICION),dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR_1,.fun=mean,.desc=T)),sep="-")) %>%

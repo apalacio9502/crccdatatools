@@ -42,9 +42,10 @@ dt_adm_gen_miembros<- function(conexion,segmentos_analisis=NULL,seudonimo="REAL"
   }
 
   # Descarga datos
-  datos <- dbGetQuery(conexion,glue("SELECT {dt_id_seudonimo(seudonimo)} AS ID_SEUDONIMO,
+  datos <- dbGetQuery(conexion,glue("SELECT ID, {dt_id_seudonimo(seudonimo)} AS ID_SEUDONIMO,
                                     {dt_nombre_abreviacion_seudonimo(seudonimo)} AS NOMBRE_ABREVIACION_SEUDONIMO
-                                    FROM ADM_GEN_MIEMBROS WHERE ID<>'CRCC' {segmentos_analisis_sql}"))
+                                    FROM ADM_GEN_MIEMBROS WHERE ID<>'CRCC' {segmentos_analisis_sql} ")) %>%
+    arrange(ID_SEUDONIMO)
 
 
   return(datos)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_divisas.R
 \name{gt_div_vol_liq_op_diario}
 \alias{gt_div_vol_liq_op_diario}
-\title{Grafica el volumen vs. liquidación diaria vs. número operaciones diaro (lines)}
+\title{Grafica el volumen vs. liquidación vs. número operaciones diaras (lines)}
 \usage{
 gt_div_vol_liq_op_diario(
   datos,
@@ -15,7 +15,7 @@ gt_div_vol_liq_op_diario(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_pa_resumen}} o tener una estructura igual a dichos datos}
+\code{\link{dt_div_vol_liq_op}} o tener una estructura igual a dichos datos}
 
 \item{colores}{clase data.frame. Debe contener los datos generados
 por la función \code{\link{dt_adm_gen_colores}}}
@@ -31,6 +31,6 @@ con un botón seleccionado en especifico. Por defecto NULL}
 en la gráfica ("Segmento", "Tipo Miembro"). Por defecto c()}
 }
 \description{
-Esta función crea la gráfica del volumen (eje y1) vs. liquidación (eje y2) vs. número operaciones diario en formato de lineas.
+Esta función crea la gráfica del volumen (eje y1) vs. liquidación (eje y2) vs. número operaciones diarias en formato de lineas.
 La información se muestra acorde a la agrupación relacionada con cada botón
 }
