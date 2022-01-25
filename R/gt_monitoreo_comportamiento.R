@@ -103,10 +103,10 @@ gt_div_monitoreo_comportamiento_miembro<- function(datos,fecha_analisis){
     # Se crea la gráfica
     plot <- plot_ly(type = 'scatterpolar',fill = 'toself',mode="markers") %>%
       add_trace(r =datos_completos[1,c(9,11,13,15,10,12,14,16)] %>% t() %>% as.vector(),
-                theta=c("Volumen CM", "Liquidación CM", "Número Op. CM", "Participancion VT", "Volumen VT", "Liquidación VT","Número Op. VT", "Participación CM"),
+                theta=c("Volumen CM", "Liquidación CM", "Número Op. CM", "Participancion CM", "Volumen VT", "Liquidación VT","Número Op. VT", "Participación VT"),
                 text=datos_completos[1,c(17,19,21,23,18,20,22,24)] %>% t() %>% as.vector(),name = 'Comportamiento Día') %>%
       add_trace(r =datos_completos[2,c(9,11,13,15,10,12,14,16)] %>% t() %>% as.vector(),
-                theta=c("Volumen CM", "Liquidación CM", "Número Op. CM", "Participancion VT", "Volumen VT", "Liquidación VT","Número Op. VT", "Participación CM"),
+                theta=c("Volumen CM", "Liquidación CM", "Número Op. CM", "Participancion CM", "Volumen VT", "Liquidación VT","Número Op. VT", "Participación VT"),
                 text=datos_completos[2,c(17,19,21,23,18,20,22,24)] %>% t() %>% as.vector(),name = 'Comportamiento Tipico') %>%
       layout(margin = list(l=70,r=70),legend = list(orientation = 'h',xanchor = "center",x = 0.5),
              polar = list(radialaxis = list(visible = T,range = c(0,1)))) %>%
