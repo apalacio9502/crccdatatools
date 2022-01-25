@@ -19,7 +19,7 @@ gt_div_monitoreo_comportamiento_resumen<- function(datos,fecha_analisis,pageLeng
               ACUMULADO_TIPICOS_PERIODO=n()-sum(ATIPICO),
               PORCENTAJE_ATIPICOS_PERIODO=ACUMULADO_ATIPICOS_PERIODO/n(),
               PORCENTAJE_TIPICOS_PERIODO=ACUMULADO_TIPICOS_PERIODO/n(),.groups = "drop") %>%
-    arrange(desc(ACUMULADO_ATIPICOS_PERIODO,ATIPICO_DIARIO)) %>%
+    arrange(desc(ACUMULADO_ATIPICOS_PERIODO),desc(ATIPICO_DIARIO)) %>%
     transmute("Miembro ID"=MIEMBRO_ID_SEUDONIMO,
               "Atípico Último Día"=ATIPICO_DIARIO,
               "Atípicos Acumulados Periodo"=ACUMULADO_ATIPICOS_PERIODO,
