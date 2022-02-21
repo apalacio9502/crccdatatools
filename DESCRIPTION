@@ -1,10 +1,10 @@
-Package: crccanalyticstools
+Package: crccdatatools
 Type: Package
-Title: CRCC Analytics Tools
+Title: CRCC Data Tools
 Version: 0.1.0
 Author: Cámara de Riesgo Central de Contraparte de Colombia <apalacio@camaraderiesgo.com.co>
 Maintainer: Cámara de Riesgo Central de Contraparte de Colombia <apalacio@camaraderiesgo.com.co>
-Description: CRCC Analytics Tools compila las graficas, tablas y metodos de transformación de datos
+Description: CRCC Data Tools compila las graficas, tablas y metodos de transformación de datos
 Depends:
     R (>= 4.1.0),
     utils,

@@ -607,7 +607,7 @@ gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLeng
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
                      options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
                                     columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-    formatCurrency(c(4,5,6), '$',digits = 0) %>% formatStyle(c(4,5,6),color = styleInterval(-0, c('orange', 'white')))
+    formatCurrency(c(4,5,6), '$',digits = 0) %>% formatStyle(c(4,5,6),color = styleInterval(-0, c('red', 'black')))
 
   return(table)
 }
@@ -665,7 +665,7 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
              TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
              TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
-      mutate(ORDENADOR=paste(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="-")) %>%
+      mutate(ORDENADOR=paste(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="_")) %>%
       arrange(ORDENADOR) %>%
       replace_na(list(VALOR_1=0,VALOR_2=0,VALOR_3=0))
 

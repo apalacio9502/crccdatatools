@@ -443,3 +443,46 @@ gt_div_vol_liq_op_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash
     return(gt_mensaje_error)
   }
 }
+
+#' Grafica la distribución de la maxima obligación diaria por miembro (boxplot)
+#'
+#' Esta función crea la gráfica de la distribución de la maxima obligación diaria por miembro en formato de boxplot
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_div_analisis_lole}} o tener una estructura igual a dichos datos
+#' @param colores clase data.frame. Debe contener los datos generados
+#' por la función \code{\link{dt_adm_gen_colores}}
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @export
+
+gt_div_dist_max_obligacion_diaria<- function(datos,colores,fixedrange=FALSE){
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%
+      transmute(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO), MAXIMA_OBLIGACION,.fun=max,.desc=T),
+                TIPO="MIEMBRO_TIPO",ID=factor(MIEMBRO_TIPO),VALOR_1=MAXIMA_OBLIGACION/1e+6,VALOR_2=LOLE,COLOR_ID=dt_num_char(ID))
+
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+    # Se crea la gráfica
+    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,
+                    transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0))) %>%
+      add_boxplot(y=~VALOR_1,name=~ID,color=~COLOR_ID,legendgroup=~ID) %>%
+      add_lines(y=~VALOR_2,name="LOLE",line = list(color="Black", dash="dot")) %>%
+      layout(hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2,tracegroupgap=0),
+             xaxis = list(title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Millones-USD",fixedrange=fixedrange))%>%
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
