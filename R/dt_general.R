@@ -41,6 +41,23 @@ dt_segmentos_analisis_sql<- function(segmentos_analisis){
   return(segmentos_analisis_sql)
 }
 
+#' Convertir miembros_analisis a formato SQL (system)
+#'
+#' Esta función convierte una lista de miembros a formato SQL
+#' @param miembros_analisis clase array character. Debe contener la lista de miembros análisis
+
+dt_miembros_analisis_sql<- function(miembros_analisis){
+  # Se verifica si miembros_analisis es nulo
+  if (is.null(miembros_analisis)) {
+    # Se crea la variable miembros_analisis_sql
+    miembros_analisis_sql <- glue("MIEMBRO_ID NOT IN (' ')")
+  }else{
+    # Se crea la variable miembros_analisis_sql
+    miembros_analisis_sql <- glue("MIEMBRO_ID IN ('{paste0(miembros_analisis,collapse = \"','\")}')")
+  }
+  return(miembros_analisis_sql)
+}
+
 #' ID_SEUDONIMO Miembros
 #'
 #' Esta función devuelve el ID_SEUDONIMO correspondiente acorde a la condición.

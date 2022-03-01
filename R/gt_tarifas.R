@@ -1,8 +1,8 @@
-#' Tabla ingresos resumen
+#' Tabla tarifas resumen
 #'
-#' Esta función crea la tabla ingresos en formato html
+#' Esta función crea la tabla tarifas en formato html
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -10,7 +10,7 @@
 #' para renderizar la tabla. Por defecto "bootstrap4"
 #' @export
 
-gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
+gt_tar_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
   # Manipulación de datos
   datos <- datos  %>%
@@ -19,22 +19,22 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
     summarise(TARIFA=sum(TARIFA,na.rm=TRUE),.groups="drop") %>%
     mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
     group_by(SEGMENTO_NOMBRE,PRODUCTO_NOMBRE,PRODUCTO_TIPO) %>%
-    summarise(INGRESO_DIARIO=sum(TARIFA[FECHA==fecha_analisis]),
-              INGRESO_DIARIO_PROMEDIO_MENSUAL=mean(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-              INGRESO_ACUMULADO_MENSUAL=sum(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-              INGRESO_DIARIO_PROMEDIO_PERIODO=mean(TARIFA),
-              INGRESO_ACUMULADO_PERIODO=sum(TARIFA),.groups = "drop")  %>%
-    arrange(desc(INGRESO_DIARIO)) %>%
+    summarise(TARIFA_DIARIA=sum(TARIFA[FECHA==fecha_analisis]),
+              TARIFA_DIARIA_PROMEDIO_MENSUAL=mean(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+              TARIFA_ACUMULADO_MENSUAL=sum(TARIFA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+              TARIFA_DIARIA_PROMEDIO_PERIODO=mean(TARIFA),
+              TARIFA_ACUMULADO_PERIODO=sum(TARIFA),.groups = "drop")  %>%
+    arrange(desc(TARIFA_DIARIA)) %>%
     transmute(Segmento=SEGMENTO_NOMBRE,"Tipo Producto"=PRODUCTO_TIPO,
               "Producto"=PRODUCTO_NOMBRE,
-              "%"=if_else(SEGMENTO_NOMBRE=="Consolidado",1,INGRESO_DIARIO/sum(INGRESO_DIARIO[SEGMENTO_NOMBRE!="Consolidado"])),
-              "Ingresos Último Día"=INGRESO_DIARIO,
-              "Ingresos Promedio Diario Último Mes"=INGRESO_DIARIO_PROMEDIO_MENSUAL,
-              "Ingresos Acumulados Último Mes"=INGRESO_ACUMULADO_MENSUAL,
-              "Ingresos Promedio Diario Periodo"=INGRESO_DIARIO_PROMEDIO_PERIODO,
-              "Ingresos Acumulados Periodo"=INGRESO_ACUMULADO_PERIODO)
+              "%"=if_else(SEGMENTO_NOMBRE=="Consolidado",1,TARIFA_DIARIA/sum(TARIFA_DIARIA[SEGMENTO_NOMBRE!="Consolidado"])),
+              "Tarifas Último Día"=TARIFA_DIARIA,
+              "Tarifas Promedio Diario Último Mes"=TARIFA_DIARIA_PROMEDIO_MENSUAL,
+              "Tarifas Acumuladas Último Mes"=TARIFA_ACUMULADO_MENSUAL,
+              "Tarifas Promedio Diario Periodo"=TARIFA_DIARIA_PROMEDIO_PERIODO,
+              "Tarifas Acumuladas Periodo"=TARIFA_ACUMULADO_PERIODO)
 
-  # Se crea la tabla ingresos
+  # Se crea la tabla tarifas
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
                      options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,searching = F,
                                     columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
@@ -43,12 +43,12 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
   return(table)
 }
 
-#' Grafica los ingresos (pie)
+#' Grafica las tarifas (pie)
 #'
-#' Esta función crea la gráfica de los ingresos en formato de pie.
+#' Esta función crea la gráfica de las tarifas en formato de pie.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -58,7 +58,7 @@ gt_ing_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"
 #' "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
 
-gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
+gt_tar<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
 
   # Se filtran los datos
   datos <- datos %>% filter(TARIFA>0)
@@ -117,12 +117,12 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
   }
 }
 
-#' Grafica los ingresos por miembro  (barras)
+#' Grafica las tarifas por miembro  (barras)
 #'
-#' Esta función crea la gráfica de los ingresos por miembro en formato de barras.
+#' Esta función crea la gráfica de las tarifas por miembro en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -133,7 +133,7 @@ gt_ing<- function(datos,colores,boton_activo=NULL,botones_inactivos=c()){
 #' "Subtipo Producto", "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
 
-gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_tar_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
 
   # Se filtran los datos
   datos <- datos %>% filter(TARIFA>0)
@@ -205,12 +205,12 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
   }
 }
 
-#' Grafica los ingresos promedio diario por miembro (barras)
+#' Grafica las tarifas promedio diario por miembro (barras)
 #'
-#' Esta función crea la gráfica de los ingresos promedio diario en formato de barras.
+#' Esta función crea la gráfica de las tarifas promedio diario en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -221,7 +221,7 @@ gt_ing_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
 
-gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_tar_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -294,12 +294,12 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
   }
 }
 
-#' Grafica los ingresos diarios (lines)
+#' Grafica las tarifas diarios (lines)
 #'
-#' Esta función crea la gráfica de los ingresos diarios en formato de lineas.
+#' Esta función crea la gráfica de las tarifas diarios en formato de lineas.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -310,7 +310,7 @@ gt_ing_promedio_diario_por_miembro<- function(datos,colores,fixedrange=FALSE,bot
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
 
-gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_tar_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -379,12 +379,12 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
   }
 }
 
-#' Grafica los ingresos promedio diario por (Mes o Año) (barras)
+#' Grafica las tarifas promedio diario por (Mes o Año) (barras)
 #'
-#' Esta función crea la gráfica de los ingresos promedio diario en formato de barras.
+#' Esta función crea la gráfica de las tarifas promedio diario en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -396,7 +396,7 @@ gt_ing_diarios<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,boton
 #' "Origen Producto", "Tipo Cuenta Gar.", "Concepto Tarifa"). Por defecto c()
 #' @export
 
-gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",boton_activo=NULL,botones_inactivos=c()){
+gt_tar_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",boton_activo=NULL,botones_inactivos=c()){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -475,12 +475,12 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
   }
 }
 
-#' Grafica los ingresos promedio diario por (Mes o Año) y tipo de cuenta (barras)
+#' Grafica las tarifas promedio diario por (Mes o Año) y tipo de cuenta (barras)
 #'
-#' Esta función crea la gráfica de los ingresos promedio diario por tipo de cuenta en formato de barras.
+#' Esta función crea la gráfica de las tarifas promedio diario por tipo de cuenta en formato de barras.
 #' La información se muestra acorde a la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param colores clase data.frame. Debe contener los datos generados
 #' por la función \code{\link{dt_adm_gen_colores}}
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
@@ -489,7 +489,7 @@ gt_ing_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m",bo
 #' con un botón seleccionado en especifico ("Posición Propia", "Posición Terceros", "Posición Cartera"). Por defecto NULL
 #' @export
 
-gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,promedio="m",boton_activo=NULL){
+gt_tar_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,promedio="m",boton_activo=NULL){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -568,7 +568,7 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
 #'
 #' Esta función crea la tabla cumlimplimiento presupuesto en formato html.
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param pageLength clase number. Número de filas por hoja que alojara
 #' la tabla. Por defecto 100
@@ -576,7 +576,7 @@ gt_ing_promedio_diario_tipocuenta<- function(datos,colores,fixedrange=FALSE,prom
 #' para renderizar la tabla. Por defecto "bootstrap4"
 #' @export
 
-gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
+gt_tar_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
   # Manipulación de datos
   datos <- datos %>%
@@ -618,7 +618,7 @@ gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLeng
 #' y periodo(fecha min a fecha max de los datos) (barras).
 #' La información se muestra acorde la agrupación relacionada con cada botón
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos
 #' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
@@ -627,7 +627,7 @@ gt_ing_cumplimiento_presupuesto_resumen<- function(datos,fecha_analisis,pageLeng
 #' en la gráfica ("Segmento", "Tipo Producto", "Origen Producto", "Producto"). Por defecto c()
 #' @export
 
-gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_tar_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -651,19 +651,19 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
       pivot_longer(tipos$TIPO,names_to ="TIPO",values_to = "ID") %>%
       group_by(FECHA,FECHA_ANO_MES,TIPO,ID) %>%
       summarise(PROYECCION_DIARIA=sum(PROYECCION_DIARIA,na.rm = TRUE),
-                INGRESO_DIARIO=sum(TARIFA,na.rm=TRUE),.groups="drop") %>% group_by(TIPO,ID) %>%
-      summarise(INGRESO_ULTIMO_DIA=sum(INGRESO_DIARIO[FECHA==fecha_analisis]),
-                INGRESO_ULTIMO_MES=sum(INGRESO_DIARIO[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
-                INGRESO_PERIODO=sum(INGRESO_DIARIO),
+                TARIFA_DIARIA=sum(TARIFA,na.rm=TRUE),.groups="drop") %>% group_by(TIPO,ID) %>%
+      summarise(TARIFA_ULTIMO_DIA=sum(TARIFA_DIARIA[FECHA==fecha_analisis]),
+                TARIFA_ULTIMO_MES=sum(TARIFA_DIARIA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+                TARIFA_PERIODO=sum(TARIFA_DIARIA),
                 PROYECCION_ULTIMO_DIA=sum(PROYECCION_DIARIA[FECHA==fecha_analisis]),
                 PROYECCION_ULTIMO_MES=sum(PROYECCION_DIARIA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
                 PROYECCION_PERIODO=sum(PROYECCION_DIARIA),.groups = "drop") %>%
-      mutate(VALOR_1=INGRESO_ULTIMO_DIA/PROYECCION_ULTIMO_DIA,
-             VALOR_2=INGRESO_ULTIMO_MES/PROYECCION_ULTIMO_MES,
-             VALOR_3=INGRESO_PERIODO/PROYECCION_PERIODO,
-             TEXTO_1=paste(dt_porcentaje_caracter(VALOR_1),"/",round((INGRESO_ULTIMO_DIA-PROYECCION_ULTIMO_DIA)/1e+6,6),"Millones"),
-             TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((INGRESO_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
-             TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((INGRESO_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
+      mutate(VALOR_1=TARIFA_ULTIMO_DIA/PROYECCION_ULTIMO_DIA,
+             VALOR_2=TARIFA_ULTIMO_MES/PROYECCION_ULTIMO_MES,
+             VALOR_3=TARIFA_PERIODO/PROYECCION_PERIODO,
+             TEXTO_1=paste(dt_porcentaje_caracter(VALOR_1),"/",round((TARIFA_ULTIMO_DIA-PROYECCION_ULTIMO_DIA)/1e+6,6),"Millones"),
+             TEXTO_2=paste(dt_porcentaje_caracter(VALOR_2),"/",round((TARIFA_ULTIMO_MES-PROYECCION_ULTIMO_MES)/1e+6,6),"Millones"),
+             TEXTO_3=paste(dt_porcentaje_caracter(VALOR_3),"/",round((TARIFA_PERIODO-PROYECCION_PERIODO)/1e+6,6),"Millones")) %>%
       left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
       mutate(ORDENADOR=paste(dt_num_char(POSICION),dt_num_char(relevel(factor(ID),"Consolidado")),sep="_")) %>%
       arrange(ORDENADOR) %>%
@@ -703,15 +703,15 @@ gt_ing_cumplimiento_presupuesto<- function(datos,fecha_analisis,fixedrange=FALSE
 }
 
 
-#' Gráfica el comportamiento de los ingresos promedio diario por mes, producto y miembro (treemap)
+#' Gráfica el comportamiento de las tarifas promedio diario por mes, producto y miembro (treemap)
 #'
-#' Esta función crea la gráfica del comportamiento de los ingresos promedio diario por mes, producto y miembro en
+#' Esta función crea la gráfica del comportamiento de las tarifas promedio diario por mes, producto y miembro en
 #' formato treemap
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @export
 
-gt_ing_promedio_diario_por_mes_producto_miembro<- function(datos){
+gt_tar_promedio_diario_por_mes_producto_miembro<- function(datos){
 
   # Se filtran los datos y se crea la columna FECHA_ANO_MES
   datos <- datos %>% filter(SEGMENTO_ID!="GE") %>%
@@ -742,9 +742,9 @@ gt_ing_promedio_diario_por_mes_producto_miembro<- function(datos){
                                        TOTAL_CAMBIO_VALOR<(-5) ~"< -5 Millones",TRUE~"0 Millones"))
 
     # Se modifica el data.frame datos_completos
-    datos_completos <- datos_completos  %>% group_by(LABEL="Ingresos",PARENT="") %>%
+    datos_completos <- datos_completos  %>% group_by(LABEL="Tarifas",PARENT="") %>%
       summarise(NIVEL=1,N=n_distinct(FECHA_ANO_MES,PRODUCTO_SUBTIPO),.groups="drop") %>%
-      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Ingresos") %>%
+      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Tarifas") %>%
                   summarise(NIVEL=2,N=n_distinct(PRODUCTO_SUBTIPO),
                             VALOR=round(sum(VALOR),6),
                             VALOR_ANTERIOR=round(sum(VALOR),6),
@@ -796,15 +796,15 @@ gt_ing_promedio_diario_por_mes_producto_miembro<- function(datos){
 
 
 
-#' Gráfica el comportamiento de los ingresos promedio diario por mes, miembro y producto (treemap)
+#' Gráfica el comportamiento de las tarifas promedio diario por mes, miembro y producto (treemap)
 #'
-#' Esta función crea la gráfica del comportamiento de los ingresos promedio diario por mes, miembro y producto en
+#' Esta función crea la gráfica del comportamiento de las tarifas promedio diario por mes, miembro y producto en
 #' formato treemap
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @export
 
-gt_ing_promedio_diario_por_mes_miembro_producto<- function(datos){
+gt_tar_promedio_diario_por_mes_miembro_producto<- function(datos){
 
   # Se filtran los datos y se crea la columna FECHA_ANO_MES
   datos <- datos %>% filter(SEGMENTO_ID!="GE") %>%
@@ -835,9 +835,9 @@ gt_ing_promedio_diario_por_mes_miembro_producto<- function(datos){
                                        TOTAL_CAMBIO_VALOR<(-5) ~"< -5 Millones",TRUE~"0 Millones"))
 
     # Se modifica el data.frame datos_completos
-    datos_completos <- datos_completos  %>% group_by(LABEL="Ingresos",PARENT="") %>%
+    datos_completos <- datos_completos  %>% group_by(LABEL="Tarifas",PARENT="") %>%
       summarise(NIVEL=1,N=n_distinct(FECHA_ANO_MES,MIEMBRO_ID_SEUDONIMO),.groups="drop") %>%
-      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Ingresos") %>%
+      bind_rows(datos_completos %>% group_by(LABEL=FECHA_ANO_MES,PARENT="Tarifas") %>%
                   summarise(NIVEL=2,N=n_distinct(MIEMBRO_ID_SEUDONIMO),
                             VALOR=round(sum(VALOR),6),
                             VALOR_ANTERIOR=round(sum(VALOR),6),

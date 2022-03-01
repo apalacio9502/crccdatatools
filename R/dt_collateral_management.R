@@ -6,18 +6,23 @@
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param miembros_analisis clase array character. Lista de miembros
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
+dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,miembros_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
+
+  # Se covierte el miembros analisis a SQL
+  miembros_analisis_sql <- dt_miembros_analisis_sql(miembros_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -28,7 +33,7 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
                                            MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,ACTIVO_TIPO,
                                            VOLUMEN, IMPORTE_ANTES_HAIRCUT, IMPORTE
                                            FROM GEN_GAR_DEP_RESUMEN
-                                           WHERE {segmentos_analisis_sql} AND
+                                           WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
                                            FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
   # Se verifica si segmentos_analisis es diferente de nulo
@@ -53,16 +58,26 @@ dt_gen_gar_dep_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param miembros_analisis clase array character. Lista de miembros
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros
+#' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
+dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,miembros_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
+
+  # Se covierte el miembros analisis a SQL
+  miembros_analisis_sql <- dt_miembros_analisis_sql(miembros_analisis)
+
+  # Se covierte el segmentos analisis a SQL
+  segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID, SEGMENTO_NOMBRE,
@@ -73,7 +88,8 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
                                      IMPORTE_GARANTIA_DESPUES_HAIRCUT,
                                      IMPORTE_GARANTIA_HAIRCUT, IMPORTE_MEC_SEN, IMPORTE_SIMULTANEAS
                                      FROM GEN_CM_TITULOS
-                                     WHERE FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
+                                     WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                     FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
 
   # Se modifica el dataframe datos (Se cambia la estructura a pivot_longer)
@@ -111,16 +127,26 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param miembros_analisis clase array character. Lista de miembros
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros
+#' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CN","CV","C2","C7","C8","C9")
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudonimo="REAL"){
+dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,miembros_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
+
+  # Se covierte el miembros analisis a SQL
+  miembros_analisis_sql <- dt_miembros_analisis_sql(miembros_analisis)
+
+  # Se covierte el segmentos analisis a SQL
+  segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
 
   # Descarga datos
   datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
@@ -131,8 +157,8 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                     IMPORTE_GARANTIA_DESPUES_HAIRCUT,
                                     IMPORTE_GARANTIA_HAIRCUT, IMPORTE_CONTADO, IMPORTE_ADR
                                     FROM GEN_CM_ACCIONES
-                                    WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
-                                    AND {periodo_analisis_sql[2]}"))
+                                    WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                    FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
 
   # Se modifica el dataframe datos (Se cambia la estructura a pivot_longer)

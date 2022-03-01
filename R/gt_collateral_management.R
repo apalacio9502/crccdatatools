@@ -93,7 +93,8 @@ gt_gar_dep <- function(datos,colores){
 
 gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
 
-  # Preprosemiento
+  # Se filtran los datos
+  datos <-  datos %>% filter(VOLUMEN>0 | IMPORTE_ANTES_HAIRCUT>0 | IMPORTE>0)
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {

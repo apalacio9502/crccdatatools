@@ -1,23 +1,28 @@
-#' Descarga los datos gen_ingresos_resumen
+#' Descarga los datos gen_tarifas_resumen
 #'
-#' Esta función descarga los datos de la tabla gen_ingresos_resumen para un periodo de análisis y
+#' Esta función descarga los datos de la tabla gen_tarifas_resumen para un periodo de análisis y
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
+#' @param miembros_analisis clase array character. Lista de miembros
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_gen_ing_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
+dt_gen_tar_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,miembros_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)
 
   # Se covierte el periodo de analisis a SQL
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
+
+  # Se covierte el miembros analisis a SQL
+  miembros_analisis_sql <- dt_miembros_analisis_sql(miembros_analisis)
 
   # Se covierte el segmentos analisis a SQL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
@@ -27,8 +32,9 @@ dt_gen_ing_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                            SEGMENTO_NOMBRE, MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                            MIEMBRO_TIPO,CUENTA_GARANTIA_TIPO,PRODUCTO_NOMBRE,PRODUCTO_TIPO,PRODUCTO_SUBTIPO,
                                            PRODUCTO_ORIGEN,TARIFA_CONCEPTO, TARIFA
-                                           FROM GEN_INGRESOS_RESUMEN
-                                           WHERE {segmentos_analisis_sql} AND FECHA BETWEEN {periodo_analisis_sql[1]}
+                                           FROM GEN_TARIFAS_RESUMEN
+                                           WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                           FECHA BETWEEN {periodo_analisis_sql[1]}
                                            AND {periodo_analisis_sql[2]} AND TARIFA_SANCION=0"))
 
   # Se verifica si segmentos_analisis es diferente de nulo
@@ -47,19 +53,19 @@ dt_gen_ing_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
   return(datos)
 }
 
-#' Crea la tabla gen_ing_cumplimiento_presupuesto
+#' Crea la tabla gen_tar_cumplimiento_presupuesto
 #'
-#' Esta función descarga los datos params_proyeccion_ingresos y los une a gen_ingresos_resumen (descargados con anterioridad)
-#' creando la tabla gen_ing_cumplimiento_presupuesto (localmente).
+#' Esta función descarga los datos params_proyeccion_ingresos y los une a gen_tarifas_resumen (descargados con anterioridad)
+#' creando la tabla gen_tar_cumplimiento_presupuesto (localmente).
 #' @param conexion clase formal. Conexión base de datos
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
-#' \code{\link{dt_gen_ing_resumen}} o tener una estructura igual a dichos datos
+#' \code{\link{dt_gen_tar_resumen}} o tener una estructura igual a dichos datos
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 #' diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL
 #' @export
 
-dt_gen_ing_cumplimiento_presupuesto<- function(conexion,datos,periodo_analisis=NULL,fecha_analisis=NULL){
+dt_gen_tar_cumplimiento_presupuesto<- function(conexion,datos,periodo_analisis=NULL,fecha_analisis=NULL){
 
   # Se verifica si la descarga va hacer para una fecha de análisis
   if(is.null(periodo_analisis) & !is.null(fecha_analisis)) periodo_analisis <- rep(fecha_analisis,2)

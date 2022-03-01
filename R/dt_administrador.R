@@ -25,15 +25,26 @@ dt_adm_gen_fechas<- function(conexion,periodo_analisis){
 #' Esta función descarga los datos de la tabla adm_gen_miembros
 #' con base en los parametros ingresados
 #' @param conexion clase formal. Conexión base de datos
+#' @param miembros_analisis clase array character. Lista de miembros
+#' de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros
 #' @param segmentos_analisis clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 #' de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"
 #' @export
 
-dt_adm_gen_miembros<- function(conexion,segmentos_analisis=NULL,seudonimo="REAL"){
+dt_adm_gen_miembros<- function(conexion,miembros_analisis=NULL,segmentos_analisis=NULL,seudonimo="REAL"){
 
-  # Se inicializa la variable
+  # Se inicializa la variable miembros_analisis_sql
+  miembros_analisis_sql <- ""
+
+  # Se inicializa la variable segmentos_analisis_sql
   segmentos_analisis_sql <- ""
+
+  # Se verifica si miembros_analisis es nulo
+  if (!is.null(miembros_analisis)) {
+    # Se crea la variable miembros_analisis_sql
+    miembros_analisis_sql <- glue("AND ID IN ({paste0(paste0(\"'\",miembros_analisis,\"'\"),collapse = \" , \")})")
+  }
 
   # Se verifica si segmentos_analisis es nulo
   if (!is.null(segmentos_analisis)) {
@@ -44,7 +55,8 @@ dt_adm_gen_miembros<- function(conexion,segmentos_analisis=NULL,seudonimo="REAL"
   # Descarga datos
   datos <- dbGetQuery(conexion,glue("SELECT ID, {dt_id_seudonimo(seudonimo)} AS ID_SEUDONIMO,
                                     {dt_nombre_abreviacion_seudonimo(seudonimo)} AS NOMBRE_ABREVIACION_SEUDONIMO
-                                    FROM ADM_GEN_MIEMBROS WHERE ID<>'CRCC' {segmentos_analisis_sql} ")) %>%
+                                    FROM ADM_GEN_MIEMBROS WHERE ID<>'CRCC' {miembros_analisis_sql}
+                                    {segmentos_analisis_sql}")) %>%
     arrange(ID_SEUDONIMO)
 
 

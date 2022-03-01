@@ -13,7 +13,7 @@ gt_rv_activos_elegibles_repo(
 }
 \arguments{
 \item{datos}{clase data.frame. Los datos deben ser los generados por la función
-\code{\link{dt_gen_ing_cumplimiento_presupuesto}} o tener una estructura igual a dichos datos}
+\code{\link{dt_rv_activos_elegibles_repo}} o tener una estructura igual a dichos datos}
 
 \item{fecha_analisis}{clase date. Fecha en la que se realiza el análisis (Último día de los datos)}
 

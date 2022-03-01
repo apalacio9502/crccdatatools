@@ -4,10 +4,18 @@
 \alias{dt_adm_gen_miembros}
 \title{Descargar los datos adm_gen_miembros}
 \usage{
-dt_adm_gen_miembros(conexion, segmentos_analisis = NULL, seudonimo = "REAL")
+dt_adm_gen_miembros(
+  conexion,
+  miembros_analisis = NULL,
+  segmentos_analisis = NULL,
+  seudonimo = "REAL"
+)
 }
 \arguments{
 \item{conexion}{clase formal. Conexión base de datos}
+
+\item{miembros_analisis}{clase array character. Lista de miembros
+de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros}
 
 \item{segmentos_analisis}{clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.}
