@@ -8,7 +8,8 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo(
   datos,
   colores,
   fixedrange = FALSE,
-  boton_activo = NULL
+  boton_activo = NULL,
+  completa = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo(
 
 \item{boton_activo}{clase character. Si se desea que la gráfica se inicialice
 con un botón seleccionado en especifico ("Efectivo", "Nominal", "Efectivo Cover 2", "Nominal Cover 2"). Por defecto NULL}
+
+\item{completa}{clase boolean. TRUE si se desea mostar la gráfica completa.
+FALSE si desea mostrar solo los valores de las garantias depositadas por título. Por defecto TRUE}
 }
 \description{
 Esta función crea la gráfica de la garantía depositada (barras) vs volumen negociado (puntos)

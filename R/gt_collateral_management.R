@@ -12,7 +12,7 @@
 
 gt_gar_dep_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
 
-  # Preprosesamiento
+  # Manipulación de datos
   datos <- datos %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",ACTIVO_TIPO="Consolidado")) %>%
     group_by(FECHA,SEGMENTO_NOMBRE,ACTIVO_TIPO) %>%
     summarise(IMPORTE=sum(IMPORTE),.groups="drop") %>%
@@ -28,7 +28,7 @@ gt_gar_dep_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstr
               "Garantía Depositada Promedio Diario Último Mes M-COP"=IMPORTE_DIARIO_PROMEDIO_MENSUAL/1e+6,
               "Garantía Depositada Promedio Diario Periodo M-COP"=IMPORTE_DIARIO_PROMEDIO_PERIODO/1e+6)
 
-  # Se crea la tabla garantía depositada
+  # Se crea la tabla
   table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
                      options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,
                                     columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
@@ -102,7 +102,7 @@ gt_gar_dep_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
     # Se crea el data.frame datos_completos
     datos_completos <- datos %>% mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO), IMPORTE,.fun=sum,.desc=T),VALOR=IMPORTE)  %>%
       group_by(MIEMBRO_ID_SEUDONIMO,TIPO="ACTIVO_TIPO",ID=ACTIVO_TIPO) %>% summarise(across(VALOR, ~round(sum(.x)/1e+12,6)),.groups="drop_last")%>%
-      mutate(TEXTO=paste(VALOR,"Billones","/",dt_porcentaje_caracter(VALOR/sum(VALOR)))) %>% ungroup() %>%
+      mutate(TEXTO=paste(VALOR,"Billones","/",dt_porcentaje_caracter(VALOR/sum(VALOR)),"P")) %>% ungroup() %>%
       mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste0(TIPO,"-",ID)),VALOR,.fun=mean,.desc=T))) %>%
       arrange(COLOR_ID)
 
@@ -239,83 +239,138 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Nominal", "Efectivo Cover 2", "Nominal Cover 2"). Por defecto NULL
+#' @param completa clase boolean. TRUE si se desea mostar la gráfica completa.
+#' FALSE si desea mostrar solo los valores de las garantias depositadas por título. Por defecto TRUE
 #' @export
 
-gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL){
+gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,completa=TRUE){
 
   # Se verifica si existen datos
   if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+    # Se verifica si la grafica se debe mostrar completa o parcial
+    if (completa==TRUE) {
+      # Verificación inputs
+      if (is.null(boton_activo)) boton_activo <- "Efectivo"
 
-    # Verificación inputs
-    if (is.null(boton_activo)) boton_activo <- "Efectivo"
+      # Se crea el data.frame tipos
+      tipos <- data.frame(TIPO=c("EFECTIVO","NOMINAL","EFECTIVO COVER 2","NOMINAL COVER 2"),
+                          BOTON=c("Efectivo","Nominal","Efectivo Cover 2","Nominal Cover 2"),
+                          POSICION=c(1,2,3,4)) %>%
+        mutate(VISIBLE=BOTON==boton_activo)
 
-    # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("EFECTIVO","NOMINAL","EFECTIVO COVER 2","NOMINAL COVER 2"),
-                        BOTON=c("Efectivo","Nominal","Efectivo Cover 2","Nominal Cover 2"),
-                        POSICION=c(1,2,3,4)) %>%
-      mutate(VISIBLE=BOTON==boton_activo)
-
-    # Se crea el data.frame datos_completos
-    datos_completos <- datos %>%
-      group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
-      summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-      bind_rows(datos %>% inner_join(
-        datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
-          group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-          summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
-          arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
-          bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
-          group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-          summarise(VALOR=round(sum(VALOR)/1e+9,6),
-                    TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
-          summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
-      left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
-      mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
-             ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
-             COLOR_ID=paste(POSICION,if_else(nchar(as.numeric(ID))==1,"0",""),as.numeric(ID)),sep="-") %>% arrange(COLOR_ID)
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos %>%
+        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
+        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
+        bind_rows(datos %>% inner_join(
+          datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
+            group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+            summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
+            arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
+            bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
+            group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+            summarise(VALOR=round(sum(VALOR)/1e+9,6),
+                      TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
+            summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+               ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
+               COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
 
 
-    # Se crean los botones
-    botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
-      visible <- tipos$BOTON[i]==tipos$BOTON
-      list(list(label = tipos$BOTON[i],method = "restyle",
-                args = list(list(boton_activo=tipos$BOTON[i],
-                                 visible = as.logical(c(rep(visible[1],2),
-                                                        rep(visible[2],1),
-                                                        rep(visible[3],2),
-                                                        rep(visible[4],1),
-                                                        rep(visible[1],2),
-                                                        rep(visible[2],2),
-                                                        rep(visible[3],2),
-                                                        rep(visible[4],2)))))))
+      # Se crean los botones
+      botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
+        visible <- tipos$BOTON[i]==tipos$BOTON
+        list(list(label = tipos$BOTON[i],method = "restyle",
+                  args = list(list(boton_activo=tipos$BOTON[i],
+                                   visible = as.logical(c(rep(visible[1],2),
+                                                          rep(visible[2],1),
+                                                          rep(visible[3],2),
+                                                          rep(visible[4],1),
+                                                          rep(visible[1],2),
+                                                          rep(visible[2],2),
+                                                          rep(visible[3],2),
+                                                          rep(visible[4],2)))))))
+      }
+
+      # Se crea el vector colores
+      colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+        left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+      # Se grafica la garantia depositada vs volumen negociado por titulo promedio diario
+      plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
+                      color=~COLOR_ID,colors=colores,textposition = 'none') %>%
+        add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                 name=~ID,hoverinfo="text+x+name") %>%
+        add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%
+        add_markers(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                    name=~ID,hoverinfo="text+x+name",stackgroup="1",fillcolor="transparent") %>%
+        layout(barmode="stack",hovermode = 'x',
+               legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
+               updatemenus=list(
+                 list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+                      yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+               xaxis = list(title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+      return(plot)
+
+    }else{
+
+      # Verificación inputs
+      if (is.null(boton_activo)) boton_activo <- "Efectivo"
+
+      # Se crea el data.frame tipos
+      tipos <- data.frame(TIPO=c("EFECTIVO","NOMINAL"),
+                          BOTON=c("Efectivo","Nominal"),
+                          POSICION=c(1,2)) %>%
+        mutate(VISIBLE=BOTON==boton_activo)
+
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA")%>%
+        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
+        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+               ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
+               COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+
+
+      # Se crean los botones
+      botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
+        visible <- tipos$BOTON[i]==tipos$BOTON
+        list(list(label = tipos$BOTON[i],method = "restyle",
+                  args = list(list(boton_activo=tipos$BOTON[i],
+                                   visible = as.logical(c(rep(visible[1],2),
+                                                          rep(visible[2],1)))))))
+      }
+
+      # Se crea el vector colores
+      colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+        left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+      # Se grafica la garantia depositada vs volumen negociado por titulo promedio diario
+      plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
+                      color=~COLOR_ID,colors=colores,textposition = 'none') %>%
+        add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                 name=~ID,hoverinfo="text+x+name") %>%
+        layout(barmode="stack",hovermode = 'x',
+               legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
+               updatemenus=list(
+                 list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+                      yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+               xaxis = list(title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+      return(plot)
     }
-
-    # Se crea el vector colores
-    colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
-                        left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
-
-    # Se grafica la garantia depositada vs volumen negociado por titulo promedio diario
-    plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
-                    color=~COLOR_ID,colors=colores,textposition = 'none') %>%
-      add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
-               name=~ID,hoverinfo="text+x+name") %>%
-      add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%
-      add_markers(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
-                  name=~ID,hoverinfo="text+x+name",stackgroup="1",fillcolor="transparent") %>%
-      layout(barmode="stack",hovermode = 'x',
-             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
-             updatemenus=list(
-               list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
-                    yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
-             xaxis = list(title = NA,fixedrange=fixedrange),
-             yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
-
-    return(plot)
   }else{
     return(gt_mensaje_error)
   }
 }
+
 
 #' Gráfica la garantía depositada por título, miembro y tipo cuenta promedio diario (treemap)
 #'
@@ -488,6 +543,8 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
   }
 }
 
+
+
 #' Gráfica la garantía depositada vs volumen negociado por acción promedio diario (barras+puntos)
 #'
 #' Esta función crea la gráfica de la garantía depositada (barras) vs volumen negociado (puntos)
@@ -499,82 +556,139 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
 #' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico ("Efectivo", "Acciones", "Efectivo Cover 2", "Acciones Cover 2"). Por defecto NULL
+#' @param completa clase boolean. TRUE si se desea mostar la gráfica completa.
+#' FALSE si desea mostrar solo los valores de las garantias depositadas por título. Por defecto TRUE
 #' @export
 
-gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL){
+gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,completa=FALSE){
 
   ## Se verifica si existen datos
   if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
 
-    # Verificación inputs
-    if (is.null(boton_activo)) boton_activo <- "Efectivo"
+    # Se verifica si la grafica se debe mostrar completa o parcial
+    if (completa==TRUE) {
 
-    # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("EFECTIVO","ACCIONES","EFECTIVO COVER 2","ACCIONES COVER 2"),
-                        BOTON=c("Efectivo","Acciones","Efectivo Cover 2","Acciones Cover 2"),
-                        POSICION=c(1,2,3,4)) %>%
-      mutate(VISIBLE=BOTON==boton_activo)
+      # Verificación inputs
+      if (is.null(boton_activo)) boton_activo <- "Efectivo"
 
-    # Se crea el data.frame datos_completos
-    datos_completos <- datos %>%
-      group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>% summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-      bind_rows(datos %>% inner_join(
-        datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
-          group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-          summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
-          arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
-          bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
-          group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-          summarise(VALOR=round(sum(VALOR)/1e+9,6),
-                    TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
-          summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
-      left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
-      mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
-             ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
-             COLOR_ID=paste0(POSICION,"-",if_else(nchar(as.numeric(ID))==1,"0",""),as.numeric(ID))) %>% arrange(COLOR_ID)
+      # Se crea el data.frame tipos
+      tipos <- data.frame(TIPO=c("EFECTIVO","ACCIONES","EFECTIVO COVER 2","ACCIONES COVER 2"),
+                          BOTON=c("Efectivo","Acciones","Efectivo Cover 2","Acciones Cover 2"),
+                          POSICION=c(1,2,3,4)) %>%
+        mutate(VISIBLE=BOTON==boton_activo)
 
-    # Se crean los botones
-    botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
-      visible <- tipos$BOTON[i]==tipos$BOTON
-      list(list(label = tipos$BOTON[i],method = "update",
-                args = list(list(boton_activo=tipos$BOTON[i],
-                                 visible = as.logical(c(rep(visible[1],2),
-                                                        rep(visible[2],1),
-                                                        rep(visible[3],2),
-                                                        rep(visible[4],1),
-                                                        rep(visible[1],2),
-                                                        rep(visible[2],2),
-                                                        rep(visible[3],2),
-                                                        rep(visible[4],2)))),
-                            list(yaxis=list(title=ifelse(i==1,"Miles de Millones-COP","Miles de Millones de Acciones"),fixedrange=fixedrange)))))
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos %>%
+        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>% summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
+        bind_rows(datos %>% inner_join(
+          datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
+            group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+            summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
+            arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
+            bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
+            group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+            summarise(VALOR=round(sum(VALOR)/1e+9,6),
+                      TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
+            summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+               ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
+               COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+
+      # Se crean los botones
+      botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
+        visible <- tipos$BOTON[i]==tipos$BOTON
+        list(list(label = tipos$BOTON[i],method = "update",
+                  args = list(list(boton_activo=tipos$BOTON[i],
+                                   visible = as.logical(c(rep(visible[1],2),
+                                                          rep(visible[2],1),
+                                                          rep(visible[3],2),
+                                                          rep(visible[4],1),
+                                                          rep(visible[1],2),
+                                                          rep(visible[2],2),
+                                                          rep(visible[3],2),
+                                                          rep(visible[4],2)))),
+                              list(yaxis=list(title=ifelse(i==1,"Miles de Millones-COP","Miles de Millones de Acciones"),fixedrange=fixedrange)))))
+      }
+
+      # Se crea el vector colores
+      colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+        left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+      # Se grafica la garantia depositada vs volumen negociado por acción promedio diario
+      plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
+                      color=~COLOR_ID,colors=colores,textposition = 'none') %>%
+        add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                 name=~ID,hoverinfo="text+x+name") %>%
+        add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%
+        add_markers(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                    name=~ID,hoverinfo="text+x+name",stackgroup="1",fillcolor="transparent") %>%
+        layout(barmode="stack",hovermode = 'compare',
+               legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
+               updatemenus=list(
+                 list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+                      yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+               xaxis = list(title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+      return(plot)
+
+    }else{
+
+      # Verificación inputs
+      if (is.null(boton_activo)) boton_activo <- "Efectivo"
+
+      # Se crea el data.frame tipos
+      tipos <- data.frame(TIPO=c("EFECTIVO","ACCIONES"),
+                          BOTON=c("Efectivo","Acciones"),
+                          POSICION=c(1,2)) %>%
+        mutate(VISIBLE=BOTON==boton_activo)
+
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos  %>% filter(MIEMBRO_ID_SEUDONIMO!="NA") %>%
+        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
+        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+               ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
+               COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+
+      # Se crean los botones
+      botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
+        visible <- tipos$BOTON[i]==tipos$BOTON
+        list(list(label = tipos$BOTON[i],method = "update",
+                  args = list(list(boton_activo=tipos$BOTON[i],
+                                   visible = as.logical(c(rep(visible[1],2),
+                                                          rep(visible[2],1)))),
+                              list(yaxis=list(title=ifelse(i==1,"Miles de Millones-COP","Miles de Millones de Acciones"),fixedrange=fixedrange)))))
+      }
+
+      # Se crea el vector colores
+      colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
+        left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+      # Se grafica la garantia depositada vs volumen negociado por acción promedio diario
+      plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
+                      color=~COLOR_ID,colors=colores,textposition = 'none') %>%
+        add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
+                 name=~ID,hoverinfo="text+x+name") %>%
+        layout(barmode="stack",hovermode = 'compare',
+               legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
+               updatemenus=list(
+                 list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+                      yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
+               xaxis = list(title = NA,fixedrange=fixedrange),
+               yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
+        config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+      return(plot)
     }
-
-    # Se crea el vector colores
-    colores <- datos_completos %>% distinct(TIPO="UNIDAD",ID,COLOR_ID) %>%
-      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
-
-    # Se grafica la garantia depositada vs volumen negociado por acción promedio diario
-    plot <- plot_ly(data= datos_completos %>% filter(str_detect(ID,"Garantia")==TRUE) ,x=~ACTIVO_DESCRIPCION,
-                    color=~COLOR_ID,colors=colores,textposition = 'none') %>%
-      add_bars(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
-               name=~ID,hoverinfo="text+x+name") %>%
-      add_data(data= datos_completos %>%  filter(str_detect(ID,"Garantia")!=TRUE)) %>%
-      add_markers(y=~VALOR,text=~TEXTO,visible=~VISIBLE,
-                  name=~ID,hoverinfo="text+x+name",stackgroup="1",fillcolor="transparent") %>%
-      layout(barmode="stack",hovermode = 'compare',
-             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=1.05,tracegroupgap=0),
-             updatemenus=list(
-               list(active = which(tipos$BOTON == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
-                    yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones)),
-             xaxis = list(title = NA,fixedrange=fixedrange),
-             yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
-      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
-
-    return(plot)
   }else{
     return(gt_mensaje_error)
   }
 }
+
 
 #' Gráfica la garantía depositada por acción, miembro y tipo cuenta promedio diario (treemap)
 #'
@@ -751,7 +865,232 @@ gt_gar_dep_ratio_liquidacion_por_accion<- function(datos,fixedrange=FALSE,boton_
 }
 
 
+#' Tabla garantía depositada remuneración resumen
+#'
+#' Esta función crea la tabla garantía depositada remuneración en formato html
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_cm_remuneracion_resumen}} o tener una estructura igual a dichos datos
+#' @param fecha_analisis clase date. Fecha en la que se realiza el análisis (Último día de los datos)
+#' @param pageLength clase number. Número de filas por hoja que alojara
+#' la tabla. Por defecto 100
+#' @param style clase character. Estilo boostrap que se debe utilizar
+#' para renderizar la tabla. Por defecto "bootstrap4"
+#' @export
+
+gt_gar_dep_remuneracion_resumen<- function(datos,fecha_analisis,pageLength=100,style="bootstrap4"){
+
+  # Manipulación de datos
+  datos <- datos %>% bind_rows(datos %>% mutate(SEGMENTO_NOMBRE="Consolidado",CUENTA_GARANTIA_TIPO="Consolidado")) %>%
+    group_by(FECHA,SEGMENTO_NOMBRE,CUENTA_GARANTIA_TIPO) %>%
+    summarise(GARANTIA_REMUNERADA=sum(GARANTIA[ESTADO=="Garantia Remunerada"],na.rm=TRUE),
+              GARANTIA_NO_REMUNERADA=sum(GARANTIA[ESTADO=="Garantia No Remunerada"],na.rm=TRUE),.groups="drop") %>%
+    mutate(FECHA_ANO_MES=format(FECHA, "%Y-%m"),.after="FECHA") %>%
+    group_by(SEGMENTO_NOMBRE,CUENTA_GARANTIA_TIPO) %>%
+    summarise(GARANTIA_REMUNERADA_DIARIA=sum(GARANTIA_REMUNERADA[FECHA==fecha_analisis]),
+              GARANTIA_REMUNERADA_DIARIA_PROMEDIO_MENSUAL=mean(GARANTIA_REMUNERADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+              GARANTIA_REMUNERADA_DIARIA_PROMEDIO_PERIODO=mean(GARANTIA_REMUNERADA),
+              GARANTIA_NO_REMUNERADA_DIARIA=sum(GARANTIA_NO_REMUNERADA[FECHA==fecha_analisis]),
+              GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_MENSUAL=mean(GARANTIA_NO_REMUNERADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
+              GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_PERIODO=mean(GARANTIA_NO_REMUNERADA) ,.groups="drop") %>%
+    arrange(desc(GARANTIA_REMUNERADA_DIARIA)) %>%
+    transmute(Segmento=SEGMENTO_NOMBRE,"Cuenta"=CUENTA_GARANTIA_TIPO,
+              "%"=GARANTIA_REMUNERADA_DIARIA/(GARANTIA_REMUNERADA_DIARIA+GARANTIA_NO_REMUNERADA_DIARIA),
+              "Garantía Remunerada Último Día M-COP"=GARANTIA_REMUNERADA_DIARIA/1e+6,
+              "Garantía No Remunerada Último Día M-COP"=GARANTIA_NO_REMUNERADA_DIARIA/1e+6,
+              "Garantía Remunerada Promedio Diario Último Mes M-COP"=GARANTIA_REMUNERADA_DIARIA_PROMEDIO_MENSUAL/1e+6,
+              "Garantía No Remunerada Promedio Diario Último Mes M-COP"=GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_MENSUAL/1e+6,
+              "Garantía Remunerada Promedio Diario Periodo M-COP"=GARANTIA_REMUNERADA_DIARIA_PROMEDIO_PERIODO/1e+6,
+              "Garantía No Remunerada Promedio Diario Periodo M-COP"=GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_PERIODO/1e+6)
+
+  # Se crea la tabla
+  table <- datatable(datos,rownames = FALSE,style=style,fillContainer=FALSE,extensions = 'Responsive',
+                     options = list(searching = F,processing=T,language = gt_espanol,pageLength = pageLength, lengthChange = F,
+                                    columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+    formatPercentage(3,digits = 2) %>% formatCurrency(c(4,5,6,7,8,9), '$',digits = 0)
+
+  return(table)
+}
 
 
 
+#' Gráfica la garantía depositada vs. utilidad remuneración vs. tarifa remuneración por miembro de una fecha de análisis (barras)
+#'
+#' Esta función crea la gráfica de la garantía depositada vs. utilidad remuneración vs. tarifa remuneración por miembro para una
+#' fecha de análisis en formato de barras
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_cm_remuneracion_resumen}} o tener una estructura igual a dichos datos
+#' @param colores clase data.frame. Debe contener los datos generados
+#' por la función \code{\link{dt_adm_gen_colores}}
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @export
+
+gt_gar_dep_remuneracion_por_miembro_fecha <- function(datos,colores,fixedrange=FALSE){
+
+  # Se filtran los datos
+  datos <-  datos %>% filter(GARANTIA>0)
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%
+      mutate(MIEMBRO_ID_SEUDONIMO=fct_reorder(factor(MIEMBRO_ID_SEUDONIMO), GARANTIA,.fun=sum,.desc=T),
+             VALOR_1=GARANTIA,VALOR_2=UTILIDAD_REMUNERACION,VALOR_3=TARIFA_REMUNERACION)  %>%
+      group_by(MIEMBRO_ID_SEUDONIMO,TIPO="ESTADO",ID=ESTADO) %>%
+      summarise(across(VALOR_1, ~round(sum(.x)/1e+9,6)),across(c(VALOR_2:VALOR_3), ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
+      mutate(TEXTO_1=paste(VALOR_1,"Miles Millones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1))),
+             TEXTO_2=paste(VALOR_2,"Millones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2))),
+             TEXTO_3=paste(VALOR_3,"Millones","/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)))) %>% ungroup() %>%
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste(TIPO,ID,sep="-")),VALOR_1,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
+
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+    # Se grafica la garantia depositada por miembro (Fecha Especifica)
+    plot <- plot_ly(data= datos_completos ,x=~MIEMBRO_ID_SEUDONIMO,colors = colores,color=~COLOR_ID,
+                    transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
+                    textposition = 'none') %>%
+      add_bars(y=~VALOR_1,text=~TEXTO_1,name=~ID,
+               legendgroup=~ID,hoverinfo="text+x+name") %>%
+      add_bars(y=~VALOR_2,text=~TEXTO_2,name=~ID,
+               legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y2") %>%
+      add_bars(y=~VALOR_3,text=~TEXTO_3,name=~ID,
+               legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y3") %>%
+      subplot(nrows = 3,shareX = TRUE) %>%
+      layout(barmode="relative",hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2,tracegroupgap=0),
+             xaxis = list(title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Garantía Miles M-COP",fixedrange=fixedrange),
+             yaxis2 = list(title = "Utilidad M-COP",fixedrange=fixedrange),
+             yaxis3 = list(title = "Tarifa M-COP",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+    return(plot)
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
+
+#' Gráfica la garantía depositada vs. utilidad remuneración vs. tarifa remuneración diaria (lineas)
+#'
+#' Esta función crea la gráfica de la garantía depositada vs. utilidad remuneración vs. tarifa remuneración
+#'  diaria en formato de lineas
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_cm_remuneracion_resumen}} o tener una estructura igual a dichos datos
+#' @param colores clase data.frame. Debe contener los datos generados
+#' #' por la función \code{\link{dt_adm_gen_colores}}
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @export
+
+gt_gar_dep_remuneracion_diaria<- function(datos,colores,fixedrange=FALSE){
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%
+      mutate(VALOR_1=GARANTIA,VALOR_2=UTILIDAD_REMUNERACION,VALOR_3=TARIFA_REMUNERACION) %>%
+      group_by(TIPO="ESTADO",ID=ESTADO,FECHA) %>%
+      summarise(across(VALOR_1, ~round(sum(.x)/1e+9,6)),across(c(VALOR_2:VALOR_3), ~round(sum(.x)/1e+6,6)),.groups="drop_last")%>%
+      mutate(across(c(VALOR_1:VALOR_3),~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA,TIPO)  %>% group_by(FECHA,TIPO) %>%
+      mutate(TEXTO_1=paste(VALOR_1,"Miles Millones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)),"P /",CAMBIO_VALOR_1,"C"),
+             TEXTO_2=paste(VALOR_2,"Millones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C"),
+             TEXTO_3=paste(VALOR_3,"Millones","/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)),"P /",CAMBIO_VALOR_3,"C")) %>% ungroup() %>%
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste(TIPO,ID,sep = "-")),VALOR_1,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
+
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+    # Se grafica la garantia depositada diaria
+    plot <- plot_ly(data= datos_completos ,x=~FECHA,colors = colores,color=~COLOR_ID,alpha=1,
+                    textposition = 'none') %>%
+      add_lines(y=~VALOR_1,text=~TEXTO_1,name=~ID,line = list(color = 'transparent'),
+                fill = 'tonexty',stackgroup="1",legendgroup=~ID,hoverinfo="text+x+name") %>%
+      add_lines(y=~VALOR_2,text=~TEXTO_2,name=~ID,line = list(color = 'transparent'),
+                fill = 'tonexty',stackgroup="1",legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y2") %>%
+      add_lines(y=~VALOR_3,text=~TEXTO_3,name=~ID,line = list(color = 'transparent'),
+                fill = 'tonexty',stackgroup="1",legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y3") %>%
+      subplot(nrows = 3,shareX = TRUE) %>%
+      layout(hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
+             xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Garantía Miles M-COP",fixedrange=fixedrange),
+             yaxis2 = list(title = "Utilidad M-COP",fixedrange=fixedrange),
+             yaxis3 = list(title = "Tarifa M-COP",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+    return(plot)
+  }else{
+    return(gt_mensaje_error)
+  }
+}
+
+
+#' Gráfica la garantía depositada vs. utilidad remuneración vs. tarifa remuneración promedio diario por (Mes o Año) (barras)
+#'
+#' Esta función crea la gráfica de la garantía depositada vs. utilidad remuneración vs. tarifa remuneración promedio diario en formato de barras.
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_cm_remuneracion_resumen}} o tener una estructura igual a dichos datos
+#' @param colores clase data.frame. Debe contener los datos generados
+#' #' por la función \code{\link{dt_adm_gen_colores}}
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @param promedio clase character. "m" si se desea promediar por mes y "y" si se desea promediar por año. Por defecto "m"
+#' @export
+
+gt_gar_dep_remuneracion_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m"){
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se define la granularidad del promedio
+    if (promedio=="m"){
+      fecha_formato <- list(FORMATO_DATOS="%Y-%m",FORMATO_TIPO_GRAFICA="date",FORMATO_GRAFICA="%b-%Y")
+    }else{
+      fecha_formato <- list(FORMATO_DATOS="%Y",FORMATO_TIPO_GRAFICA=NULL,FORMATO_GRAFICA=NULL)
+    }
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%
+      mutate(FECHA_FORMATO=format(FECHA,fecha_formato$FORMATO_DATOS),
+             VALOR_1=GARANTIA,VALOR_2=UTILIDAD_REMUNERACION,VALOR_3=TARIFA_REMUNERACION)  %>%
+      group_by(TIPO="ESTADO",ID=ESTADO,FECHA_FORMATO,FECHA) %>%
+      summarise(across(VALOR_1, ~sum(.x)/1e+9),across(c(VALOR_2:VALOR_3), ~sum(.x)/1e+6),.groups="drop_last") %>%
+      summarise(across(c(VALOR_1:VALOR_3), ~round(mean(.x),6)),.groups="drop_last")%>%
+      mutate(across(c(VALOR_1:VALOR_3),~ dt_porcentaje_variacion(.x),.names="CAMBIO_{.col}"))%>% group_by(FECHA_FORMATO,TIPO) %>%
+      mutate(TEXTO_1=paste(VALOR_1,"Miles Millones","/",dt_porcentaje_caracter(VALOR_1/sum(VALOR_1)),"P /",CAMBIO_VALOR_1,"C"),
+             TEXTO_2=paste(VALOR_2,"Millones","/",dt_porcentaje_caracter(VALOR_2/sum(VALOR_2)),"P /",CAMBIO_VALOR_2,"C"),
+             TEXTO_3=paste(VALOR_3,"Millones","/",dt_porcentaje_caracter(VALOR_3/sum(VALOR_3)),"P /",CAMBIO_VALOR_3,"C")) %>% ungroup() %>%
+      mutate(COLOR_ID=dt_num_char(fct_reorder(factor(paste(TIPO,ID,sep="-")),VALOR_1,.fun=mean,.desc=T))) %>%
+      arrange(COLOR_ID)
+
+    # Se crea el vector colores
+    colores <- datos_completos %>% distinct(TIPO,ID,COLOR_ID) %>%
+      left_join(colores,by = c("TIPO", "ID")) %>% arrange(COLOR_ID) %>% pull(COLOR)
+
+    # Se grafica la garantia depositada promedio diario por (Mes o Año)
+    plot <- plot_ly(data= datos_completos ,x=~FECHA_FORMATO,colors = colores,color=~COLOR_ID,
+                    transforms = list(list(type = 'filter',target = 'y',operation = ')(',value = 0)),
+                    textposition = 'none') %>%
+      add_bars(y=~VALOR_1,text=~TEXTO_1,name=~ID,legendgroup=~ID,hoverinfo="text+x+name") %>%
+      add_bars(y=~VALOR_2,text=~TEXTO_2,name=~ID,legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y2") %>%
+      add_bars(y=~VALOR_3,text=~TEXTO_3,name=~ID,legendgroup=~ID,showlegend=FALSE,hoverinfo="text+x+name",yaxis="y3") %>%
+      subplot(nrows = 3,shareX = TRUE) %>%
+      layout(barmode="relative",hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,tracegroupgap=0),
+             xaxis = list(type=fecha_formato$FORMATO_TIPO_GRAFICA,tickformat = fecha_formato$FORMATO_GRAFICA,title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Garantía Miles M-COP",fixedrange=fixedrange),
+             yaxis2 = list(title = "Utilidad M-COP",fixedrange=fixedrange),
+             yaxis3 = list(title = "Tarifa M-COP",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+    return(plot)
+  }else{
+    return(gt_mensaje_error)
+  }
+}
 

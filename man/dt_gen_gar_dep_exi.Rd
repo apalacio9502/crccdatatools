@@ -8,6 +8,7 @@ dt_gen_gar_dep_exi(
   conexion,
   periodo_analisis = NULL,
   fecha_analisis = NULL,
+  miembros_analisis = NULL,
   segmentos_analisis = NULL,
   seudonimo = "REAL"
 )
@@ -19,6 +20,9 @@ dt_gen_gar_dep_exi(
 
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
+
+\item{miembros_analisis}{clase array character. Lista de miembros
+de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros}
 
 \item{segmentos_analisis}{clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.}

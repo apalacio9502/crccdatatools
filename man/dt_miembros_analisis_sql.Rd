@@ -4,10 +4,12 @@
 \alias{dt_miembros_analisis_sql}
 \title{Convertir miembros_analisis a formato SQL (system)}
 \usage{
-dt_miembros_analisis_sql(miembros_analisis)
+dt_miembros_analisis_sql(miembros_analisis, liquidadores = FALSE)
 }
 \arguments{
 \item{miembros_analisis}{clase array character. Debe contener la lista de miembros análisis}
+
+\item{liquidadores}{clase boolean. TRUE si se va a filtrar por miembros liquidadores. Por defecto FALSE}
 }
 \description{
 Esta función convierte una lista de miembros a formato SQL

@@ -45,15 +45,30 @@ dt_segmentos_analisis_sql<- function(segmentos_analisis){
 #'
 #' Esta función convierte una lista de miembros a formato SQL
 #' @param miembros_analisis clase array character. Debe contener la lista de miembros análisis
+#' @param liquidadores clase boolean. TRUE si se va a filtrar por miembros liquidadores. Por defecto FALSE
 
-dt_miembros_analisis_sql<- function(miembros_analisis){
-  # Se verifica si miembros_analisis es nulo
-  if (is.null(miembros_analisis)) {
-    # Se crea la variable miembros_analisis_sql
-    miembros_analisis_sql <- glue("MIEMBRO_ID NOT IN (' ')")
+dt_miembros_analisis_sql<- function(miembros_analisis,liquidadores=FALSE){
+
+  # Se verifica si se va a filtra por miembros liquidadores
+  if (liquidadores==TRUE) {
+    # Se verifica si miembros_analisis es nulo
+    if (is.null(miembros_analisis)) {
+      # Se crea la variable miembros_analisis_sql
+      miembros_analisis_sql <- glue("MIEMBRO_LIQ_ID NOT IN (' ')")
+    }else{
+      # Se crea la variable miembros_analisis_sql
+      miembros_analisis_sql <- glue("MIEMBRO_LIQ_ID IN ('{paste0(miembros_analisis,collapse = \"','\")}')")
+    }
   }else{
-    # Se crea la variable miembros_analisis_sql
-    miembros_analisis_sql <- glue("MIEMBRO_ID IN ('{paste0(miembros_analisis,collapse = \"','\")}')")
+    # Se verifica si miembros_analisis es nulo
+    if (is.null(miembros_analisis)) {
+      # Se crea la variable miembros_analisis_sql
+      miembros_analisis_sql <- glue("MIEMBRO_ID NOT IN (' ')")
+    }else{
+      # Se crea la variable miembros_analisis_sql
+      miembros_analisis_sql <- glue("MIEMBRO_ID IN ('{paste0(miembros_analisis,collapse = \"','\")}')")
+    }
+
   }
   return(miembros_analisis_sql)
 }

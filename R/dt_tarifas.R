@@ -37,8 +37,8 @@ dt_gen_tar_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
                                            FECHA BETWEEN {periodo_analisis_sql[1]}
                                            AND {periodo_analisis_sql[2]} AND TARIFA_SANCION=0"))
 
-  # Se verifica si segmentos_analisis es diferente de nulo
-  if (!is.null(segmentos_analisis)) {
+  # Se verifica si segmentos_analisis o miembros_analisis es diferente de nulo
+  if (!is.null(segmentos_analisis) | !is.null(miembros_analisis)) {
     # Se agregan todas las posibles fechas del periodo de análisis
     datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
   }
@@ -52,6 +52,7 @@ dt_gen_tar_resumen<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 
   return(datos)
 }
+
 
 #' Crea la tabla gen_tar_cumplimiento_presupuesto
 #'
