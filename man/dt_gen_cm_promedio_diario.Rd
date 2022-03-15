@@ -4,10 +4,12 @@
 \alias{dt_gen_cm_promedio_diario}
 \title{Promedio diario de los datos gen_cm_titulos o gen_cm_acciones}
 \usage{
-dt_gen_cm_promedio_diario(datos)
+dt_gen_cm_promedio_diario(datos, activo)
 }
 \arguments{
-\item{datos}{clase data.frame. Los datos deben ser los generados por la función
+\item{datos}{clase data.frame. Los datos deben ser los generados por la función}
+
+\item{activo}{clase string. Nombre del activo ("Titulos" o "Acciones")
 \code{\link{dt_gen_cm_titulos}} / \code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos}
 }
 \description{

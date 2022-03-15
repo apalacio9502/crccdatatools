@@ -228,6 +228,7 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
   }
 }
 
+
 #' Gráfica la garantía depositada vs volumen negociado por título promedio diario (barras+puntos)
 #'
 #' Esta función crea la gráfica de la garantía depositada (barras) vs volumen negociado (puntos)
@@ -246,7 +247,7 @@ gt_gar_dep_promedio_diario<- function(datos,colores,fixedrange=FALSE,promedio="m
 gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,completa=TRUE){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
     # Se verifica si la grafica se debe mostrar completa o parcial
     if (completa==TRUE) {
       # Verificación inputs
@@ -260,23 +261,33 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
 
       # Se crea el data.frame datos_completos
       datos_completos <- datos %>%
-        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
-        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-        bind_rows(datos %>% inner_join(
-          datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
-            group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-            summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
-            arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
-            bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
-            group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-            summarise(VALOR=round(sum(VALOR)/1e+9,6),
-                      TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
-            summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
-        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        group_by(GRUPO="GENERAL",ACTIVO_DESCRIPCION) %>%
+        summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),
+                  across(c(VOLUMEN_MEC_SEN:IMPORTE_SIMULTANEAS), ~round(max(.x)/1e+9,6)),.groups="drop") %>%
+        bind_rows(datos %>%
+                    group_by(GRUPO="COVER 2",ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+                    summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),
+                              across(c(VOLUMEN_MEC_SEN:IMPORTE_SIMULTANEAS), ~round(max(.x)/1e+9,6)),.groups="drop_last") %>%
+                    arrange(desc(IMPORTE_GARANTIA_HAIRCUT)) %>% slice_head(n = 2) %>% ungroup()) %>%
+        pivot_longer(c(VOLUMEN_GARANTIA, VOLUMEN_MEC_SEN, VOLUMEN_SIMULTANEAS,
+                       IMPORTE_GARANTIA_DESPUES_HAIRCUT,
+                       IMPORTE_GARANTIA_HAIRCUT, IMPORTE_MEC_SEN, IMPORTE_SIMULTANEAS),names_to ="ID",values_to = "VALOR") %>%
+        mutate(TIPO=case_when(str_detect(ID,"VOLUMEN")==TRUE ~"NOMINAL",TRUE~"EFECTIVO"),
+               TIPO=case_when(GRUPO=="COVER 2" ~paste(TIPO,GRUPO),TRUE~ TIPO),
+               ID=case_when(ID =="IMPORTE_GARANTIA_DESPUES_HAIRCUT"~ "Garantia Con HC",
+                            ID =="IMPORTE_GARANTIA_HAIRCUT"~ "HC Garantia",
+                            ID =="VOLUMEN_GARANTIA" ~ "Garantia",
+                            ID %in% c("VOLUMEN_MEC_SEN","IMPORTE_MEC_SEN")~ "MEC+SEN",
+                            ID %in% c("VOLUMEN_SIMULTANEAS","IMPORTE_SIMULTANEAS")==TRUE~ "Simultaneas"),.before="ID") %>%
+        group_by(GRUPO,ACTIVO_DESCRIPCION,TIPO,ID) %>%
+        summarise(TEXTO_COMPLEMENTO=paste(paste(MIEMBRO_ID_SEUDONIMO,VALOR,"Miles M"),collapse = "\n"),
+                  VALOR=case_when(first(ID) %in% c("Simultaneas","MEC+SEN") ~max(VALOR),TRUE~sum(VALOR)),
+                  TEXTO=case_when(!(first(GRUPO)=="COVER 2" & first(ID) %in% c("Garantia Con HC","HC Garantia","Garantia"))~paste(VALOR,"Miles M"),
+                                  TRUE~paste(paste(VALOR,"Miles M"),TEXTO_COMPLEMENTO,sep="\n")),.groups = "drop") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
         mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
                ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
                COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
-
 
       # Se crean los botones
       botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
@@ -328,14 +339,18 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
         mutate(VISIBLE=BOTON==boton_activo)
 
       # Se crea el data.frame datos_completos
-      datos_completos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA")%>%
-        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
-        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
-        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+      datos_completos <- datos %>%
+        group_by(ACTIVO_DESCRIPCION) %>%
+        summarise(across(c(VOLUMEN_GARANTIA,IMPORTE_GARANTIA_DESPUES_HAIRCUT,IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),.groups="drop") %>%
+        pivot_longer(c(VOLUMEN_GARANTIA,IMPORTE_GARANTIA_DESPUES_HAIRCUT,IMPORTE_GARANTIA_HAIRCUT),names_to ="ID",values_to = "VALOR") %>%
+        mutate(TIPO=case_when(str_detect(ID,"VOLUMEN")==TRUE ~"NOMINAL",TRUE~"EFECTIVO"),
+               ID=case_when(ID =="IMPORTE_GARANTIA_DESPUES_HAIRCUT"~ "Garantia Con HC",
+                            ID =="IMPORTE_GARANTIA_HAIRCUT"~ "HC Garantia",
+                            ID =="VOLUMEN_GARANTIA" ~ "Garantia"),.before="ID") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
+        mutate(TEXTO=paste(VALOR,"Miles M"),ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
                ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
                COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
-
 
       # Se crean los botones
       botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
@@ -383,12 +398,12 @@ gt_gar_dep_vol_negociado_promedio_diario_por_titulo<- function(datos,colores,fix
 gt_gar_dep_promedio_diario_por_titulo_miembro_tipocuenta<- function(datos){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Se filtra y modifica la granularidad de los datos
-    datos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA",UNIDAD=="EFECTIVO")  %>% filter(VALOR!=0) %>%
+    datos <- datos %>% filter(IMPORTE_GARANTIA>0) %>%
       group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO) %>%
-      summarise(VALOR=sum(VALOR,na.rm = TRUE)/1e+9,.groups="drop")
+      summarise(VALOR=sum(IMPORTE_GARANTIA,na.rm = TRUE)/1e+9,.groups="drop")
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Títulos",PARENT="") %>%
@@ -416,6 +431,7 @@ gt_gar_dep_promedio_diario_por_titulo_miembro_tipocuenta<- function(datos){
   }
 }
 
+
 #' Gráfica la garantía depositada por miembro, título y tipo cuenta promedio diario (treemap)
 #'
 #' Esta función crea la gráfica de la  garantía depositada promedio diario por miembro, título y tipo cuenta en
@@ -427,12 +443,12 @@ gt_gar_dep_promedio_diario_por_titulo_miembro_tipocuenta<- function(datos){
 gt_gar_dep_promedio_diario_por_miembro_titulo_tipocuenta<- function(datos){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Se filtra y modifica la granularidad de los datos
-    datos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA",UNIDAD=="EFECTIVO")  %>% filter(VALOR!=0) %>%
+    datos <- datos %>% filter(IMPORTE_GARANTIA>0) %>%
       group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO) %>%
-      summarise(VALOR=sum(VALOR,na.rm = TRUE)/1e+9,.groups="drop")
+      summarise(VALOR=sum(IMPORTE_GARANTIA,na.rm = TRUE)/1e+9,.groups="drop")
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Miembros",PARENT="") %>%
@@ -460,6 +476,7 @@ gt_gar_dep_promedio_diario_por_miembro_titulo_tipocuenta<- function(datos){
   }
 }
 
+
 #' Gráfica el ratio periodo de liquidación por título (heatmap)
 #'
 #' Esta función crea la gráfica del ratio periodo de liquidación por título en formato heatmap
@@ -474,7 +491,7 @@ gt_gar_dep_promedio_diario_por_miembro_titulo_tipocuenta<- function(datos){
 gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_activo=NULL){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Verificación inputs
     if (is.null(boton_activo)) boton_activo <- "General"
@@ -485,19 +502,24 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
       mutate(VISIBLE=BOTON==boton_activo)
 
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(UNIDAD=="EFECTIVO") %>%
-      transmute(FECHA,ACTIVO_DESCRIPCION,VARIABLE=if_else(str_detect(VARIABLE,"Garantia")==TRUE,"Garantia",VARIABLE),VALOR) %>%
-      bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA",UNIDAD=="EFECTIVO") %>%
-                  mutate(VARIABLE=if_else(str_detect(VARIABLE,"Garantia")==TRUE,"Garantia Cover 2",VARIABLE)) %>%
-                  group_by(FECHA,ACTIVO_DESCRIPCION,VARIABLE,MIEMBRO_ID_SEUDONIMO) %>%
-                  summarise(VALOR=sum(VALOR),.groups="drop_last") %>% filter(VALOR!=0) %>%
-                  arrange(desc(VALOR)) %>% slice_head(n = 2) %>%
-                  summarise(TEXTO_COMPLEMENTO=paste(paste("Garantía:",MIEMBRO_ID_SEUDONIMO,round(VALOR/1e+9,6),"Miles M"),collapse="\n"),VALOR=sum(VALOR),.groups="drop")) %>%
+    datos_completos <- datos %>%
+      group_by(FECHA,GRUPO="GENERAL",ACTIVO_DESCRIPCION) %>%
+      summarise(across(c(IMPORTE_GARANTIA), ~round(sum(.x)/1e+9,6)),
+                across(c(IMPORTE_MEC_SEN:IMPORTE_SIMULTANEAS), ~round(max(.x)/1e+9,6)),.groups="drop") %>%
+      bind_rows(datos %>%
+                  group_by(FECHA,GRUPO="COVER 2",ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+                  summarise(across(c(IMPORTE_GARANTIA), ~round(sum(.x)/1e+9,6)),
+                            across(c(IMPORTE_MEC_SEN:IMPORTE_SIMULTANEAS), ~round(max(.x)/1e+9,6)),.groups="drop_last") %>%
+                  arrange(desc(IMPORTE_GARANTIA)) %>% slice_head(n = 2) %>% ungroup() %>%
+                  group_by(FECHA,GRUPO,ACTIVO_DESCRIPCION) %>%
+                  summarise(TEXTO_COMPLEMENTO=paste(paste(MIEMBRO_ID_SEUDONIMO,IMPORTE_GARANTIA,"Miles M"),collapse = "\n"),
+                            across(c(IMPORTE_GARANTIA), ~sum(.x)),
+                            across(c(IMPORTE_MEC_SEN:IMPORTE_SIMULTANEAS), ~max(.x)),.groups="drop")) %>%
       group_by(FECHA,ACTIVO_DESCRIPCION) %>%
-      summarise(GARANTIAS=round(sum(VALOR[VARIABLE=="Garantia"])/1e+9,6),
-                GARANTIAS_COVER_2=round(sum(VALOR[VARIABLE=="Garantia Cover 2"])/1e+9,6),
-                MEC_SEN=round(sum(VALOR[VARIABLE=="MEC+SEN"])/1e+9,6),
-                SIMULTANEAS=round(sum(VALOR[VARIABLE=="Simultaneas"])/1e+9,6),
+      summarise(GARANTIAS=sum(IMPORTE_GARANTIA[GRUPO=="GENERAL"]),
+                GARANTIAS_COVER_2=sum(IMPORTE_GARANTIA[GRUPO=="COVER 2"]),
+                MEC_SEN=max(IMPORTE_MEC_SEN),
+                SIMULTANEAS=max(IMPORTE_SIMULTANEAS),
                 VALOR_1=ifelse(GARANTIAS==0,0,ifelse(MEC_SEN+SIMULTANEAS>0,round(GARANTIAS/(MEC_SEN+SIMULTANEAS),2),NaN)),
                 TEXTO_1=paste(paste("Periodo Liquidación:",VALOR_1,"días"),paste("Garantía:",GARANTIAS,"Miles M"),paste("MEC+SEN:",MEC_SEN,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),sep="\n"),
                 VALOR_2=ifelse(GARANTIAS==0,0,ifelse(MEC_SEN>0,round(GARANTIAS/(MEC_SEN),2),NaN)),
@@ -505,12 +527,11 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
                 VALOR_3=ifelse(GARANTIAS==0,0,ifelse(SIMULTANEAS>0,round(GARANTIAS/(SIMULTANEAS),2),NaN)),
                 TEXTO_3=paste(paste("Periodo Liquidación:",VALOR_3,"días"),paste("Garantía:",GARANTIAS,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),sep="\n"),
                 VALOR_4=ifelse(GARANTIAS_COVER_2==0,0,ifelse(MEC_SEN+SIMULTANEAS>0,round(GARANTIAS_COVER_2/(MEC_SEN+SIMULTANEAS),2),NaN)),
-                TEXTO_4=paste(paste("Periodo Liquidación:",VALOR_4,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("MEC+SEN:",MEC_SEN,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),
+                TEXTO_4=paste(paste("Periodo Liquidación:",VALOR_4,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("MEC+SEN:",MEC_SEN,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="COVER 2"]),sep="\n"),
                 VALOR_5=ifelse(GARANTIAS_COVER_2==0,0,ifelse(MEC_SEN>0,round(GARANTIAS_COVER_2/(MEC_SEN),2),NaN)),
-                TEXTO_5=paste(paste("Periodo Liquidación:",VALOR_5,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("MEC+SEN:",MEC_SEN,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),
+                TEXTO_5=paste(paste("Periodo Liquidación:",VALOR_5,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("MEC+SEN:",MEC_SEN,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="COVER 2"]),sep="\n"),
                 VALOR_6=ifelse(GARANTIAS_COVER_2==0,0,ifelse(SIMULTANEAS>0,round(GARANTIAS_COVER_2/(SIMULTANEAS),2),NaN)),
-                TEXTO_6=paste(paste("Periodo Liquidación:",VALOR_6,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),.groups="drop")
-
+                TEXTO_6=paste(paste("Periodo Liquidación:",VALOR_6,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Simultaneas:",SIMULTANEAS,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="COVER 2"]),sep="\n"),.groups="drop")
 
     # Se crean los botones
     botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
@@ -560,10 +581,10 @@ gt_gar_dep_ratio_liquidacion_por_titulo<- function(datos,fixedrange=FALSE,boton_
 #' FALSE si desea mostrar solo los valores de las garantias depositadas por título. Por defecto TRUE
 #' @export
 
-gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,completa=FALSE){
+gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,completa=TRUE){
 
   ## Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Se verifica si la grafica se debe mostrar completa o parcial
     if (completa==TRUE) {
@@ -579,18 +600,30 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fix
 
       # Se crea el data.frame datos_completos
       datos_completos <- datos %>%
-        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>% summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-        bind_rows(datos %>% inner_join(
-          datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA", UNIDAD=="EFECTIVO") %>%
-            group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-            summarise(VALOR=round(sum(VALOR)/1e+9,6),.groups="drop_last") %>% filter(VALOR!=0) %>%
-            arrange(desc(VALOR)) %>% slice_head(n = 2) %>% select(MIEMBRO_ID_SEUDONIMO,ACTIVO_DESCRIPCION))%>%
-            bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO=="NA")) %>% mutate(UNIDAD=paste(UNIDAD,"COVER 2")) %>%
-            group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
-            summarise(VALOR=round(sum(VALOR)/1e+9,6),
-                      TEXTO_COMPLEMENTO=if_else(last(MIEMBRO_ID_SEUDONIMO)=="NA","",paste(last(MIEMBRO_ID_SEUDONIMO),VALOR,"Miles M")),.groups="drop_last") %>%
-            summarise(VALOR=sum(VALOR),TEXTO=paste(paste(VALOR,"Miles M"),paste(TEXTO_COMPLEMENTO,collapse = "\n"),sep="\n"),.groups="drop")) %>%
-        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
+        group_by(GRUPO="GENERAL",ACTIVO_DESCRIPCION) %>%
+        summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),
+                  across(c(VOLUMEN_CONTADO:IMPORTE_ADR), ~round(max(.x)/1e+9,6)),.groups="drop") %>%
+        bind_rows(datos %>%
+                    group_by(GRUPO="COVER 2",ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+                    summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),
+                              across(c(VOLUMEN_CONTADO:IMPORTE_ADR), ~round(max(.x)/1e+9,6)),.groups="drop_last") %>%
+                    arrange(desc(IMPORTE_GARANTIA_HAIRCUT)) %>% slice_head(n = 2) %>% ungroup()) %>%
+        pivot_longer(c(VOLUMEN_GARANTIA, VOLUMEN_CONTADO, VOLUMEN_ADR,
+                       IMPORTE_GARANTIA_DESPUES_HAIRCUT,
+                       IMPORTE_GARANTIA_HAIRCUT, IMPORTE_CONTADO, IMPORTE_ADR),names_to ="ID",values_to = "VALOR") %>%
+        mutate(TIPO=case_when(str_detect(ID,"VOLUMEN")==TRUE ~"ACCIONES", TRUE~"EFECTIVO"),
+               TIPO=case_when(GRUPO=="COVER 2" ~paste(TIPO,GRUPO),TRUE~ TIPO),
+               ID=case_when(ID =="IMPORTE_GARANTIA_DESPUES_HAIRCUT"~ "Garantia Con HC",
+                            ID =="IMPORTE_GARANTIA_HAIRCUT"~ "HC Garantia",
+                            ID =="VOLUMEN_GARANTIA" ~ "Garantia",
+                            ID %in% c("VOLUMEN_CONTADO","IMPORTE_CONTADO")~ "Contado",
+                            ID %in% c("VOLUMEN_ADR","IMPORTE_ADR")==TRUE~ "ADR"),.before="ID") %>%
+        group_by(GRUPO,ACTIVO_DESCRIPCION,TIPO,ID) %>%
+        summarise(TEXTO_COMPLEMENTO=paste(paste(MIEMBRO_ID_SEUDONIMO,VALOR,"Miles M"),collapse = "\n"),
+                  VALOR=case_when(first(ID) %in% c("Contado","ADR") ~max(VALOR),TRUE~sum(VALOR)),
+                  TEXTO=case_when(!(first(GRUPO)=="COVER 2" & first(ID) %in% c("Garantia Con HC","HC Garantia","Garantia"))~paste(VALOR,"Miles M"),
+                                  TRUE~paste(paste(VALOR,"Miles M"),TEXTO_COMPLEMENTO,sep="\n")),.groups = "drop") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
         mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
                ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
                COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
@@ -646,13 +679,20 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fix
         mutate(VISIBLE=BOTON==boton_activo)
 
       # Se crea el data.frame datos_completos
-      datos_completos <- datos  %>% filter(MIEMBRO_ID_SEUDONIMO!="NA") %>%
-        group_by(TIPO=UNIDAD,ID=VARIABLE,ACTIVO_DESCRIPCION) %>%
-        summarise(VALOR=round(sum(VALOR)/1e+9,6),TEXTO=paste(VALOR,"Miles M"),.groups="drop") %>%
-        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO")%>%
-        mutate(ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
+      datos_completos <- datos %>%
+        group_by(GRUPO="GENERAL",ACTIVO_DESCRIPCION) %>%
+        summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_GARANTIA_HAIRCUT), ~round(sum(.x)/1e+9,6)),.groups="drop") %>%
+        pivot_longer(c(VOLUMEN_GARANTIA,IMPORTE_GARANTIA_DESPUES_HAIRCUT,IMPORTE_GARANTIA_HAIRCUT),names_to ="ID",values_to = "VALOR") %>%
+        mutate(TIPO=case_when(str_detect(ID,"VOLUMEN")==TRUE ~"ACCIONES",TRUE~"EFECTIVO"),
+               ID=case_when(ID =="IMPORTE_GARANTIA_DESPUES_HAIRCUT"~ "Garantia Con HC",
+                            ID =="IMPORTE_GARANTIA_HAIRCUT"~ "HC Garantia",
+                            ID =="VOLUMEN_GARANTIA" ~ "Garantia"),.before="ID") %>%
+        left_join(tipos %>% select(TIPO,POSICION,VISIBLE),by="TIPO") %>%
+        mutate(TEXTO=paste(VALOR,"Miles M"),
+               ID=fct_reorder(factor(ID),VALOR,.fun=mean,.desc=T),
                ACTIVO_DESCRIPCION=fct_reorder(factor(ACTIVO_DESCRIPCION),if_else(ID %in% c("Garantia Con HC","HC Garantia"),VALOR,0),.fun=sum,.desc=T),
                COLOR_ID=paste(POSICION,dt_num_char(ID),sep="-")) %>% arrange(COLOR_ID)
+
 
       # Se crean los botones
       botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {
@@ -701,13 +741,12 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion<- function(datos,colores,fix
 gt_gar_dep_promedio_diario_por_accion_miembro_tipocuenta<- function(datos){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Se filtra y modifica la granularidad de los datos
-    datos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA") %>%
-      filter(UNIDAD=="EFECTIVO")  %>% filter(VALOR!=0) %>%
+    datos <- datos %>% filter(IMPORTE_GARANTIA>0) %>%
       group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO) %>%
-      summarise(VALOR=sum(VALOR,na.rm = TRUE)/1e+9,.groups="drop")
+      summarise(VALOR=sum(IMPORTE_GARANTIA,na.rm = TRUE)/1e+9,.groups="drop")
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Acciones",PARENT="") %>%
@@ -747,13 +786,12 @@ gt_gar_dep_promedio_diario_por_accion_miembro_tipocuenta<- function(datos){
 gt_gar_dep_promedio_diario_por_miembro_accion_tipocuenta<- function(datos){
 
   # Se verifica si existen datos
-  if (nrow(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA"))>0) {
+  if (nrow(datos)>0) {
 
     # Se filtra y modifica la granularidad de los datos
-    datos <- datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA") %>%
-      filter(UNIDAD=="EFECTIVO")  %>% filter(VALOR!=0) %>%
+    datos <- datos %>% filter(IMPORTE_GARANTIA>0) %>%
       group_by(ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO) %>%
-      summarise(VALOR=sum(VALOR,na.rm = TRUE)/1e+9,.groups="drop")
+      summarise(VALOR=sum(IMPORTE_GARANTIA,na.rm = TRUE)/1e+9,.groups="drop")
 
     # Se crea el data.frame datos_completos
     datos_completos <- datos  %>% group_by(LABEL="Miembros",PARENT="") %>%
@@ -805,20 +843,26 @@ gt_gar_dep_ratio_liquidacion_por_accion<- function(datos,fixedrange=FALSE,boton_
                         BOTON=c("General","Contado","ADR","General Cover 2","Contado Cover 2","ADR Cover 2")) %>%
       mutate(VISIBLE=BOTON==boton_activo)
 
+
     # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(UNIDAD=="EFECTIVO") %>%
-      transmute(FECHA,ACTIVO_DESCRIPCION,VARIABLE=if_else(str_detect(VARIABLE,"Garantia")==TRUE,"Garantia",VARIABLE),VALOR) %>%
-      bind_rows(datos %>% filter(MIEMBRO_ID_SEUDONIMO!="NA",UNIDAD=="EFECTIVO") %>%
-                  mutate(VARIABLE=if_else(str_detect(VARIABLE,"Garantia")==TRUE,"Garantia Cover 2",VARIABLE)) %>%
-                  group_by(FECHA,ACTIVO_DESCRIPCION,VARIABLE,MIEMBRO_ID_SEUDONIMO) %>%
-                  summarise(VALOR=sum(VALOR),.groups="drop_last") %>% filter(VALOR!=0) %>%
-                  arrange(desc(VALOR)) %>% slice_head(n = 2) %>%
-                  summarise(TEXTO_COMPLEMENTO=paste(paste("Garantía:",MIEMBRO_ID_SEUDONIMO,round(VALOR/1e+9,6),"Miles M"),collapse="\n"),VALOR=sum(VALOR),.groups="drop")) %>%
+    datos_completos <- datos %>%
+      group_by(FECHA,GRUPO="GENERAL",ACTIVO_DESCRIPCION) %>%
+      summarise(across(c(IMPORTE_GARANTIA), ~round(sum(.x)/1e+9,6)),
+                across(c(IMPORTE_CONTADO:IMPORTE_ADR), ~round(max(.x)/1e+9,6)),.groups="drop") %>%
+      bind_rows(datos %>%
+                  group_by(FECHA,GRUPO="COVER 2",ACTIVO_DESCRIPCION,MIEMBRO_ID_SEUDONIMO) %>%
+                  summarise(across(c(IMPORTE_GARANTIA), ~round(sum(.x)/1e+9,6)),
+                            across(c(IMPORTE_CONTADO:IMPORTE_ADR), ~round(max(.x)/1e+9,6)),.groups="drop_last") %>%
+                  arrange(desc(IMPORTE_GARANTIA)) %>% slice_head(n = 2) %>% ungroup() %>%
+                  group_by(FECHA,GRUPO,ACTIVO_DESCRIPCION) %>%
+                  summarise(TEXTO_COMPLEMENTO=paste(paste(MIEMBRO_ID_SEUDONIMO,IMPORTE_GARANTIA,"Miles M"),collapse = "\n"),
+                            across(c(IMPORTE_GARANTIA), ~sum(.x)),
+                            across(c(IMPORTE_CONTADO:IMPORTE_ADR), ~max(.x)),.groups="drop")) %>%
       group_by(FECHA,ACTIVO_DESCRIPCION) %>%
-      summarise(GARANTIAS=round(sum(VALOR[VARIABLE=="Garantia"])/1e+9,6),
-                GARANTIAS_COVER_2=round(sum(VALOR[VARIABLE=="Garantia Cover 2"])/1e+9,6),
-                ADR=round(sum(VALOR[VARIABLE=="ADR"])/1e+9,6),
-                CONTADO=round(sum(VALOR[VARIABLE=="Contado"])/1e+9,6),
+      summarise(GARANTIAS=sum(IMPORTE_GARANTIA[GRUPO=="GENERAL"]),
+                GARANTIAS_COVER_2=sum(IMPORTE_GARANTIA[GRUPO=="COVER 2"]),
+                CONTADO=max(IMPORTE_CONTADO),
+                ADR=max(IMPORTE_ADR),
                 VALOR_1=ifelse(GARANTIAS==0,0,ifelse(CONTADO+ADR>0,round(GARANTIAS/(CONTADO+ADR),2),NaN)),
                 TEXTO_1=paste(paste("Periodo Liquidación:",VALOR_1,"días"),paste("Garantía:",GARANTIAS,"Miles M"),paste("Contado:",CONTADO,"Miles M"),paste("ADR:",ADR,"Miles M"),sep="\n"),
                 VALOR_2=ifelse(GARANTIAS==0,0,ifelse(CONTADO>0,round(GARANTIAS/(CONTADO),2),NaN)),
@@ -826,12 +870,11 @@ gt_gar_dep_ratio_liquidacion_por_accion<- function(datos,fixedrange=FALSE,boton_
                 VALOR_3=ifelse(GARANTIAS==0,0,ifelse(ADR>0,round(GARANTIAS/(ADR),2),NaN)),
                 TEXTO_3=paste(paste("Periodo Liquidación:",VALOR_3,"días"),paste("Garantía:",GARANTIAS,"Miles M"),paste("ADR:",ADR,"Miles M"),sep="\n"),
                 VALOR_4=ifelse(GARANTIAS_COVER_2==0,0,ifelse(CONTADO+ADR>0,round(GARANTIAS_COVER_2/(CONTADO+ADR),2),NaN)),
-                TEXTO_4=paste(paste("Periodo Liquidación:",VALOR_4,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Contado:",CONTADO,"Miles M"),paste("ADR:",ADR,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),
+                TEXTO_4=paste(paste("Periodo Liquidación:",VALOR_4,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Contado:",CONTADO,"Miles M"),paste("ADR:",ADR,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="Cover 2"]),sep="\n"),
                 VALOR_5=ifelse(GARANTIAS_COVER_2==0,0,ifelse(CONTADO>0,round(GARANTIAS_COVER_2/(CONTADO),2),NaN)),
-                TEXTO_5=paste(paste("Periodo Liquidación:",VALOR_5,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Contado:",CONTADO,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),
+                TEXTO_5=paste(paste("Periodo Liquidación:",VALOR_5,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("Contado:",CONTADO,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="Cover 2"]),sep="\n"),
                 VALOR_6=ifelse(GARANTIAS_COVER_2==0,0,ifelse(ADR>0,round(GARANTIAS_COVER_2/(ADR),2),NaN)),
-                TEXTO_6=paste(paste("Periodo Liquidación:",VALOR_6,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("ADR:",ADR,"Miles M"),paste(TEXTO_COMPLEMENTO[VARIABLE=="Garantia Cover 2"]),sep="\n"),.groups="drop")
-
+                TEXTO_6=paste(paste("Periodo Liquidación:",VALOR_6,"días"),paste("Garantía:",GARANTIAS_COVER_2,"Miles M"),paste("ADR:",ADR,"Miles M"),paste(TEXTO_COMPLEMENTO[GRUPO=="Cover 2"]),sep="\n"),.groups="drop")
 
     # Se crean los botones
     botones <- foreach(i=1:nrow(tipos),.combine = append) %do% {

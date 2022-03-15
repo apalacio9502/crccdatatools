@@ -84,37 +84,37 @@ dt_gen_cm_titulos<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,
                                      MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
                                      REPLACE(CUENTA_GARANTIA_ID,MIEMBRO_ID,MIEMBRO_{dt_id_seudonimo(seudonimo)}) AS CUENTA_GARANTIA_ID_SEUDONIMO,
                                      CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION,
-                                     VOLUMEN_GARANTIA, VOLUMEN_MEC_SEN, VOLUMEN_SIMULTANEAS,
-                                     IMPORTE_GARANTIA_DESPUES_HAIRCUT,
-                                     IMPORTE_GARANTIA_HAIRCUT, IMPORTE_MEC_SEN, IMPORTE_SIMULTANEAS
+                                     VOLUMEN_GARANTIA,IMPORTE_GARANTIA_DESPUES_HAIRCUT,
+                                     IMPORTE_GARANTIA_HAIRCUT
                                      FROM GEN_CM_TITULOS
                                      WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
                                      FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
+  # Descarga datos_complemento
+  datos_complemento <- dbGetQuery(conexion, glue("SELECT FECHA, ACTIVO_DESCRIPCION,
+                                     MAX(VOLUMEN_MEC_SEN) AS VOLUMEN_MEC_SEN,
+                                     MAX(VOLUMEN_SIMULTANEAS) AS VOLUMEN_SIMULTANEAS,
+                                     MAX(IMPORTE_MEC_SEN) AS IMPORTE_MEC_SEN,
+                                     MAX(IMPORTE_SIMULTANEAS) AS IMPORTE_SIMULTANEAS
+                                     FROM GEN_CM_TITULOS
+                                     WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                     FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}
+                                     GROUP BY FECHA, ACTIVO_DESCRIPCION"))
 
-  # Se modifica el dataframe datos (Se cambia la estructura a pivot_longer)
-  datos <- datos %>%
-    pivot_longer(c(VOLUMEN_GARANTIA, VOLUMEN_MEC_SEN, VOLUMEN_SIMULTANEAS,
-                   IMPORTE_GARANTIA_DESPUES_HAIRCUT,
-                   IMPORTE_GARANTIA_HAIRCUT, IMPORTE_MEC_SEN, IMPORTE_SIMULTANEAS),names_to ="VARIABLE",values_to = "VALOR") %>%
-    mutate(UNIDAD=case_when(str_detect(VARIABLE,"VOLUMEN")==TRUE ~"NOMINAL",
-                            TRUE~"EFECTIVO"),
-           VARIABLE=case_when(str_detect(VARIABLE,"GARANTIA_DESPUES_HAIRCUT")==TRUE~ "Garantia Con HC",
-                              str_detect(VARIABLE,"GARANTIA_HAIRCUT")==TRUE~ "HC Garantia",
-                              str_detect(VARIABLE,"GARANTIA")==TRUE~ "Garantia",
-                              str_detect(VARIABLE,"SIMULTANEAS")==TRUE~ "Simultaneas",
-                              str_detect(VARIABLE,"MEC_SEN")==TRUE~ "MEC+SEN"),.before="VARIABLE")
+  # Se verifica si segmentos_analisis o miembros_analisis es diferente de nulo
+  if (!is.null(segmentos_analisis) | !is.null(miembros_analisis)) {
+    # Se agregan todas las posibles fechas del periodo de análisis
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+  }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
-  datos <- datos %>%
-    filter(VARIABLE %in% c("Garantia Con HC","HC Garantia","Garantia")) %>%
-    bind_rows(datos %>% filter(!VARIABLE %in% c("Garantia Con HC","HC Garantia","Garantia")) %>%
-                distinct(FECHA,SEGMENTO_ID="NA",SEGMENTO_NOMBRE="NA",MIEMBRO_ID_SEUDONIMO="NA",
-                         CUENTA_GARANTIA_ID_SEUDONIMO="NA",CUENTA_GARANTIA_TIPO="NA",
-                         ACTIVO_DESCRIPCION,UNIDAD,VARIABLE,VALOR)) %>%
-    complete(FECHA,nesting(SEGMENTO_ID,SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO,
-                           CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO,
-                           ACTIVO_DESCRIPCION,UNIDAD,VARIABLE), fill = list(VALOR=0))
+  datos <-  datos %>%
+    complete(FECHA,nesting(SEGMENTO_ID, SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO, CUENTA_GARANTIA_ID_SEUDONIMO,
+                           CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION),
+             fill = list(VOLUMEN_GARANTIA=0,IMPORTE_GARANTIA_DESPUES_HAIRCUT=0,IMPORTE_GARANTIA_HAIRCUT=0)) %>%
+    mutate(IMPORTE_GARANTIA=IMPORTE_GARANTIA_DESPUES_HAIRCUT+IMPORTE_GARANTIA_HAIRCUT) %>%
+    left_join(datos_complemento,by = c("FECHA", "ACTIVO_DESCRIPCION")) %>%
+    replace_na(list(VOLUMEN_MEC_SEN=0,VOLUMEN_SIMULTANEAS=0,IMPORTE_MEC_SEN=0,IMPORTE_SIMULTANEAS=0))
 
   return(datos)
 }
@@ -149,41 +149,42 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
   segmentos_analisis_sql <- dt_segmentos_analisis_sql(segmentos_analisis)
 
   # Descarga datos
-  datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID,
-                                    MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
-                                    REPLACE(CUENTA_GARANTIA_ID,MIEMBRO_ID,MIEMBRO_{dt_id_seudonimo(seudonimo)}) AS CUENTA_GARANTIA_ID_SEUDONIMO,
-                                    CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION,
-                                    VOLUMEN_GARANTIA, VOLUMEN_CONTADO, VOLUMEN_ADR,
-                                    IMPORTE_GARANTIA_DESPUES_HAIRCUT,
-                                    IMPORTE_GARANTIA_HAIRCUT, IMPORTE_CONTADO, IMPORTE_ADR
-                                    FROM GEN_CM_ACCIONES
-                                    WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
-                                    FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
+  datos <- dbGetQuery(conexion, glue("SELECT FECHA, SEGMENTO_ID, SEGMENTO_NOMBRE,
+                                     MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO,
+                                     REPLACE(CUENTA_GARANTIA_ID,MIEMBRO_ID,MIEMBRO_{dt_id_seudonimo(seudonimo)}) AS CUENTA_GARANTIA_ID_SEUDONIMO,
+                                     CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION,
+                                     VOLUMEN_GARANTIA,IMPORTE_GARANTIA_DESPUES_HAIRCUT,
+                                     IMPORTE_GARANTIA_HAIRCUT
+                                     FROM GEN_CM_ACCIONES
+                                     WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                     FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}"))
 
+  # Descarga datos_complemento
+  datos_complemento <- dbGetQuery(conexion, glue("SELECT FECHA, ACTIVO_DESCRIPCION,
+                                     MAX(VOLUMEN_CONTADO) AS VOLUMEN_CONTADO,
+                                     MAX(VOLUMEN_ADR) AS VOLUMEN_ADR,
+                                     MAX(IMPORTE_CONTADO) AS IMPORTE_CONTADO,
+                                     MAX(IMPORTE_ADR) AS IMPORTE_ADR
+                                     FROM GEN_CM_ACCIONES
+                                     WHERE {miembros_analisis_sql} AND {segmentos_analisis_sql} AND
+                                     FECHA BETWEEN {periodo_analisis_sql[1]} AND {periodo_analisis_sql[2]}
+                                     GROUP BY FECHA, ACTIVO_DESCRIPCION"))
 
-  # Se modifica el dataframe datos (Se cambia la estructura a pivot_longer)
-  datos <- datos %>%
-    pivot_longer(c(VOLUMEN_GARANTIA, VOLUMEN_CONTADO, VOLUMEN_ADR,
-                   IMPORTE_GARANTIA_DESPUES_HAIRCUT,
-                   IMPORTE_GARANTIA_HAIRCUT, IMPORTE_CONTADO, IMPORTE_ADR),names_to ="VARIABLE",values_to = "VALOR") %>%
-    mutate(UNIDAD=case_when(str_detect(VARIABLE,"VOLUMEN")==TRUE ~"ACCIONES",
-                            TRUE~"EFECTIVO"),
-           VARIABLE=case_when(VARIABLE =="IMPORTE_GARANTIA_DESPUES_HAIRCUT"~ "Garantia Con HC",
-                              VARIABLE =="IMPORTE_GARANTIA_HAIRCUT"~ "HC Garantia",
-                              VARIABLE =="VOLUMEN_GARANTIA" ~ "Garantia",
-                              VARIABLE %in% c("VOLUMEN_CONTADO","IMPORTE_CONTADO")~ "Contado",
-                              VARIABLE %in% c("VOLUMEN_ADR","IMPORTE_ADR")==TRUE~ "ADR"),.before="VARIABLE")
+  # Se verifica si segmentos_analisis o miembros_analisis es diferente de nulo
+  if (!is.null(segmentos_analisis) | !is.null(miembros_analisis)) {
+    # Se agregan todas las posibles fechas del periodo de análisis
+    datos <- dt_adm_gen_fechas(conexion=conexion,periodo_analisis=periodo_analisis) %>% left_join(datos,by="FECHA")
+  }
 
   # Se modifica el dataframe datos (Se completan los datos con la función complete)
-  datos <- datos %>%
-    filter(VARIABLE %in% c("Garantia Con HC","HC Garantia","Garantia")) %>%
-    bind_rows(datos %>% filter(!VARIABLE %in% c("Garantia Con HC","HC Garantia","Garantia")) %>%
-                distinct(FECHA,SEGMENTO_ID="NA",SEGMENTO_NOMBRE="NA",MIEMBRO_ID_SEUDONIMO="NA",
-                         CUENTA_GARANTIA_ID_SEUDONIMO="NA",CUENTA_GARANTIA_TIPO="NA",
-                         ACTIVO_DESCRIPCION,UNIDAD,VARIABLE,VALOR)) %>%
-    complete(FECHA,nesting(SEGMENTO_ID,SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO,
-                           CUENTA_GARANTIA_ID_SEUDONIMO,CUENTA_GARANTIA_TIPO,
-                           ACTIVO_DESCRIPCION,UNIDAD,VARIABLE), fill = list(VALOR=0))
+  datos <-  datos %>%
+    complete(FECHA,nesting(SEGMENTO_ID, SEGMENTO_NOMBRE,MIEMBRO_ID_SEUDONIMO, CUENTA_GARANTIA_ID_SEUDONIMO,
+                           CUENTA_GARANTIA_TIPO, ACTIVO_DESCRIPCION),
+             fill = list(VOLUMEN_GARANTIA=0,IMPORTE_GARANTIA_DESPUES_HAIRCUT=0,IMPORTE_GARANTIA_HAIRCUT=0)) %>%
+    mutate(IMPORTE_GARANTIA=IMPORTE_GARANTIA_DESPUES_HAIRCUT+IMPORTE_GARANTIA_HAIRCUT) %>%
+    left_join(datos_complemento,by = c("FECHA", "ACTIVO_DESCRIPCION")) %>%
+    replace_na(list(VOLUMEN_CONTADO=0,VOLUMEN_ADR=0,IMPORTE_CONTADO=0,IMPORTE_ADR=0))
+
 
   return(datos)
 }
@@ -192,16 +193,29 @@ dt_gen_cm_acciones<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL
 #'
 #' Esta función calcula el promedio diario de los datos gen_cm_titulos o gen_cm_acciones.
 #' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' @param activo clase string. Nombre del activo ("Titulos" o "Acciones")
 #' \code{\link{dt_gen_cm_titulos}} / \code{\link{dt_gen_cm_acciones}} o tener una estructura igual a dichos datos
 #' @export
 
-dt_gen_cm_promedio_diario<- function(datos){
+dt_gen_cm_promedio_diario<- function(datos,activo){
 
-  # Se modifica el dataframe datos
-  datos <- datos %>%
-    group_by(MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,
-             CUENTA_GARANTIA_TIPO,ACTIVO_DESCRIPCION,UNIDAD,VARIABLE) %>%
-    summarise(VALOR=mean(VALOR),.groups="drop")
+  # Se verifica si el activo es Acciones
+  if (activo=="Titulos") {
+    # Se modifica el dataframe datos
+    datos <- datos %>%
+      group_by(SEGMENTO_ID,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,
+               CUENTA_GARANTIA_TIPO,ACTIVO_DESCRIPCION) %>%
+      summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_SIMULTANEAS), ~mean(.x)),.groups="drop")
+
+  }else{
+    # Se modifica el dataframe datos
+    datos <- datos %>%
+      group_by(SEGMENTO_ID,MIEMBRO_ID_SEUDONIMO,CUENTA_GARANTIA_ID_SEUDONIMO,
+               CUENTA_GARANTIA_TIPO,ACTIVO_DESCRIPCION) %>%
+      summarise(across(c(VOLUMEN_GARANTIA:IMPORTE_ADR), ~mean(.x)),.groups="drop")
+  }
+
+
 
   return(datos)
 }

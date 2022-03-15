@@ -24,7 +24,7 @@ con un botón seleccionado en especifico. Por defecto NULL}
 
 \item{botones_inactivos}{clase vector character. Vector de los nombres de los botones a desactivar
 en la gráfica ("Segmento", Tipo Producto", "Subtipo Producto", "Origen Producto",
-"Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()}
+"Tipo Cuenta Gar."). Por defecto c()}
 }
 \description{
 Esta función crea la gráfica del posición abierta (compradora y vendedora)

@@ -89,7 +89,7 @@ gt_vol_resumen<- function(datos,fecha_analisis,pageLength=100,fillContainer=FALS
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
-#' "Origen Producto", "Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()
+#' "Origen Producto", "Tipo Cuenta Gar."). Por defecto c()
 #' @export
 
 gt_vol<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
@@ -101,8 +101,8 @@ gt_vol<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,botones_inact
   if (nrow(datos)>0) {
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
-                        BOTON=c("Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Miembro","Tipo Cuenta Gar."))  %>%
+    tipos <- data.frame(TIPO=c("SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","CUENTA_GARANTIA_TIPO"),
+                        BOTON=c("Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Cuenta Gar."))  %>%
       filter(!BOTON %in% botones_inactivos)
 
     # Verificación boton_activo
@@ -275,7 +275,7 @@ gt_vol_por_miembro<- function(datos,colores,fixedrange=FALSE,boton_activo=NULL,b
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
-#' "Origen Producto", "Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()
+#' "Origen Producto", "Tipo Cuenta Gar."). Por defecto c()
 #' @export
 
 gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_activo=NULL,botones_inactivos=c()){
@@ -284,8 +284,8 @@ gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_ac
   if (nrow(datos)>0) {
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
-                        BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Miembro","Tipo Cuenta Gar."),
+    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","CUENTA_GARANTIA_TIPO"),
+                        BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Cuenta Gar."),
                         AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T,T)) %>%
       filter(!BOTON %in% botones_inactivos)
 
@@ -366,7 +366,7 @@ gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_ac
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
 #' en la gráfica ("Segmento", "Tipo Producto", "Subtipo Producto",
-#' "Origen Producto", "Tipo Miembro", "Tipo Cuenta Gar."). Por defecto c()
+#' "Origen Producto", "Tipo Cuenta Gar."). Por defecto c()
 #' @export
 
 gt_vol_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,promedio="m",boton_activo=NULL,botones_inactivos=c()){
@@ -375,8 +375,8 @@ gt_vol_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE
   if (nrow(datos)>0) {
 
     # Se crea el data.frame tipos
-    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","MIEMBRO_TIPO","CUENTA_GARANTIA_TIPO"),
-                        BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Miembro","Tipo Cuenta Gar."),
+    tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","CUENTA_GARANTIA_TIPO"),
+                        BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Cuenta Gar."),
                         AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T,T)) %>%
       filter(!BOTON %in% botones_inactivos)
 

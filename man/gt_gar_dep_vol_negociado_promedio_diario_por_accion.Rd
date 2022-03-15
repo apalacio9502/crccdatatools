@@ -9,7 +9,7 @@ gt_gar_dep_vol_negociado_promedio_diario_por_accion(
   colores,
   fixedrange = FALSE,
   boton_activo = NULL,
-  completa = FALSE
+  completa = TRUE
 )
 }
 \arguments{
