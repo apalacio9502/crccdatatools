@@ -9,6 +9,7 @@ dt_gen_cm_remuneracion_resumen(
   periodo_analisis = NULL,
   fecha_analisis = NULL,
   miembros_analisis = NULL,
+  miembros_liq_analisis = NULL,
   segmentos_analisis = NULL,
   seudonimo = "REAL"
 )
@@ -23,6 +24,9 @@ diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
 \item{miembros_analisis}{clase array character. Lista de miembros
 de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros}
+
+\item{miembros_liq_analisis}{clase array character. Lista de miembros liquidadores
+de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros liquidadores}
 
 \item{segmentos_analisis}{clase array character. Lista de segmentos ("GE","CD","CV","C2","C7","C8","C9")
 de los cuales se desea descargar la información. Por defecto descarga la información de todos los segmentos.}

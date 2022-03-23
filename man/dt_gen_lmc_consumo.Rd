@@ -8,7 +8,7 @@ dt_gen_lmc_consumo(
   conexion,
   periodo_analisis = NULL,
   fecha_analisis = NULL,
-  miembros_analisis = NULL,
+  miembros_liq_analisis = NULL,
   seudonimo = "REAL"
 )
 }
@@ -20,8 +20,8 @@ dt_gen_lmc_consumo(
 \item{fecha_analisis}{clase date. Debe contener la fecha del análisis, si el parametro periodo_analisis es
 diferente de NULL este parametro no se tendra en cuenta. Por defecto NULL}
 
-\item{miembros_analisis}{clase array character. Lista de miembros
-de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros}
+\item{miembros_liq_analisis}{clase array character. Lista de miembros liquidadores
+de los cuales se desea descargar la información. Por defecto descarga la información de todos los miembros liquidadores}
 
 \item{seudonimo}{clase character. Debe ser igual a "REAL" o "FICTICIO".Por defecto "REAL"}
 }

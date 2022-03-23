@@ -102,4 +102,23 @@ dt_adm_gen_colores<- function(conexion){
   return(datos)
 }
 
+#' Descargar los datos adm_gen_perfiles
+#'
+#' Esta función descarga los datos de la tabla adm_gen_perfiles para un perfil
+#' @param conexion clase formal. Conexión base de datos
+#' @param perfil_analisis clase character. Nombre del perfil
+#' @export
+
+dt_adm_gen_perfiles<- function(conexion,perfil_analisis){
+
+  # Descarga datos
+  datos <- dbGetQuery(conexion,glue("SELECT * FROM ADM_GEN_PERFILES WHERE NOMBRE='{perfil_analisis}'"))
+
+  return(datos)
+}
+
+
+
+
+
 

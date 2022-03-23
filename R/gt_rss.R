@@ -8,10 +8,12 @@
 #' @param boton_activo clase character. Si se desea que la gráfica se inicialice
 #' con un botón seleccionado en especifico. Por defecto NULL
 #' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
-#' en la gráfica (....). Por defecto c()
+#' en la gráfica. Por defecto c()
+#' @param completa clase boolean. TRUE si se desea mostar la gráfica completa.
+#' FALSE si desea mostrar sin los ID's de los miembros. Por defecto TRUE
 #' @export
 
-gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c(),completa=TRUE){
 
   # Se verifica si existen datos
   if (nrow(datos)>0) {
@@ -27,19 +29,40 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
     # Verificación inputs
     if (is.null(boton_activo) || !boton_activo %in% segmentos) boton_activo <- segmentos[1]
 
-    # Se crea el data.frame datos_completos
-    datos_completos <- datos %>% filter(POSICION<=2) %>%
-      select(-c(MIEMBRO_LIQ_TIPO,MIEMBRO_LIQ_COLETIVIZADOR,RIESGO_ST,GARANTIA_EXIGIDA,GARANTIA_EXIGIDA_FGC)) %>%
-      pivot_wider(names_from = POSICION, values_from = c(MIEMBRO_LIQ_ID_SEUDONIMO,RIESGO_ST_PROMEDIO)) %>%
-      left_join(datos %>% group_by(FECHA,SEGMENTO_ID) %>%
-                  summarise(GARANTIA_FGC=sum(GARANTIA_EXIGIDA_FGC),.groups = "drop"),by=c("FECHA","SEGMENTO_ID"))%>%
-      mutate(RIESGO_ST_PROMEDIO_1=round(RIESGO_ST_PROMEDIO_1/1e+9,6),
-             RIESGO_ST_PROMEDIO_2=round(RIESGO_ST_PROMEDIO_2/1e+9,6),
-             GARANTIA_FGC=round(GARANTIA_FGC/1e+9,6),
-             TEXT_RIESGO_ST_1=paste("Miles M",RIESGO_ST_PROMEDIO_1,"/",MIEMBRO_LIQ_ID_SEUDONIMO_1),
-             TEXT_RIESGO_ST_2=paste("Miles M",RIESGO_ST_PROMEDIO_2,"/",MIEMBRO_LIQ_ID_SEUDONIMO_2),
-             TEXT_GARANTIA_FGC=paste("Miles M",GARANTIA_FGC),
-             VISIBLE=SEGMENTO_NOMBRE==boton_activo)
+    # Se verifica si la grafica se debe mostrar completa o parcial
+    if (completa==TRUE) {
+
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos %>% filter(POSICION<=2) %>%
+        select(-c(MIEMBRO_LIQ_TIPO,MIEMBRO_LIQ_COLETIVIZADOR,RIESGO_ST,GARANTIA_EXIGIDA,GARANTIA_EXIGIDA_FGC)) %>%
+        pivot_wider(names_from = POSICION, values_from = c(MIEMBRO_LIQ_ID_SEUDONIMO,RIESGO_ST_PROMEDIO)) %>%
+        left_join(datos %>% group_by(FECHA,SEGMENTO_ID) %>%
+                    summarise(GARANTIA_FGC=sum(GARANTIA_EXIGIDA_FGC),.groups = "drop"),by=c("FECHA","SEGMENTO_ID"))%>%
+        mutate(RIESGO_ST_PROMEDIO_1=round(RIESGO_ST_PROMEDIO_1/1e+9,6),
+               RIESGO_ST_PROMEDIO_2=round(RIESGO_ST_PROMEDIO_2/1e+9,6),
+               GARANTIA_FGC=round(GARANTIA_FGC/1e+9,6),
+               TEXTO_RIESGO_ST_1=paste(RIESGO_ST_PROMEDIO_1,"Miles M","/",MIEMBRO_LIQ_ID_SEUDONIMO_1),
+               TEXTO_RIESGO_ST_2=paste(RIESGO_ST_PROMEDIO_2,"Miles M","/",MIEMBRO_LIQ_ID_SEUDONIMO_2),
+               TEXTO_GARANTIA_FGC=paste(GARANTIA_FGC,"Miles M"),
+               VISIBLE=SEGMENTO_NOMBRE==boton_activo)
+
+    }else{
+
+      # Se crea el data.frame datos_completos
+      datos_completos <- datos %>% filter(POSICION<=2) %>%
+        select(-c(MIEMBRO_LIQ_TIPO,MIEMBRO_LIQ_COLETIVIZADOR,RIESGO_ST,GARANTIA_EXIGIDA,GARANTIA_EXIGIDA_FGC)) %>%
+        pivot_wider(names_from = POSICION, values_from = c(MIEMBRO_LIQ_ID_SEUDONIMO,RIESGO_ST_PROMEDIO)) %>%
+        left_join(datos %>% group_by(FECHA,SEGMENTO_ID) %>%
+                    summarise(GARANTIA_FGC=sum(GARANTIA_EXIGIDA_FGC),.groups = "drop"),by=c("FECHA","SEGMENTO_ID"))%>%
+        mutate(RIESGO_ST_PROMEDIO_1=round(RIESGO_ST_PROMEDIO_1/1e+9,6),
+               RIESGO_ST_PROMEDIO_2=round(RIESGO_ST_PROMEDIO_2/1e+9,6),
+               GARANTIA_FGC=round(GARANTIA_FGC/1e+9,6),
+               TEXTO_RIESGO_ST_1=paste(RIESGO_ST_PROMEDIO_1,"Miles M"),
+               TEXTO_RIESGO_ST_2=paste(RIESGO_ST_PROMEDIO_2,"Miles M"),
+               TEXTO_GARANTIA_FGC=paste(GARANTIA_FGC,"Miles M"),
+               VISIBLE=SEGMENTO_NOMBRE==boton_activo)
+
+    }
 
 
     # Se verifica si se debe crear el updatemenus
@@ -64,9 +87,9 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
     # Se crea la gráfica
     plot <- plot_ly(data=datos_completos,split=~SEGMENTO_NOMBRE,x=~FECHA,colors=c("#66c2a5","#8da0cb"),
                     hoverinfo="text+x+name") %>%
-      add_lines(y=~RIESGO_ST_PROMEDIO_1,text=~TEXT_RIESGO_ST_1,visible=~VISIBLE,stackgroup="1",name="1st. RSS",color="1") %>%
-      add_lines(y=~RIESGO_ST_PROMEDIO_2,text=~TEXT_RIESGO_ST_2,visible=~VISIBLE,stackgroup="1",name="2st. RSS",color="2") %>%
-      add_lines(y=~GARANTIA_FGC,text=~TEXT_GARANTIA_FGC,visible=~VISIBLE,fillcolor = 'transparent',line = list(color="blue",dash = "dash"),stackgroup="2",name="FGC") %>%
+      add_lines(y=~RIESGO_ST_PROMEDIO_1,text=~TEXTO_RIESGO_ST_1,visible=~VISIBLE,stackgroup="1",name="1st. RSS",color="1") %>%
+      add_lines(y=~RIESGO_ST_PROMEDIO_2,text=~TEXTO_RIESGO_ST_2,visible=~VISIBLE,stackgroup="1",name="2st. RSS",color="2") %>%
+      add_lines(y=~GARANTIA_FGC,text=~TEXTO_GARANTIA_FGC,visible=~VISIBLE,fillcolor = 'transparent',line = list(color="blue",dash = "dash"),stackgroup="2",name="FGC") %>%
       layout(hovermode = 'x',
              legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2),
              updatemenus=updatemenus,
@@ -81,6 +104,81 @@ gt_rss_promedio <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_ina
   }
 }
 
+#' Grafica el riesgo en situación de estres promedio 90 dias de un miembro (lineas)
+#'
+#' Esta función crea la gráfica del riesgo en situación de estres promedio 90 dias  de un miembro en formato lineas.
+#' La información se muestra acorde a la agrupación relacionada con cada botón
+#' @param datos clase data.frame. Los datos deben ser los generados por la función
+#' \code{\link{dt_gen_rss_promedio}} o tener una estructura igual a dichos datos
+#' @param fixedrange clase boolean. TRUE si se desea desactivar la función de zoom en las gráficas. Por defecto FALSE
+#' @param boton_activo clase character. Si se desea que la gráfica se inicialice
+#' con un botón seleccionado en especifico. Por defecto NULL
+#' @param botones_inactivos clase vector character. Vector de los nombres de los botones a desactivar
+#' en la gráfica. Por defecto c()
+#' @export
+
+gt_rss_promedio_miembro <- function(datos,fixedrange=FALSE,boton_activo=NULL,botones_inactivos=c()){
+
+  # Se verifica si existen datos
+  if (nrow(datos)>0) {
+
+    # Se convierte el SEGMENTO_NOMBRE en un factor
+    datos <- datos %>% filter(MIEMBRO_LIQ_COLETIVIZADOR==1, !SEGMENTO_NOMBRE %in% botones_inactivos) %>%
+      mutate(SEGMENTO_NOMBRE=factor(SEGMENTO_NOMBRE)) %>%
+      arrange(SEGMENTO_NOMBRE)
+
+    # Se crea la lista de segmetos
+    segmentos <- levels(datos$SEGMENTO_NOMBRE)
+
+    # Verificación inputs
+    if (is.null(boton_activo) || !boton_activo %in% segmentos) boton_activo <- segmentos[1]
+
+
+    # Se crea el data.frame datos_completos
+    datos_completos <- datos %>%
+      mutate(RIESGO_ST=round(RIESGO_ST/1e+9,6),
+             RIESGO_ST_PROMEDIO=round(RIESGO_ST_PROMEDIO/1e+9,6),
+             TEXTO_RIESGO_ST=paste(RIESGO_ST,"Miles M"),
+             TEXTO_RIESGO_ST_PROMEDIO=paste(RIESGO_ST_PROMEDIO,"Miles M"),
+             VISIBLE=SEGMENTO_NOMBRE==boton_activo)
+
+    # Se verifica si se debe crear el updatemenus
+    if (length(segmentos)>1) {
+      # Se crean los botones
+      botones <- foreach(i=1:length(segmentos),.combine = append) %do% {
+        visible <- segmentos[i]==segmentos
+        list(list(label = segmentos[i],method = "restyle",
+                  args = list(list(boton_activo=segmentos[i],
+                                   visible = as.logical(rep(visible,2))))))
+      }
+
+      # Se crea el updatemenus
+      updatemenus <- list(
+        list(active = which(segmentos == boton_activo)-1,type= 'dropdown',direction = "down",xanchor = 'center',
+             yanchor = "top",x=0.5,y=1.2,pad = list('r'= 0, 't'= 10, 'b' = 10),buttons = botones))
+    }else{
+      # Se crea el updatemenus
+      updatemenus <- NULL
+    }
+
+    # Se crea la gráfica
+    plot <- plot_ly(data=datos_completos,split=~SEGMENTO_NOMBRE,x=~FECHA,colors=c("#66c2a5","#8da0cb"),
+                    hoverinfo="text+x+name") %>%
+      add_lines(y=~RIESGO_ST,text=~TEXTO_RIESGO_ST,visible=~VISIBLE,name="RSS",color="1") %>%
+      add_lines(y=~RIESGO_ST_PROMEDIO,text=~TEXTO_RIESGO_ST_PROMEDIO,visible=~VISIBLE,name="RSS Promedio",color="2") %>%
+      layout(hovermode = 'x',
+             legend = list(orientation = 'h',xanchor = "center",x = 0.5,y=-0.2),
+             updatemenus=updatemenus,
+             xaxis = list(type='date',tickformat = "%d-%b",title = NA,fixedrange=fixedrange),
+             yaxis = list(title = "Miles de Millones-COP",fixedrange=fixedrange)) %>%
+      config(displaylogo = F,locale = "es",modeBarButtonsToAdd = list(gt_mbb_minimizar_pantalla,gt_mbb_maximizar_pantalla))
+
+    return(plot)
+
+  }else{
+    return(gt_mensaje_error)
+  }
+}
 
 #' Tabla fgc resumen
 #'

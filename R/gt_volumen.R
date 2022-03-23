@@ -286,7 +286,7 @@ gt_vol_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE,boton_ac
     # Se crea el data.frame tipos
     tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","CUENTA_GARANTIA_TIPO"),
                         BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Cuenta Gar."),
-                        AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T,T)) %>%
+                        AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T)) %>%
       filter(!BOTON %in% botones_inactivos)
 
     # Verificación boton_activo
@@ -377,7 +377,7 @@ gt_vol_promedio_diario<- function(datos,colores,fixedrange=FALSE,dash_board=TRUE
     # Se crea el data.frame tipos
     tipos <- data.frame(TIPO=c("GENERAL","SEGMENTO_NOMBRE","PRODUCTO_TIPO","PRODUCTO_SUBTIPO","PRODUCTO_ORIGEN","CUENTA_GARANTIA_TIPO"),
                         BOTON=c("General","Segmento","Tipo Producto","Subtipo Producto","Origen Producto","Tipo Cuenta Gar."),
-                        AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T,T)) %>%
+                        AMBOS=c(dash_board==T,dash_board==T,dash_board==T,dash_board==T,dash_board==T,T)) %>%
       filter(!BOTON %in% botones_inactivos)
 
     # Verificación boton_activo

@@ -935,9 +935,9 @@ gt_gar_dep_remuneracion_resumen<- function(datos,fecha_analisis,pageLength=100,s
               GARANTIA_NO_REMUNERADA_DIARIA=sum(GARANTIA_NO_REMUNERADA[FECHA==fecha_analisis]),
               GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_MENSUAL=mean(GARANTIA_NO_REMUNERADA[FECHA_ANO_MES==format(fecha_analisis,"%Y-%m")]),
               GARANTIA_NO_REMUNERADA_DIARIA_PROMEDIO_PERIODO=mean(GARANTIA_NO_REMUNERADA) ,.groups="drop") %>%
-    arrange(desc(GARANTIA_REMUNERADA_DIARIA)) %>%
+    arrange(desc(GARANTIA_REMUNERADA_DIARIA+GARANTIA_NO_REMUNERADA_DIARIA)) %>%
     transmute(Segmento=SEGMENTO_NOMBRE,"Cuenta"=CUENTA_GARANTIA_TIPO,
-              "%"=GARANTIA_REMUNERADA_DIARIA/(GARANTIA_REMUNERADA_DIARIA+GARANTIA_NO_REMUNERADA_DIARIA),
+              "% Garantía Remunerada"=GARANTIA_REMUNERADA_DIARIA/(GARANTIA_REMUNERADA_DIARIA+GARANTIA_NO_REMUNERADA_DIARIA),
               "Garantía Remunerada Último Día M-COP"=GARANTIA_REMUNERADA_DIARIA/1e+6,
               "Garantía No Remunerada Último Día M-COP"=GARANTIA_NO_REMUNERADA_DIARIA/1e+6,
               "Garantía Remunerada Promedio Diario Último Mes M-COP"=GARANTIA_REMUNERADA_DIARIA_PROMEDIO_MENSUAL/1e+6,

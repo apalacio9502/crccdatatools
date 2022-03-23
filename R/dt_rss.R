@@ -26,6 +26,12 @@ dt_gen_rss_promedio<- function(conexion,periodo_analisis=NULL,fecha_analisis=NUL
                                         WHERE FECHA BETWEEN {periodo_analisis_sql[1]}
                                         AND {periodo_analisis_sql[2]}"))
 
+  # Se modifica el data.frame datos (Se completan los datos con la función complete)
+  datos <- datos %>%
+    complete(FECHA,nesting(SEGMENTO_ID,SEGMENTO_NOMBRE,MIEMBRO_LIQ_ID_SEUDONIMO,MIEMBRO_LIQ_TIPO,MIEMBRO_LIQ_COLETIVIZADOR),
+             fill = list(RIESGO_ST=0,RIESGO_ST_PROMEDIO=0,GARANTIA_EXIGIDA=0,GARANTIA_EXIGIDA_FGC=0)) %>%
+    filter(!is.na(SEGMENTO_ID))
+
   return(datos)
 }
 
