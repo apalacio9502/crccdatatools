@@ -2,6 +2,7 @@
 #'
 #' Esta función convierte un periodo de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param periodo_analisis clase array date. Debe contener la fecha inicio y fin del análisis
+#' @export
 
 dt_periodo_analisis_sql<- function(periodo_analisis){
 
@@ -15,6 +16,7 @@ dt_periodo_analisis_sql<- function(periodo_analisis){
 #'
 #' Esta función convierte una fecha de análisis a formato SQL dependiendo del tipo de base de datos
 #' @param fecha_analisis clase date. Debe contener la fecha del análisis
+#' @export
 
 dt_fecha_analisis_sql<- function(fecha_analisis){
 
@@ -28,6 +30,7 @@ dt_fecha_analisis_sql<- function(fecha_analisis){
 #'
 #' Esta función convierte una lista de segmentos a formato SQL
 #' @param segmentos_analisis clase array character. Debe contener la lista de segmentos análisis
+#' @export
 
 dt_segmentos_analisis_sql<- function(segmentos_analisis){
   # Se verifica si segmentos_analisis es nulo
@@ -46,6 +49,7 @@ dt_segmentos_analisis_sql<- function(segmentos_analisis){
 #' Esta función convierte una lista de miembros a formato SQL
 #' @param miembros_analisis clase array character. Debe contener la lista de miembros análisis
 #' @param liquidadores clase boolean. TRUE si se va a filtrar por miembros liquidadores. Por defecto FALSE
+#' @export
 
 dt_miembros_analisis_sql<- function(miembros_analisis,liquidadores=FALSE){
 
@@ -77,6 +81,7 @@ dt_miembros_analisis_sql<- function(miembros_analisis,liquidadores=FALSE){
 #'
 #' Esta función devuelve el ID_SEUDONIMO correspondiente acorde a la condición.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+#' @export
 
 dt_id_seudonimo<- function(seudonimo){
   if_else(seudonimo=="REAL","ID","ID_FICTICIO")
@@ -86,6 +91,7 @@ dt_id_seudonimo<- function(seudonimo){
 #'
 #' Esta función devuelve el NOMBRE_ABREVIACION_SEUDONIMO correspondiente acorde a la condición.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+#' @export
 
 dt_nombre_abreviacion_seudonimo<- function(seudonimo){
   if_else(seudonimo=="REAL","NOMBRE_ABREVIACION","NOMBRE_ABREVIACION_FICTICIO")
@@ -95,6 +101,7 @@ dt_nombre_abreviacion_seudonimo<- function(seudonimo){
 #'
 #' Esta función devuelve el sql para extraer la CUENTA_GARANTIA_TITULAR_SEUDONIMO acorde a la condición.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+#' @export
 
 dt_cuenta_garantia_titular_seudonimo_sql<- function(seudonimo){
   if_else(seudonimo=="REAL","CUENTA_GARANTIA_TITULAR","'No Aplica'")
@@ -104,6 +111,7 @@ dt_cuenta_garantia_titular_seudonimo_sql<- function(seudonimo){
 #'
 #' Esta función devuelve el sql para extraer la CUENTA_GARANTIA_IDENTIFICACION_SEUDONIMO acorde a la condición.
 #' @param seudonimo clase character. Debe ser igual a "REAL" o "FICTICIO".
+#' @export
 
 dt_cuenta_garantia_identificacion_seudonimo_sql<- function(seudonimo){
   if_else(seudonimo=="REAL","CUENTA_GARANTIA_IDENTIFICACION","TRANSLATE(CUENTA_GARANTIA_IDENTIFICACION, '0123456789','ZXYABCLMNK')")

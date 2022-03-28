@@ -5,7 +5,6 @@
 #' @param conexion clase formal. Conexión base de datos
 #' @param llave_analisis clase character.
 #' @param segmento_analisis clase character. Segmento analisis ("GE","CD","CV","C2","C7","C8","C9")
-#'
 #' @export
 
 dt_app_gen_estructura_llave<- function(conexion,llave_analisis,segmento_analisis){
