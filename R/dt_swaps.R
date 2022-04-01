@@ -18,7 +18,7 @@ dt_sw_sen_pa<- function(conexion,periodo_analisis=NULL,fecha_analisis=NULL,seudo
   periodo_analisis_sql <-  dt_periodo_analisis_sql(periodo_analisis)
 
   # Descarga datos
-  datos <- dbGetQuery(conexion , glue("SELECT FECHA,SEGMENTO_ID, SEGMENTO_NOMBRE,
+  datos <- dbGetQuery(conexion , glue("SELECT FECHA,
                                         MIEMBRO_{dt_id_seudonimo(seudonimo)} AS MIEMBRO_ID_SEUDONIMO, MIEMBRO_NOMBRE,
                                         MIEMBRO_TIPO, CUENTA_GARANTIA_TIPO, NODO,RANGO, SENSIBILIDAD,
                                         POSICION_VENDEDORA_VALORADA, POSICION_COMPRADORA_VALORADA,POSICION_NETA_VALORADA
